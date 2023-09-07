@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "ml-horoscope",
+  "private_key_id": "0b2e20e90e590474d31833368203a69165452974",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCnM+5RsByYHgIn\nGZVIFyi/OG/aQ8snfnEEs94dFlOYCaP4LM0j+nO/3/TQKxqNKMs3HhHJ2f4gRGGf\n/0EtL4T2sVfwcrq8nHrLLseP27UHoh7svPdVtWbHkfjmnkCOqVS8B99Zjf2Omcu6\nj2qTgcK7sZK9IjGFV8H7u230kZVQ/dCJSZrwBl1TIk6CvgJLgnyPc22ZFszUjYQu\nYma4sxekx4KwSPxo/ODDU1xEpuHokF41e0mzzH1qtev+nMdkkiYGAp3xMAFGj+w3\nWBdZbk0uJgEvVodWC9tjAkRL92BfiU+bzCt5fgZHJV97vkX6/ZaQP3v6SWlcyWwk\niujtbG2FAgMBAAECggEAR8InWUKievyCAwLdSRO7ZpnTk1J+GWSQH6sMO+KNnNYi\nW4vqvLKrw6Dbwg2FtyhXUr/idYVLpdCDL3YOpFRdFbzV13l9wB3OK25XsltiLbT7\n3bFZ2xxf0G3K6zrmzPNKTOp6BkbEl9NUlqwfWtAZYZFbvzUyGJ6pv55YmdpzQU8D\neCylHlqPdnKWL9VM8IP8VPoDgdevek+ojRMeWGbRjPxYv84YB/qqQP+qtOh2BzaN\nP5r2JT4h3aWLh1iuoH4odVbYuEnoQWOpOqfoXMLx0Z0VmmVWBW0R8Qi61Xh2xzlJ\nsJj5q685rNnRU/xUchnfr4q48L+4eqH7kdsunEX23wKBgQDSlaQl+bbOoEu2xt3+\ndlHPzozNFnA2S1EtJSZtY97cDSsk84XRkaHtATN9gT1nVt7WAn7F9dYgt4zYx0v/\nSvx9MlFO71C7rP7dQVfS6iH9y2kJ65qkMC+6IebmnY9PGxkokwp4LDg9jSTQ0UFO\nDH+4NgoFCh8pMd3OItsG+A4bEwKBgQDLQzCdfyrbOKt0LJPSZND0B5Fz/ZKOhs3m\nmHwmqZG7O3KSyj0p+dS0ON3RJqfk/6ocIypoaFzPbeNQLjUUq9elw6OQgI7d4gRo\ngWgTt1cQJXPWBCCDJkTE67n7rS8lwO5ZTdwt8RYrbNQgIuJuQ5ANHQJ1aMjKrwvM\nkpIcddWQBwKBgHVZkHzdGGMy7p5vWfxYoSSlnM8ZBvUqqZT30983vVRxPi68SkFL\n36l8dt4krDwvK8Sk5VKZuXbH8oRHI3GjrupxpN/Q+vNq5ygTJsbRVJnixakSkz2V\n4LLf+5VeDiNuHWn/7uCi+8BJLE/1nGfLDU1xR8ohJtZFBK6/u8C5cNrjAoGANftB\nJQLJ4fCZ8D+KfpzRtY1w/qoASyPX+P7UMfxkvKHcGsnlFonICJj1p/8pJbMUfWaF\nc7cLtvcLIJc096lvmxFrFgxeZOUKoKqFdn8Be0NHETaFX+9A4j9sZD+pPtCPPF5m\nNDlL1vqPF33MPtZoomLq7T2H3fRBIPJoJXDR5+8CgYBcyjelYOhdI2go9vB7caE4\nswdTPybszS5ATaGtEBnEBqV33sGDX89nE6ZweoN6QOIL+vWxyhYKRYx+Z4SLOSVI\n8Di4RweL9rn9mJyrol0wC4OBkqYr5W32CMQvZcZ1cvHh2dSAdu/zcm60yHupTVHO\nytqxCaUw4whQJdxjVzJ+cQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "admin-723@ml-horoscope.iam.gserviceaccount.com",
+  "client_id": "101065826805010615574",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/admin-723%40ml-horoscope.iam.gserviceaccount.com"
+}
