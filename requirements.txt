@@ -3,3 +3,4 @@ seaborn
 numpy
 flatlib
 uszipcode
+streamlit
