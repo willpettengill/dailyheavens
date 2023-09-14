@@ -62,7 +62,7 @@ class Stars:
 			self.p[k]['sign_expresses'] = self.sign_qualities.get(v.get('sign').lower())
 
 	def pull_chart(self, date, btime):
-		b='+'+str(btime)
+		b='+'+str(btime)#.strftime("%H:%M"))
 		c=[int(i) for i in date.split('/')]
 		offset= ['-',5,0,0] ## modify this for non eastern time zones
 		self.pos = GeoPos(self.zipcode_dict["lat"], self.zipcode_dict["lng"])
@@ -91,7 +91,7 @@ class Stars:
 		fields = {}
 
 		try:
-			fields['name']=planet.name=planet.__str__()[1:planet.__str__().find(' ')]
+			fields['name']=planet.__str__()[1:planet.__str__().find(' ')] # planet.name=
 		except:
 			pass
 		try:

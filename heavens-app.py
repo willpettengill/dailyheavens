@@ -1,9 +1,22 @@
+import sys
+sys.path.append('/usr/local/lib/python3.9/site-packages/flatlib/resources/swefiles')
+
 import streamlit as st
 from astrology import Stars
 from datetime import datetime
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+from flatlib.datetime import Datetime
+from flatlib.geopos import GeoPos
+from flatlib.chart import Chart
+from flatlib import const
+from flatlib import ephem
+
+print('path: ', flatlib.PATH_LIB, flatlib.PATH_RES, sys.path, flush=True)
+
+print('path: ', flatlib.PATH_LIB, flatlib.PATH_RES, sys.path)
 
 st.title('Calculate Your Chart :night_with_stars::milky_way:')
 st.subheader('See the makeup of your full zodiac chart')
@@ -13,6 +26,7 @@ with st.form("user_zodiac_data"):
     bt=st.time_input("Your Birthtime")
     st.caption('optional, approximate is okay')
     bz=st.text_input("Your Birthplace Zip Code", value='01776')
+    #st.write(bd, bt, bz)
     st.caption('optional, approximate is okay')
     submitted = st.form_submit_button("Read Chart")
     if submitted:
