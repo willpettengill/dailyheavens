@@ -66,7 +66,7 @@ class Stars:
 		offset= ['-',5,0,0] ## modify this for non eastern time zones
 		self.pos = GeoPos(self.zipcode_dict["lat"], self.zipcode_dict["lng"])
 		self.new_date_obj = Datetime(c, b, offset)
-		self.chart = Chart(self.new_date_obj, self.pos, IDs=const.LIST_OBJECTS)
+		self.chart = Chart(self.new_date_obj, self.pos, IDs=const_ids)
 
 	def get_birthplace(self, bplacezip):
 		search = SearchEngine() # simple_zipcode=True
