@@ -1,5 +1,6 @@
 import sys
-sys.path.append('/usr/local/lib/python3.9/site-packages/flatlib/resources/swefiles')
+eph_path='/usr/local/lib/python3.9/site-packages/flatlib/resources/swefiles'
+sys.path.append(eph_path)
 
 import streamlit as st
 from uszipcode import SearchEngine
@@ -13,6 +14,10 @@ from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib.chart import Chart
 from flatlib import const
+
+from flatlib.ephem.swe import setPath
+setPath(eph_path)
+
 
 class Stars:
 
