@@ -129,7 +129,7 @@ class Stars:
 print('path: ', flatlib.PATH_LIB, flatlib.PATH_RES, sys.path, flush=True)
 date = Datetime('2015/03/13', '17:00', '+00:00')
 pos = GeoPos('38n32', '8w54')
-chart = Chart(date, pos)
+chart = Chart(date, pos, , IDs=const.LIST_OBJECTS)
 sun = chart.get(const.SUN)
 print(sun)
 
