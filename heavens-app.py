@@ -2,6 +2,7 @@ import sys
 sys.path.append('/usr/local/lib/python3.9/site-packages/flatlib/resources/swefiles')
 
 import streamlit as st
+from uszipcode import SearchEngine
 #from astrology import Stars
 from datetime import datetime
 import pandas as pd
