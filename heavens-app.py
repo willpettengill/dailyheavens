@@ -7,16 +7,19 @@ from datetime import datetime
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+import flatlib
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib.chart import Chart
 from flatlib import const
-from flatlib import ephem
 
 print('path: ', flatlib.PATH_LIB, flatlib.PATH_RES, sys.path, flush=True)
+date = Datetime('2015/03/13', '17:00', '+00:00')
+pos = GeoPos('38n32', '8w54')
+chart = Chart(date, pos)
+sun = chart.get(const.SUN)
+print(sun)
 
-print('path: ', flatlib.PATH_LIB, flatlib.PATH_RES, sys.path)
 
 st.title('Calculate Your Chart :night_with_stars::milky_way:')
 st.subheader('See the makeup of your full zodiac chart')
