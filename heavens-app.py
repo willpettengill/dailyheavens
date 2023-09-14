@@ -19,7 +19,7 @@ from flatlib.ephem.swe import setPath
 if sys.platform.startswith('darwin'):
 	pass 
 else:
-	eph_path='/usr/local/lib/python3.9/site-packages/flatlib/resources/swefiles'
+    eph_path='/usr/local/lib/python3.9/site-packages/flatlib/resources/swefiles'
     sys.path.append(eph_path)
     setPath(eph_path)
 
