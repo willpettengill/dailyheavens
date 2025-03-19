@@ -1,0 +1,89 @@
+{
+  "dignities": {
+    "exaltation": {
+      "sun": "Aries",
+      "moon": "Taurus",
+      "mercury": "Virgo",
+      "venus": "Pisces",
+      "mars": "Capricorn",
+      "jupiter": "Cancer",
+      "saturn": "Libra"
+    },
+    "fall": {
+      "sun": "Libra",
+      "moon": "Scorpio",
+      "mercury": "Pisces",
+      "venus": "Virgo",
+      "mars": "Cancer",
+      "jupiter": "Capricorn",
+      "saturn": "Aries"
+    },
+    "rulership": {
+      "sun": ["Leo"],
+      "moon": ["Cancer"],
+      "mercury": ["Gemini", "Virgo"],
+      "venus": ["Taurus", "Libra"],
+      "mars": ["Aries", "Scorpio"],
+      "jupiter": ["Sagittarius", "Pisces"],
+      "saturn": ["Capricorn", "Aquarius"]
+    },
+    "detriment": {
+      "sun": ["Aquarius"],
+      "moon": ["Capricorn"],
+      "mercury": ["Sagittarius", "Pisces"],
+      "venus": ["Scorpio", "Aries"],
+      "mars": ["Libra", "Taurus"],
+      "jupiter": ["Gemini", "Virgo"],
+      "saturn": ["Cancer", "Leo"]
+    }
+  },
+  "relationships": {
+    "friendships": {
+      "sun": ["moon", "jupiter", "mars"],
+      "moon": ["sun", "jupiter", "venus"],
+      "mercury": ["sun", "venus", "saturn"],
+      "venus": ["moon", "mercury", "jupiter"],
+      "mars": ["sun", "jupiter", "mercury"],
+      "jupiter": ["sun", "moon", "mars", "venus"],
+      "saturn": ["mercury", "venus"]
+    },
+    "enmities": {
+      "sun": ["saturn", "venus"],
+      "moon": ["saturn", "mars"],
+      "mercury": ["jupiter", "mars"],
+      "venus": ["sun", "mars"],
+      "mars": ["venus", "mercury"],
+      "jupiter": ["mercury", "saturn"],
+      "saturn": ["sun", "moon", "jupiter"]
+    },
+    "neutral": {
+      "sun": ["mercury"],
+      "moon": ["mercury", "saturn"],
+      "mercury": ["moon"],
+      "venus": ["saturn"],
+      "mars": ["saturn"],
+      "jupiter": ["venus"],
+      "saturn": ["mercury"]
+    }
+  },
+  "combustion": {
+    "description": "A planet is considered combust when it is too close to the Sun",
+    "orb": {
+      "mercury": 8,
+      "venus": 8,
+      "mars": 17,
+      "jupiter": 11,
+      "saturn": 15
+    }
+  },
+  "retrograde": {
+    "description": "A planet appears to move backward in the sky",
+    "frequency": {
+      "mercury": "3-4 times per year",
+      "venus": "Every 18 months",
+      "mars": "Every 2 years",
+      "jupiter": "Every 13 months",
+      "saturn": "Every 12-13 months"
+    }
+  }
+} 

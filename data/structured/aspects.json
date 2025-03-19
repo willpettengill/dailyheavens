@@ -1,0 +1,83 @@
+{
+  "conjunction": {
+    "symbol": "☌",
+    "angle": 0,
+    "orb": 8,
+    "nature": "neutral",
+    "description": "Planets are at approximately the same degree",
+    "interpretation": "Combines the energies of the planets involved, creating a unified force",
+    "strength": "strong"
+  },
+  "sextile": {
+    "symbol": "⚹",
+    "angle": 60,
+    "orb": 6,
+    "nature": "harmonious",
+    "description": "Planets are 60 degrees apart",
+    "interpretation": "Creates opportunities for growth and development through harmonious interaction",
+    "strength": "moderate"
+  },
+  "square": {
+    "symbol": "□",
+    "angle": 90,
+    "orb": 8,
+    "nature": "challenging",
+    "description": "Planets are 90 degrees apart",
+    "interpretation": "Creates tension and challenges that require resolution and growth",
+    "strength": "strong"
+  },
+  "trine": {
+    "symbol": "△",
+    "angle": 120,
+    "orb": 8,
+    "nature": "harmonious",
+    "description": "Planets are 120 degrees apart",
+    "interpretation": "Creates natural flow and ease between the planets involved",
+    "strength": "strong"
+  },
+  "opposition": {
+    "symbol": "☍",
+    "angle": 180,
+    "orb": 8,
+    "nature": "challenging",
+    "description": "Planets are 180 degrees apart",
+    "interpretation": "Creates tension between opposing forces that need to be balanced",
+    "strength": "strong"
+  },
+  "semisextile": {
+    "symbol": "⚺",
+    "angle": 30,
+    "orb": 3,
+    "nature": "neutral",
+    "description": "Planets are 30 degrees apart",
+    "interpretation": "Creates subtle connections and minor opportunities",
+    "strength": "weak"
+  },
+  "semisquare": {
+    "symbol": "⚻",
+    "angle": 45,
+    "orb": 4,
+    "nature": "challenging",
+    "description": "Planets are 45 degrees apart",
+    "interpretation": "Creates minor tension and friction",
+    "strength": "weak"
+  },
+  "sesquisquare": {
+    "symbol": "⚼",
+    "angle": 135,
+    "orb": 4,
+    "nature": "challenging",
+    "description": "Planets are 135 degrees apart",
+    "interpretation": "Creates internal tension and stress",
+    "strength": "weak"
+  },
+  "quincunx": {
+    "symbol": "⚻",
+    "angle": 150,
+    "orb": 3,
+    "nature": "neutral",
+    "description": "Planets are 150 degrees apart",
+    "interpretation": "Creates adjustment and adaptation needs",
+    "strength": "weak"
+  }
+} 

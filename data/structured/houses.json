@@ -1,0 +1,110 @@
+{
+  "house1": {
+    "name": "First House",
+    "qualities": ["personality", "physical body", "early environment", "appearance"],
+    "natural_sign": "Aries",
+    "natural_planet": "Mars",
+    "angularity": "Angular",
+    "element": "Fire",
+    "modality": "Cardinal"
+  },
+  "house2": {
+    "name": "Second House",
+    "qualities": ["money", "possessions", "earning ability", "self-esteem"],
+    "natural_sign": "Taurus",
+    "natural_planet": "Venus",
+    "angularity": "Succedent",
+    "element": "Earth",
+    "modality": "Fixed"
+  },
+  "house3": {
+    "name": "Third House",
+    "qualities": ["communication", "lower mind", "short journeys", "siblings"],
+    "natural_sign": "Gemini",
+    "natural_planet": "Mercury",
+    "angularity": "Cadent",
+    "element": "Air",
+    "modality": "Mutable"
+  },
+  "house4": {
+    "name": "Fourth House",
+    "qualities": ["home", "family lands", "unconscious", "past"],
+    "natural_sign": "Cancer",
+    "natural_planet": "Moon",
+    "angularity": "Angular",
+    "element": "Water",
+    "modality": "Cardinal"
+  },
+  "house5": {
+    "name": "Fifth House",
+    "qualities": ["pleasures", "social life", "children", "creativity"],
+    "natural_sign": "Leo",
+    "natural_planet": "Sun",
+    "angularity": "Succedent",
+    "element": "Fire",
+    "modality": "Fixed"
+  },
+  "house6": {
+    "name": "Sixth House",
+    "qualities": ["service", "health", "work", "competence", "skill"],
+    "natural_sign": "Virgo",
+    "natural_planet": "Mercury",
+    "angularity": "Cadent",
+    "element": "Earth",
+    "modality": "Mutable"
+  },
+  "house7": {
+    "name": "Seventh House",
+    "qualities": ["partnership", "identification with others", "counseling", "open enemies"],
+    "natural_sign": "Libra",
+    "natural_planet": "Venus",
+    "angularity": "Angular",
+    "element": "Air",
+    "modality": "Cardinal"
+  },
+  "house8": {
+    "name": "Eighth House",
+    "qualities": ["death", "instinct", "sexuality", "regeneration", "others money"],
+    "natural_sign": "Scorpio",
+    "natural_planet": "Mars",
+    "angularity": "Succedent",
+    "element": "Water",
+    "modality": "Fixed"
+  },
+  "house9": {
+    "name": "Ninth House",
+    "qualities": ["long trips", "adventure", "higher mind", "philosophy", "religion"],
+    "natural_sign": "Sagittarius",
+    "natural_planet": "Jupiter",
+    "angularity": "Cadent",
+    "element": "Fire",
+    "modality": "Mutable"
+  },
+  "house10": {
+    "name": "Tenth House",
+    "qualities": ["career", "status", "reputation", "destiny"],
+    "natural_sign": "Capricorn",
+    "natural_planet": "Saturn",
+    "angularity": "Angular",
+    "element": "Earth",
+    "modality": "Cardinal"
+  },
+  "house11": {
+    "name": "Eleventh House",
+    "qualities": ["friends", "groups", "future", "wishes", "goals"],
+    "natural_sign": "Aquarius",
+    "natural_planet": "Saturn",
+    "angularity": "Succedent",
+    "element": "Air",
+    "modality": "Fixed"
+  },
+  "house12": {
+    "name": "Twelfth House",
+    "qualities": ["limitations", "repression", "karma", "self-unfolding", "secret enemies"],
+    "natural_sign": "Pisces",
+    "natural_planet": "Jupiter",
+    "angularity": "Cadent",
+    "element": "Water",
+    "modality": "Mutable"
+  }
+} 

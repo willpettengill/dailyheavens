@@ -1,0 +1,139 @@
+{
+  "systems": {
+    "placidus": {
+      "name": "Placidus",
+      "description": "Most commonly used house system in modern astrology",
+      "characteristics": [
+        "Unequal house sizes",
+        "Based on time",
+        "Accurate for birth times",
+        "Good for predictive work"
+      ],
+      "calculation_method": "Time-based division of the ecliptic",
+      "popularity": "Very high",
+      "best_for": ["Birth charts", "Predictive astrology", "Modern interpretations"]
+    },
+    "koch": {
+      "name": "Koch",
+      "description": "Time-based house system with focus on birth location",
+      "characteristics": [
+        "Unequal house sizes",
+        "Based on time and location",
+        "Accurate for birth times",
+        "Good for psychological astrology"
+      ],
+      "calculation_method": "Time and location-based division",
+      "popularity": "High",
+      "best_for": ["Psychological astrology", "Birth charts", "Modern interpretations"]
+    },
+    "campanus": {
+      "name": "Campanus",
+      "description": "Space-based house system dividing the prime vertical",
+      "characteristics": [
+        "Equal house sizes",
+        "Based on space",
+        "Good for rectification",
+        "Traditional approach"
+      ],
+      "calculation_method": "Division of the prime vertical",
+      "popularity": "Medium",
+      "best_for": ["Traditional astrology", "Rectification", "Equal house division"]
+    },
+    "equal": {
+      "name": "Equal House",
+      "description": "Simplest house system with equal divisions",
+      "characteristics": [
+        "Equal house sizes",
+        "Simple calculation",
+        "Traditional approach",
+        "Good for missing birth times"
+      ],
+      "calculation_method": "Equal 30-degree divisions from Ascendant",
+      "popularity": "Medium",
+      "best_for": ["Traditional astrology", "Missing birth times", "Simple interpretations"]
+    },
+    "whole_sign": {
+      "name": "Whole Sign",
+      "description": "Ancient house system using whole signs",
+      "characteristics": [
+        "Equal house sizes",
+        "Ancient approach",
+        "Simple calculation",
+        "Traditional method"
+      ],
+      "calculation_method": "Whole sign divisions from Ascendant",
+      "popularity": "Growing",
+      "best_for": ["Hellenistic astrology", "Traditional astrology", "Ancient techniques"]
+    }
+  },
+  "house_qualities": {
+    "angular": {
+      "houses": [1, 4, 7, 10],
+      "characteristics": [
+        "Most powerful houses",
+        "Active and dynamic",
+        "Initiative and action",
+        "External manifestation"
+      ],
+      "strength": "Strongest"
+    },
+    "succedent": {
+      "houses": [2, 5, 8, 11],
+      "characteristics": [
+        "Stable and fixed",
+        "Resource management",
+        "Support and maintenance",
+        "Internal strength"
+      ],
+      "strength": "Medium"
+    },
+    "cadent": {
+      "houses": [3, 6, 9, 12],
+      "characteristics": [
+        "Mutable and adaptable",
+        "Learning and communication",
+        "Service and adjustment",
+        "Internal processes"
+      ],
+      "strength": "Weakest"
+    }
+  },
+  "house_elements": {
+    "fire": {
+      "houses": [1, 5, 9],
+      "characteristics": [
+        "Spirit and inspiration",
+        "Creative expression",
+        "Personal growth",
+        "Higher mind"
+      ]
+    },
+    "earth": {
+      "houses": [2, 6, 10],
+      "characteristics": [
+        "Material resources",
+        "Practical skills",
+        "Career and status",
+        "Physical manifestation"
+      ]
+    },
+    "air": {
+      "houses": [3, 7, 11],
+      "characteristics": [
+        "Communication",
+        "Relationships",
+        "Social networks",
+        "Mental processes"
+      ]
+    },
+    "water": {
+      "houses": [4, 8, 12],
+      "characteristics": [
+        "Emotional security",
+        "Transformation",
+        "Collective resources",
+        "Spiritual growth"
+      ]
+    }
+  }
+} 

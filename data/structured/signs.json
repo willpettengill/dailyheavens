@@ -1,0 +1,76 @@
+{
+  "aries": {
+    "name": "Aries",
+    "symbol": "♈",
+    "element": "Fire",
+    "modality": "Cardinal",
+    "polarity": "Masculine",
+    "ruling_planet": "Mars",
+    "qualities": ["impulsive", "energetic", "courageous", "determined", "confident", "enthusiastic", "optimistic", "honest", "passionate"],
+    "lucky_day": "Tuesday",
+    "lucky_number": "9",
+    "birthstone": "Diamond",
+    "special_color": "Red",
+    "cities": ["Florence", "Naples", "Marseille", "Birmingham", "Leicester", "Strasbourg", "Krakow", "Singapore", "Hong Kong", "Kuwait City"],
+    "countries": ["England", "Poland", "Germany", "Syria", "Israel", "Burma", "Japan", "Canada", "Lithuania", "Denmark"],
+    "flowers": ["Thistle", "Honeysuckle", "Ginger"],
+    "trees": ["Pine", "Holly", "Thorn"],
+    "metals": ["Iron", "Steel"],
+    "animals": ["Ram", "Tiger", "Hawk"],
+    "best_traits": ["Leadership", "Courage", "Determination", "Confidence", "Enthusiasm", "Optimism", "Honesty", "Passion"],
+    "decanates": {
+      "first": {
+        "degrees": "0-10",
+        "planet": "Mars",
+        "qualities": ["Most energetic and impulsive", "Natural leadership", "Strong willpower"]
+      },
+      "second": {
+        "degrees": "10-20",
+        "planet": "Sun",
+        "qualities": ["Creative expression", "Warm personality", "Generous spirit"]
+      },
+      "third": {
+        "degrees": "20-30",
+        "planet": "Jupiter",
+        "qualities": ["Optimistic outlook", "Expansive nature", "Philosophical mind"]
+      }
+    }
+  },
+  "taurus": {
+    "name": "Taurus",
+    "symbol": "♉",
+    "element": "Earth",
+    "modality": "Fixed",
+    "polarity": "Feminine",
+    "ruling_planet": "Venus",
+    "qualities": ["reliable", "patient", "practical", "devoted", "responsible", "stable", "determined", "loyal", "stubborn"],
+    "lucky_day": "Friday",
+    "lucky_number": "6",
+    "birthstone": "Emerald",
+    "special_color": "Green",
+    "cities": ["Dublin", "Parma", "Leipzig", "St. Louis", "Pasadena", "Lucerne", "Eastbourne", "Mantua", "Palermo", "Santa Barbara"],
+    "countries": ["Ireland", "Switzerland", "Cyprus", "Greece", "Iran", "Turkey", "Iraq", "Holland", "Poland", "Russia"],
+    "flowers": ["Rose", "Poppy", "Daisy"],
+    "trees": ["Apple", "Cypress", "Ash"],
+    "metals": ["Copper", "Bronze"],
+    "animals": ["Bull", "Bear", "Beaver"],
+    "best_traits": ["Reliability", "Patience", "Practicality", "Devotion", "Responsibility", "Stability", "Determination", "Loyalty"],
+    "decanates": {
+      "first": {
+        "degrees": "0-10",
+        "planet": "Venus",
+        "qualities": ["Most sensual and pleasure-loving", "Strong aesthetic sense", "Natural charm"]
+      },
+      "second": {
+        "degrees": "10-20",
+        "planet": "Mercury",
+        "qualities": ["Practical communication", "Resourceful mind", "Adaptable nature"]
+      },
+      "third": {
+        "degrees": "20-30",
+        "planet": "Saturn",
+        "qualities": ["Strong work ethic", "Disciplined approach", "Long-term planning"]
+      }
+    }
+  }
+} 

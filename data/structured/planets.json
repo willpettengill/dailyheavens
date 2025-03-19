@@ -1,0 +1,93 @@
+{
+  "sun": {
+    "name": "Sun",
+    "qualities": ["self-expression", "will", "assertion"],
+    "element": "Fire",
+    "modality": "Fixed",
+    "gender": "Masculine",
+    "dignity": {
+      "exaltation": "Aries",
+      "fall": "Libra",
+      "rulership": "Leo",
+      "detriment": "Aquarius"
+    }
+  },
+  "moon": {
+    "name": "Moon",
+    "qualities": ["response", "intuition", "feeling"],
+    "element": "Water",
+    "modality": "Mutable",
+    "gender": "Feminine",
+    "dignity": {
+      "exaltation": "Taurus",
+      "fall": "Scorpio",
+      "rulership": "Cancer",
+      "detriment": "Capricorn"
+    }
+  },
+  "mercury": {
+    "name": "Mercury",
+    "qualities": ["communication", "thought", "movement"],
+    "element": "Air",
+    "modality": "Mutable",
+    "gender": "Neutral",
+    "dignity": {
+      "exaltation": "Virgo",
+      "fall": "Pisces",
+      "rulership": ["Gemini", "Virgo"],
+      "detriment": ["Sagittarius", "Pisces"]
+    }
+  },
+  "venus": {
+    "name": "Venus",
+    "qualities": ["harmony", "love", "beauty"],
+    "element": "Earth",
+    "modality": "Fixed",
+    "gender": "Feminine",
+    "dignity": {
+      "exaltation": "Pisces",
+      "fall": "Virgo",
+      "rulership": ["Taurus", "Libra"],
+      "detriment": ["Scorpio", "Aries"]
+    }
+  },
+  "mars": {
+    "name": "Mars",
+    "qualities": ["energy", "impulse", "aggression"],
+    "element": "Fire",
+    "modality": "Cardinal",
+    "gender": "Masculine",
+    "dignity": {
+      "exaltation": "Capricorn",
+      "fall": "Cancer",
+      "rulership": ["Aries", "Scorpio"],
+      "detriment": ["Libra", "Taurus"]
+    }
+  },
+  "jupiter": {
+    "name": "Jupiter",
+    "qualities": ["expansion", "achievement", "excess"],
+    "element": "Fire",
+    "modality": "Mutable",
+    "gender": "Masculine",
+    "dignity": {
+      "exaltation": "Cancer",
+      "fall": "Capricorn",
+      "rulership": ["Sagittarius", "Pisces"],
+      "detriment": ["Gemini", "Virgo"]
+    }
+  },
+  "saturn": {
+    "name": "Saturn",
+    "qualities": ["limitation", "structure", "containment"],
+    "element": "Earth",
+    "modality": "Cardinal",
+    "gender": "Masculine",
+    "dignity": {
+      "exaltation": "Libra",
+      "fall": "Aries",
+      "rulership": ["Capricorn", "Aquarius"],
+      "detriment": ["Cancer", "Leo"]
+    }
+  }
+} 
