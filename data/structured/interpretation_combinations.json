@@ -1,0 +1,83 @@
+{
+  "sun_moon_combinations": {
+    "same_element": {
+      "description": "When Sun and Moon are in the same element, there is a natural harmony between conscious and unconscious drives.",
+      "interpretation": "The native experiences a strong sense of internal consistency and natural flow between their conscious goals and emotional needs."
+    },
+    "compatible_elements": {
+      "description": "When Sun and Moon are in compatible elements (Fire-Air or Earth-Water), there is a supportive relationship between conscious and unconscious drives.",
+      "interpretation": "The native finds it relatively easy to align their conscious goals with their emotional needs, though some effort may be required."
+    },
+    "incompatible_elements": {
+      "description": "When Sun and Moon are in incompatible elements (Fire-Water or Earth-Air), there may be tension between conscious and unconscious drives.",
+      "interpretation": "The native may experience internal conflict between their conscious goals and emotional needs, requiring conscious effort to integrate these energies."
+    }
+  },
+  "sun_rising_combinations": {
+    "same_sign": {
+      "description": "When Sun and Rising are in the same sign, there is a strong alignment between inner identity and outward expression.",
+      "interpretation": "The native's personality is expressed very directly and authentically, with little difference between their inner and outer selves."
+    },
+    "compatible_signs": {
+      "description": "When Sun and Rising are in compatible signs (same element or complementary qualities), there is a natural flow between inner identity and outward expression.",
+      "interpretation": "The native finds it relatively easy to express their true self outwardly, though some adaptation may be required."
+    },
+    "challenging_signs": {
+      "description": "When Sun and Rising are in challenging signs (opposite elements or conflicting qualities), there may be tension between inner identity and outward expression.",
+      "interpretation": "The native may experience a gap between their inner self and how they present to others, requiring conscious effort to bridge this divide."
+    }
+  },
+  "moon_rising_combinations": {
+    "same_sign": {
+      "description": "When Moon and Rising are in the same sign, emotional expression comes naturally and authentically.",
+      "interpretation": "The native's emotional nature is immediately apparent to others, with little filtering between inner feelings and outward expression."
+    },
+    "compatible_signs": {
+      "description": "When Moon and Rising are in compatible signs, emotional expression flows relatively easily.",
+      "interpretation": "The native finds it relatively natural to express their emotions outwardly, though some adaptation may be required."
+    },
+    "challenging_signs": {
+      "description": "When Moon and Rising are in challenging signs, there may be difficulty in emotional expression.",
+      "interpretation": "The native may struggle to express their emotions outwardly, feeling misunderstood or having difficulty connecting with others emotionally."
+    }
+  },
+  "elemental_combinations": {
+    "fire_air": {
+      "description": "Combination of Fire and Air elements creates an energetic, enthusiastic personality with strong communication skills.",
+      "strengths": ["enthusiasm", "communication", "creativity"],
+      "challenges": ["impulsiveness", "lack of grounding", "scattered energy"]
+    },
+    "earth_water": {
+      "description": "Combination of Earth and Water elements creates a grounded, emotional personality with strong intuition.",
+      "strengths": ["stability", "intuition", "practicality"],
+      "challenges": ["resistance to change", "emotional overwhelm", "stubbornness"]
+    },
+    "fire_earth": {
+      "description": "Combination of Fire and Earth elements creates a determined, practical personality with strong drive.",
+      "strengths": ["determination", "practicality", "leadership"],
+      "challenges": ["stubbornness", "rigidity", "temper"]
+    },
+    "air_water": {
+      "description": "Combination of Air and Water elements creates an adaptable, intuitive personality with strong communication skills.",
+      "strengths": ["adaptability", "intuition", "communication"],
+      "challenges": ["emotional detachment", "indecision", "lack of grounding"]
+    }
+  },
+  "modality_combinations": {
+    "cardinal_fixed": {
+      "description": "Combination of Cardinal and Fixed energies creates a strong initiator who follows through.",
+      "strengths": ["leadership", "determination", "stability"],
+      "challenges": ["stubbornness", "rigidity", "resistance to change"]
+    },
+    "fixed_mutable": {
+      "description": "Combination of Fixed and Mutable energies creates a stable personality with adaptability.",
+      "strengths": ["stability", "adaptability", "reliability"],
+      "challenges": ["indecision", "resistance to change", "lack of focus"]
+    },
+    "cardinal_mutable": {
+      "description": "Combination of Cardinal and Mutable energies creates an adaptable initiator.",
+      "strengths": ["initiative", "adaptability", "versatility"],
+      "challenges": ["lack of follow-through", "scattered energy", "impatience"]
+    }
+  }
+} 

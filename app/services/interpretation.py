@@ -28,6 +28,12 @@ class InterpretationService:
             self.aspects_data = json.load(f)
         with open(structured_dir / "planetary_dignities.json", "r") as f:
             self.dignities_data = json.load(f)
+        with open(structured_dir / "descriptions.json", "r") as f:
+            self.descriptions = json.load(f)
+        with open(structured_dir / "interpretation_patterns.json", "r") as f:
+            self.patterns = json.load(f)
+        with open(structured_dir / "interpretation_combinations.json", "r") as f:
+            self.combinations = json.load(f)
 
     def _get_planet_interpretation(self, planet: str, sign: str, house: int) -> str:
         """Get interpretation for a planet in a sign and house."""
@@ -247,6 +253,73 @@ class InterpretationService:
                 chart_ruler_house=sun_data["house"],
                 chart_ruler_interpretation="focus on personal resources and values"  # Simplified interpretation
             ))
+            
+            # Add Sun sign description
+            sun_sign = sun_data["sign"].lower()
+            interpretations.append(self.descriptions[sun_sign]["sun_sign"])
+            
+            # Add Moon sign description
+            moon_data = birth_chart["planets"].get("Moon", {})
+            if moon_data:
+                moon_sign = moon_data["sign"].lower()
+                interpretations.append(self.descriptions[moon_sign]["moon_sign"])
+            
+            # Add Rising sign description
+            rising_sign = asc_data["sign"].lower()
+            interpretations.append(self.descriptions[rising_sign]["rising_sign"])
+        
+        # Add elemental pattern analysis
+        elemental_analysis = self._analyze_elemental_patterns(birth_chart)
+        if elemental_analysis:
+            interpretations.append(elemental_analysis["interpretation"]["description"])
+            if level == "detailed":
+                interpretations.extend([
+                    f"Strengths: {', '.join(elemental_analysis['interpretation']['strengths'])}",
+                    f"Challenges: {', '.join(elemental_analysis['interpretation']['challenges'])}"
+                ])
+        
+        # Add modality pattern analysis
+        modality_analysis = self._analyze_modality_patterns(birth_chart)
+        if modality_analysis:
+            interpretations.append(modality_analysis["interpretation"]["description"])
+            if level == "detailed":
+                interpretations.extend([
+                    f"Strengths: {', '.join(modality_analysis['interpretation']['strengths'])}",
+                    f"Challenges: {', '.join(modality_analysis['interpretation']['challenges'])}"
+                ])
+        
+        # Add Sun-Moon combination analysis
+        sun_moon_analysis = self._analyze_sun_moon_combination(birth_chart)
+        if sun_moon_analysis:
+            interpretations.append(sun_moon_analysis["interpretation"]["description"])
+            if level == "detailed":
+                interpretations.append(sun_moon_analysis["interpretation"]["interpretation"])
+        
+        # Add Sun-Rising combination analysis
+        sun_rising_analysis = self._analyze_sun_rising_combination(birth_chart)
+        if sun_rising_analysis:
+            interpretations.append(sun_rising_analysis["interpretation"]["description"])
+            if level == "detailed":
+                interpretations.append(sun_rising_analysis["interpretation"]["interpretation"])
+        
+        # Add Moon-Rising combination analysis
+        moon_rising_analysis = self._analyze_moon_rising_combination(birth_chart)
+        if moon_rising_analysis:
+            interpretations.append(moon_rising_analysis["interpretation"]["description"])
+            if level == "detailed":
+                interpretations.append(moon_rising_analysis["interpretation"]["interpretation"])
+        
+        # Add house emphasis analysis
+        house_emphasis_analysis = self._analyze_house_emphasis(birth_chart)
+        if house_emphasis_analysis:
+            interpretations.append(house_emphasis_analysis["interpretation"]["description"])
+            if level == "detailed":
+                interpretations.append(f"Focus areas: {', '.join(house_emphasis_analysis['interpretation']['focus'])}")
+        
+        # Add special configurations
+        special_configs = self._get_special_configurations(birth_chart)
+        if special_configs:
+            interpretations.extend(special_configs)
         
         # Add area-specific interpretations
         if area == "career":
@@ -260,14 +333,18 @@ class InterpretationService:
         elif area == "personal_growth":
             interpretations.extend(self._interpret_personal_growth(birth_chart, level))
         
-        # Add special configurations if detailed level
-        if level == "detailed":
-            interpretations.extend(self._get_special_configurations(birth_chart))
-        
         return InterpretationResponse(
             status="success",
             data={
                 "interpretations": interpretations,
+                "patterns": {
+                    "elemental": elemental_analysis,
+                    "modality": modality_analysis,
+                    "sun_moon": sun_moon_analysis,
+                    "sun_rising": sun_rising_analysis,
+                    "moon_rising": moon_rising_analysis,
+                    "house_emphasis": house_emphasis_analysis
+                },
                 "techniques_used": self.techniques.get(area, [])
             }
         )
@@ -410,4 +487,192 @@ class InterpretationService:
                         planet, "Moon", aspect["type"]
                     ))
         
-        return interpretations 
+        return interpretations
+
+    def _analyze_elemental_patterns(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze elemental patterns in the chart."""
+        elements = {
+            "fire": ["Aries", "Leo", "Sagittarius"],
+            "earth": ["Taurus", "Virgo", "Capricorn"],
+            "air": ["Gemini", "Libra", "Aquarius"],
+            "water": ["Cancer", "Scorpio", "Pisces"]
+        }
+        
+        element_counts = {element: 0 for element in elements}
+        
+        # Count planets in each element
+        for planet_data in birth_chart["planets"].values():
+            sign = planet_data["sign"]
+            for element, signs in elements.items():
+                if sign in signs:
+                    element_counts[element] += 1
+                    break
+        
+        # Determine dominant element
+        max_count = max(element_counts.values())
+        dominant_elements = [element for element, count in element_counts.items() if count == max_count]
+        
+        return {
+            "counts": element_counts,
+            "dominant": dominant_elements,
+            "interpretation": self.patterns["elemental_patterns"][f"{dominant_elements[0]}_dominant"]
+        }
+
+    def _analyze_modality_patterns(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze modality patterns in the chart."""
+        modalities = {
+            "cardinal": ["Aries", "Cancer", "Libra", "Capricorn"],
+            "fixed": ["Taurus", "Leo", "Scorpio", "Aquarius"],
+            "mutable": ["Gemini", "Virgo", "Sagittarius", "Pisces"]
+        }
+        
+        modality_counts = {modality: 0 for modality in modalities}
+        
+        # Count planets in each modality
+        for planet_data in birth_chart["planets"].values():
+            sign = planet_data["sign"]
+            for modality, signs in modalities.items():
+                if sign in signs:
+                    modality_counts[modality] += 1
+                    break
+        
+        # Determine dominant modality
+        max_count = max(modality_counts.values())
+        dominant_modalities = [modality for modality, count in modality_counts.items() if count == max_count]
+        
+        return {
+            "counts": modality_counts,
+            "dominant": dominant_modalities,
+            "interpretation": self.patterns["modality_patterns"][f"{dominant_modalities[0]}_dominant"]
+        }
+
+    def _analyze_sun_moon_combination(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze the combination of Sun and Moon signs."""
+        sun_data = birth_chart["planets"].get("Sun", {})
+        moon_data = birth_chart["planets"].get("Moon", {})
+        
+        if not sun_data or not moon_data:
+            return None
+            
+        sun_sign = sun_data["sign"]
+        moon_sign = moon_data["sign"]
+        
+        # Get elements of both signs
+        elements = {
+            "fire": ["Aries", "Leo", "Sagittarius"],
+            "earth": ["Taurus", "Virgo", "Capricorn"],
+            "air": ["Gemini", "Libra", "Aquarius"],
+            "water": ["Cancer", "Scorpio", "Pisces"]
+        }
+        
+        sun_element = None
+        moon_element = None
+        for element, signs in elements.items():
+            if sun_sign in signs:
+                sun_element = element
+            if moon_sign in signs:
+                moon_element = element
+                
+        if sun_element == moon_element:
+            combination_type = "same_element"
+        elif (sun_element in ["fire", "air"] and moon_element in ["fire", "air"]) or \
+             (sun_element in ["earth", "water"] and moon_element in ["earth", "water"]):
+            combination_type = "compatible_elements"
+        else:
+            combination_type = "incompatible_elements"
+            
+        return {
+            "sun_sign": sun_sign,
+            "moon_sign": moon_sign,
+            "combination_type": combination_type,
+            "interpretation": self.combinations["sun_moon_combinations"][combination_type]
+        }
+
+    def _analyze_sun_rising_combination(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze the combination of Sun and Rising signs."""
+        sun_data = birth_chart["planets"].get("Sun", {})
+        asc_data = birth_chart["angles"].get("Asc", {})
+        
+        if not sun_data or not asc_data:
+            return None
+            
+        sun_sign = sun_data["sign"]
+        rising_sign = asc_data["sign"]
+        
+        if sun_sign == rising_sign:
+            combination_type = "same_sign"
+        elif sun_sign in self.signs_data[rising_sign]["compatible_signs"]:
+            combination_type = "compatible_signs"
+        else:
+            combination_type = "challenging_signs"
+            
+        return {
+            "sun_sign": sun_sign,
+            "rising_sign": rising_sign,
+            "combination_type": combination_type,
+            "interpretation": self.combinations["sun_rising_combinations"][combination_type]
+        }
+
+    def _analyze_moon_rising_combination(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze the combination of Moon and Rising signs."""
+        moon_data = birth_chart["planets"].get("Moon", {})
+        asc_data = birth_chart["angles"].get("Asc", {})
+        
+        if not moon_data or not asc_data:
+            return None
+            
+        moon_sign = moon_data["sign"]
+        rising_sign = asc_data["sign"]
+        
+        if moon_sign == rising_sign:
+            combination_type = "same_sign"
+        elif moon_sign in self.signs_data[rising_sign]["compatible_signs"]:
+            combination_type = "compatible_signs"
+        else:
+            combination_type = "challenging_signs"
+            
+        return {
+            "moon_sign": moon_sign,
+            "rising_sign": rising_sign,
+            "combination_type": combination_type,
+            "interpretation": self.combinations["moon_rising_combinations"][combination_type]
+        }
+
+    def _analyze_house_emphasis(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze house emphasis in the chart."""
+        house_counts = {i: 0 for i in range(1, 13)}
+        
+        # Count planets in each house
+        for planet_data in birth_chart["planets"].values():
+            house = planet_data["house"]
+            house_counts[house] += 1
+            
+        # Determine house emphasis
+        max_count = max(house_counts.values())
+        emphasized_houses = [house for house, count in house_counts.items() if count == max_count]
+        
+        # Categorize houses
+        house_categories = {
+            "angular": [1, 4, 7, 10],
+            "succedent": [2, 5, 8, 11],
+            "cadent": [3, 6, 9, 12]
+        }
+        
+        category_counts = {category: 0 for category in house_categories}
+        for house in emphasized_houses:
+            for category, houses in house_categories.items():
+                if house in houses:
+                    category_counts[category] += 1
+                    break
+                    
+        # Determine dominant category
+        max_category_count = max(category_counts.values())
+        dominant_categories = [category for category, count in category_counts.items() if count == max_category_count]
+        
+        return {
+            "house_counts": house_counts,
+            "emphasized_houses": emphasized_houses,
+            "category_counts": category_counts,
+            "dominant_categories": dominant_categories,
+            "interpretation": self.patterns["house_emphasis"][dominant_categories[0]]
+        } 

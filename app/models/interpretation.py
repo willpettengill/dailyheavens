@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, Any, List
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class InterpretationLevel(str, Enum):
@@ -31,5 +31,18 @@ class InterpretationRequest(BaseModel):
 
 
 class InterpretationResponse(BaseModel):
-    status: str = "success"
-    data: Dict[str, Any] 
+    status: str
+    data: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "interpretations": [],
+            "patterns": {
+                "elemental": None,
+                "modality": None,
+                "sun_moon": None,
+                "sun_rising": None,
+                "moon_rising": None,
+                "house_emphasis": None
+            },
+            "techniques_used": []
+        }
+    ) 

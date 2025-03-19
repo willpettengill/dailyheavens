@@ -1,0 +1,89 @@
+{
+  "decanate_interpretations": {
+    "first": {
+      "description": "The first decanate represents the purest expression of the sign's energy, ruled by the sign's primary ruler. This placement indicates strong manifestation of the sign's core qualities.",
+      "focus": "core qualities, primary expression"
+    },
+    "second": {
+      "description": "The second decanate adds complexity through the influence of a secondary ruler, blending the sign's energy with complementary qualities.",
+      "focus": "complexity, blended expression"
+    },
+    "third": {
+      "description": "The third decanate brings transformation through the influence of a tertiary ruler, adding depth and evolution to the sign's expression.",
+      "focus": "transformation, evolved expression"
+    }
+  },
+  "elemental_patterns": {
+    "fire_dominant": {
+      "description": "A chart with dominant Fire energy indicates a passionate, enthusiastic nature with strong creative drive and leadership potential.",
+      "strengths": ["creativity", "leadership", "inspiration"],
+      "challenges": ["impulsiveness", "temper", "restlessness"]
+    },
+    "earth_dominant": {
+      "description": "A chart with dominant Earth energy suggests a practical, grounded nature with strong focus on material security and tangible results.",
+      "strengths": ["stability", "reliability", "practicality"],
+      "challenges": ["rigidity", "materialism", "resistance to change"]
+    },
+    "air_dominant": {
+      "description": "A chart with dominant Air energy indicates an intellectual, communicative nature with strong focus on ideas and social connections.",
+      "strengths": ["communication", "adaptability", "objectivity"],
+      "challenges": ["detachment", "indecision", "lack of grounding"]
+    },
+    "water_dominant": {
+      "description": "A chart with dominant Water energy suggests an emotional, intuitive nature with strong focus on feelings and spiritual matters.",
+      "strengths": ["intuition", "empathy", "creativity"],
+      "challenges": ["emotional overwhelm", "moodiness", "escapism"]
+    }
+  },
+  "modality_patterns": {
+    "cardinal_dominant": {
+      "description": "A chart with dominant Cardinal energy indicates an initiator, someone who takes action and leads the way.",
+      "strengths": ["leadership", "initiative", "drive"],
+      "challenges": ["impatience", "competitiveness", "restlessness"]
+    },
+    "fixed_dominant": {
+      "description": "A chart with dominant Fixed energy suggests a stabilizer, someone who maintains and builds upon existing structures.",
+      "strengths": ["stability", "determination", "loyalty"],
+      "challenges": ["stubbornness", "resistance to change", "rigidity"]
+    },
+    "mutable_dominant": {
+      "description": "A chart with dominant Mutable energy indicates an adapter, someone who is flexible and can adjust to changing circumstances.",
+      "strengths": ["adaptability", "versatility", "open-mindedness"],
+      "challenges": ["indecision", "lack of focus", "scattered energy"]
+    }
+  },
+  "polarity_balance": {
+    "masculine_dominant": {
+      "description": "A chart with dominant Masculine energy suggests an outwardly focused, active approach to life.",
+      "focus": ["action", "expression", "external manifestation"]
+    },
+    "feminine_dominant": {
+      "description": "A chart with dominant Feminine energy indicates an inwardly focused, receptive approach to life.",
+      "focus": ["reception", "intuition", "internal processing"]
+    }
+  },
+  "ruling_planet_patterns": {
+    "multiple_placements": {
+      "description": "When a planet rules multiple placements in the chart, its influence is strengthened and more prominent.",
+      "interpretation": "The ruling planet's qualities are emphasized and manifest more strongly in the native's life."
+    },
+    "mutual_reception": {
+      "description": "When two planets rule each other's signs, they are in mutual reception, creating a special connection.",
+      "interpretation": "The planets work together harmoniously, sharing their qualities and supporting each other's expression."
+    }
+  },
+  "house_emphasis": {
+    "angular": {
+      "description": "Strong emphasis on angular houses (1st, 4th, 7th, 10th) indicates a focus on personal identity, home, relationships, and career.",
+      "focus": ["personal development", "external manifestation", "life direction"]
+    },
+    "succedent": {
+      "description": "Strong emphasis on succedent houses (2nd, 5th, 8th, 11th) suggests focus on resources, creativity, transformation, and social groups.",
+      "focus": ["resource management", "creative expression", "social connections"]
+    },
+    "cadent": {
+      "description": "Strong emphasis on cadent houses (3rd, 6th, 9th, 12th) indicates focus on communication, service, learning, and spiritual matters.",
+      "focus": ["communication", "learning", "spiritual growth"]
+    }
+  }
+} 
