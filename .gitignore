@@ -6,7 +6,9 @@ __pycache__/
 *$py.class
 
 # Project-specific
-/data/
+/data/*
+!/data/structured/
+!/data/structured/*.json
 *.log
 
 # C extensions

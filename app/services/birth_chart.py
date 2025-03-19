@@ -17,16 +17,21 @@ PLANETS = [const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS, const.
 class BirthChartService:
     def __init__(self):
         self.data_dir = settings.DATA_DIR
-        self._load_qualities()
+        self._load_structured_data()
 
-    def _load_qualities(self):
-        """Load planet, sign, and house qualities from JSON files."""
-        with open(self.data_dir / "planet_qualities.json", "r") as f:
-            self.planet_qualities = json.load(f)
-        with open(self.data_dir / "sign_qualities.json", "r") as f:
-            self.sign_qualities = json.load(f)
-        with open(self.data_dir / "house_qualities.json", "r") as f:
-            self.house_qualities = json.load(f)
+    def _load_structured_data(self):
+        """Load structured data from JSON files."""
+        structured_dir = self.data_dir / "structured"
+        with open(structured_dir / "planets.json", "r") as f:
+            self.planets_data = json.load(f)
+        with open(structured_dir / "signs.json", "r") as f:
+            self.signs_data = json.load(f)
+        with open(structured_dir / "houses.json", "r") as f:
+            self.houses_data = json.load(f)
+        with open(structured_dir / "aspects.json", "r") as f:
+            self.aspects_data = json.load(f)
+        with open(structured_dir / "planetary_dignities.json", "r") as f:
+            self.dignities_data = json.load(f)
 
     def _get_house_number(self, chart: Chart, longitude: float) -> int:
         """Get the house number for a given longitude."""
@@ -53,7 +58,13 @@ class BirthChartService:
                         "planet": other_planet,
                         "type": aspect.type,
                         "orb": aspect.orb,
+                        "qualities": self.aspects_data.get(aspect.type, {})
                     })
+        
+        # Get planet data from structured data
+        planet_data = self.planets_data.get(obj.id, {})
+        sign_data = self.signs_data.get(obj.sign, {})
+        house_data = self.houses_data.get(str(house_num), {})
         
         return {
             "name": obj.id,
@@ -67,7 +78,10 @@ class BirthChartService:
             "is_direct": obj.isDirect(),
             "is_retrograde": obj.isRetrograde(),
             "aspects": planet_aspects,
-            "qualities": self.planet_qualities.get(obj.id, {})
+            "qualities": planet_data,
+            "sign_qualities": sign_data,
+            "house_qualities": house_data,
+            "dignities": self.dignities_data.get(obj.id, {})
         }
 
     def calculate_birth_chart(self, date_of_birth: datetime, latitude: float, longitude: float) -> Dict[str, Any]:
@@ -91,21 +105,24 @@ class BirthChartService:
         houses = {}
         for i in range(1, 13):
             house = chart.get(f"House{i}")
+            house_data = self.houses_data.get(str(i), {})
             houses[i] = {
                 "longitude": house.lon,
                 "sign": house.sign,
                 "sign_longitude": house.signlon,
-                "qualities": self.house_qualities.get(str(i), {})
+                "qualities": house_data
             }
         
         # Get angles with all available data
         angles = {}
         for angle in [const.ASC, const.MC, const.DESC, const.IC]:
             obj = chart.get(angle)
+            sign_data = self.signs_data.get(obj.sign, {})
             angles[angle] = {
                 "longitude": obj.lon,
                 "sign": obj.sign,
-                "sign_longitude": obj.signlon
+                "sign_longitude": obj.signlon,
+                "qualities": sign_data
             }
         
         return {

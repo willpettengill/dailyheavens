@@ -1,32 +1,35 @@
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, Any, List
+from datetime import datetime
 from pydantic import BaseModel
 
 
 class InterpretationLevel(str, Enum):
     BASIC = "basic"
-    INTERMEDIATE = "intermediate"
-    ADVANCED = "advanced"
+    DETAILED = "detailed"
 
 
 class InterpretationArea(str, Enum):
-    GENERAL = "general"
     CAREER = "career"
     RELATIONSHIPS = "relationships"
-    PERSONAL_GROWTH = "personal_growth"
-    SPIRITUALITY = "spirituality"
     HEALTH = "health"
-    FINANCES = "finances"
+    SPIRITUALITY = "spirituality"
+    PERSONAL_GROWTH = "personal_growth"
+
+
+class BirthData(BaseModel):
+    date: datetime
+    latitude: float
+    longitude: float
+    timezone: str
 
 
 class InterpretationRequest(BaseModel):
-    birth_chart_data: dict
-    level: InterpretationLevel = InterpretationLevel.INTERMEDIATE
-    areas: Optional[List[InterpretationArea]] = [InterpretationArea.GENERAL]
-    include_transits: bool = False
-    language_style: str = "professional"  # professional, casual, technical
+    birth_chart: Dict[str, Any]
+    area: InterpretationArea
+    level: InterpretationLevel = InterpretationLevel.BASIC
 
 
 class InterpretationResponse(BaseModel):
     status: str = "success"
-    data: dict 
+    data: Dict[str, Any] 

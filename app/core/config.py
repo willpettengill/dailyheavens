@@ -1,17 +1,13 @@
 from pathlib import Path
-from pydantic_settings import BaseSettings
+from typing import List
 
-class Settings(BaseSettings):
-    # API Settings
+class Settings:
+    PROJECT_NAME: str = "DailyHeavens API"
     API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "Daily Heavens"
-    
-    # Data Directory
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]  # In production, replace with specific origins
     DATA_DIR: Path = Path(__file__).parent.parent.parent / "data"
-    
-    # CORS Settings
-    BACKEND_CORS_ORIGINS: list[str] = ["*"]
-    
+    FLATLIB_EPHE_PATH: str = str(Path(__file__).parent.parent.parent / "ephe")
+
     class Config:
         case_sensitive = True
 

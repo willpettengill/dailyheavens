@@ -1,248 +1,413 @@
-import json
+from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any
+import json
+from typing import Dict, Any, List, Optional
 
-from app.models.interpretation import InterpretationLevel, InterpretationArea
-
+from app.core.config import settings
+from app.models.interpretation import InterpretationRequest, InterpretationResponse
 
 class InterpretationService:
     def __init__(self):
-        self.structured_data_path = Path("data/structured")
+        self.data_dir = settings.DATA_DIR
         self._load_structured_data()
 
     def _load_structured_data(self):
-        """Load all structured JSON data files."""
-        self.templates = self._load_json_file("interpretation_templates.json")
-        self.signs = self._load_json_file("signs.json")
-        self.houses = self._load_json_file("houses.json")
-        self.aspects = self._load_json_file("aspects.json")
-        self.planetary_dignities = self._load_json_file("planetary_dignities.json")
-        self.house_systems = self._load_json_file("house_systems.json")
-        self.astrological_techniques = self._load_json_file("astrological_techniques.json")
+        """Load structured data from JSON files."""
+        structured_dir = self.data_dir / "structured"
+        with open(structured_dir / "interpretation_templates.json", "r") as f:
+            self.templates = json.load(f)
+        with open(structured_dir / "astrological_techniques.json", "r") as f:
+            self.techniques = json.load(f)
+        with open(structured_dir / "planets.json", "r") as f:
+            self.planets_data = json.load(f)
+        with open(structured_dir / "signs.json", "r") as f:
+            self.signs_data = json.load(f)
+        with open(structured_dir / "houses.json", "r") as f:
+            self.houses_data = json.load(f)
+        with open(structured_dir / "aspects.json", "r") as f:
+            self.aspects_data = json.load(f)
+        with open(structured_dir / "planetary_dignities.json", "r") as f:
+            self.dignities_data = json.load(f)
 
-    def _load_json_file(self, filename: str) -> Dict[str, Any]:
-        """Load a JSON file from the structured data directory."""
-        file_path = self.structured_data_path / filename
-        with open(file_path, 'r') as f:
-            return json.load(f)
-
-    def generate_interpretation(
-        self,
-        birth_chart_data: dict,
-        level: InterpretationLevel,
-        areas: List[InterpretationArea],
-        include_transits: bool = False,
-        language_style: str = "professional"
-    ) -> dict:
-        """Generate a complete astrological interpretation based on the birth chart data."""
+    def _get_planet_interpretation(self, planet: str, sign: str, house: int) -> str:
+        """Get interpretation for a planet in a sign and house."""
+        # Get house-planet combination interpretation
+        house_planet_interp = self.templates["house_planet_combinations"].get(planet.lower(), {}).get(f"house{house}", "")
         
-        # Extract key chart components
-        planets = birth_chart_data.get("planets", {})
-        houses = birth_chart_data.get("houses", {})
-        angles = birth_chart_data.get("angles", {})
-        aspects = birth_chart_data.get("aspects", [])
+        # Get planet-sign interpretation
+        planet_sign_template = self.templates["planet_sign_interpretations"]["format"]
+        example_key = f"{planet.lower()}_in_{sign.lower()}"
+        example_interp = self.templates["planet_sign_interpretations"]["examples"].get(example_key, "")
+        
+        if not example_interp:
+            # Fallback to default qualities
+            planet_qualities = {
+                "Sun": "identity and self-expression",
+                "Moon": "emotions and instincts",
+                "Mercury": "communication and thinking",
+                "Venus": "love and values",
+                "Mars": "action and drive",
+                "Jupiter": "growth and expansion",
+                "Saturn": "discipline and responsibility",
+                "Uranus": "innovation and change",
+                "Neptune": "spirituality and imagination",
+                "Pluto": "transformation and power"
+            }
+            sign_qualities = {
+                "Aries": "pioneering and assertive energy",
+                "Taurus": "stability and practicality",
+                "Gemini": "adaptability and communication",
+                "Cancer": "nurturing and emotional depth",
+                "Leo": "creativity and self-expression",
+                "Virgo": "analysis and service",
+                "Libra": "harmony and relationships",
+                "Scorpio": "intensity and transformation",
+                "Sagittarius": "exploration and wisdom",
+                "Capricorn": "ambition and structure",
+                "Aquarius": "innovation and humanitarian ideals",
+                "Pisces": "intuition and compassion"
+            }
+            example_interp = f"{planet_qualities.get(planet, '')} through {sign_qualities.get(sign, '')}"
+        
+        planet_sign_interp = planet_sign_template.format(
+            planet=planet,
+            sign=sign,
+            interpretation=example_interp
+        )
+        
+        return f"{planet_sign_interp}. {house_planet_interp}"
 
-        # Initialize interpretation data
-        interpretation = {
-            "overview": self._generate_overview(planets, angles),
-            "personality": self._generate_personality_analysis(planets, houses, angles),
-            "areas": {},
-            "special_patterns": self._identify_special_patterns(planets, aspects)
+    def _get_aspect_interpretation(self, planet1: str, planet2: str, aspect_type: str) -> str:
+        """Get interpretation for an aspect between two planets."""
+        aspect_key = f"{planet1.lower()}_{planet2.lower()}"
+        aspect_type_map = {
+            0: "conjunction",
+            60: "sextile",
+            90: "square",
+            120: "trine",
+            180: "opposition"
         }
-
-        # Generate interpretations for requested areas
-        for area in areas:
-            interpretation["areas"][area] = self._interpret_area(
-                area, planets, houses, aspects, level
-            )
-
-        # Add transit interpretations if requested
-        if include_transits:
-            interpretation["transits"] = self._interpret_transits(birth_chart_data)
-
-        return interpretation
-
-    def _generate_overview(self, planets: dict, angles: dict) -> dict:
-        """Generate an overview of the birth chart."""
-        sun_sign = planets.get("Sun", {}).get("sign")
-        ascendant_sign = angles.get("Asc", {}).get("sign")
+        aspect_name = aspect_type_map.get(int(aspect_type))
         
-        # Get chart ruler based on Ascendant sign
-        chart_ruler = self._get_chart_ruler(ascendant_sign)
-        chart_ruler_house = planets.get(chart_ruler, {}).get("house")
+        if aspect_name:
+            aspect_interp = self.templates["aspect_interpretations"].get(aspect_key, {}).get(aspect_name)
+            if aspect_interp:
+                return aspect_interp
+        
+        # Fallback to generic aspect meanings
+        aspect_meanings = {
+            "conjunction": "combines and intensifies",
+            "sextile": "creates opportunities and harmony",
+            "square": "creates tension and growth",
+            "trine": "flows naturally and supports",
+            "opposition": "creates awareness and balance"
+        }
+        
+        planet_qualities = {
+            "Sun": "identity and vitality",
+            "Moon": "emotions and instincts",
+            "Mercury": "communication and thinking",
+            "Venus": "love and values",
+            "Mars": "action and drive",
+            "Jupiter": "growth and opportunity",
+            "Saturn": "structure and responsibility",
+            "Uranus": "innovation and change",
+            "Neptune": "inspiration and spirituality",
+            "Pluto": "transformation and power",
+            "MC": "career and public image",
+            "ASC": "self-expression and personality"
+        }
+        
+        planet1_quality = planet_qualities.get(planet1, "")
+        planet2_quality = planet_qualities.get(planet2, "")
+        aspect_meaning = aspect_meanings.get(aspect_name, "")
+        
+        return f"The {aspect_name} between {planet1} ({planet1_quality}) and {planet2} ({planet2_quality}) {aspect_meaning}."
 
-        # Use template to generate overview
-        template = self.templates["reading_structure"]["overview"]["template"]
-        overview = template.format(
-            sun_sign=sun_sign,
-            ascendant_sign=ascendant_sign,
-            personality_blend=self._blend_sun_ascendant(sun_sign, ascendant_sign),
-            chart_ruler=chart_ruler,
-            chart_ruler_house=chart_ruler_house,
-            chart_ruler_interpretation=self._interpret_planet_in_house(chart_ruler, chart_ruler_house)
+    def _get_house_interpretation(self, house: int, sign: str) -> str:
+        """Get interpretation for a house in a sign."""
+        house_meanings = {
+            1: "identity and self-image",
+            2: "resources and values",
+            3: "communication and learning",
+            4: "home and emotional foundation",
+            5: "creativity and self-expression",
+            6: "work and health",
+            7: "relationships and partnerships",
+            8: "transformation and shared resources",
+            9: "higher learning and philosophy",
+            10: "career and public image",
+            11: "groups and aspirations",
+            12: "spirituality and unconscious"
+        }
+        
+        sign_qualities = {
+            "Aries": "pioneering and assertive energy",
+            "Taurus": "stability and practicality",
+            "Gemini": "adaptability and communication",
+            "Cancer": "nurturing and emotional depth",
+            "Leo": "creativity and self-expression",
+            "Virgo": "analysis and service",
+            "Libra": "harmony and relationships",
+            "Scorpio": "intensity and transformation",
+            "Sagittarius": "exploration and wisdom",
+            "Capricorn": "ambition and structure",
+            "Aquarius": "innovation and humanitarian ideals",
+            "Pisces": "intuition and compassion"
+        }
+        
+        house_meaning = house_meanings.get(house, "")
+        sign_quality = sign_qualities.get(sign, "")
+        
+        return f"The {house}th house in {sign} indicates {house_meaning} expressed through {sign_quality}."
+
+    def _get_special_configurations(self, birth_chart: Dict[str, Any]) -> List[str]:
+        """Identify and interpret special configurations in the chart."""
+        interpretations = []
+        
+        # Check for stelliums
+        house_planets = {}
+        sign_planets = {}
+        for planet, data in birth_chart["planets"].items():
+            house = data["house"]
+            sign = data["sign"]
+            house_planets.setdefault(house, []).append(planet)
+            sign_planets.setdefault(sign, []).append(planet)
+        
+        # House themes
+        house_themes = {
+            1: "self-expression and personal identity",
+            2: "resources, values, and material security",
+            3: "communication, learning, and local environment",
+            4: "home, family, and emotional foundation",
+            5: "creativity, romance, and self-expression",
+            6: "work, health, and daily routines",
+            7: "relationships and partnerships",
+            8: "transformation and shared resources",
+            9: "higher learning, philosophy, and travel",
+            10: "career, public image, and achievements",
+            11: "groups, friendships, and future goals",
+            12: "spirituality, unconscious, and hidden matters"
+        }
+        
+        # Sign themes
+        sign_themes = {
+            "Aries": "initiative, leadership, and pioneering spirit",
+            "Taurus": "stability, resources, and practical matters",
+            "Gemini": "communication, versatility, and learning",
+            "Cancer": "emotions, nurturing, and security",
+            "Leo": "creativity, self-expression, and leadership",
+            "Virgo": "analysis, service, and improvement",
+            "Libra": "relationships, harmony, and balance",
+            "Scorpio": "transformation, depth, and intensity",
+            "Sagittarius": "expansion, wisdom, and adventure",
+            "Capricorn": "ambition, structure, and achievement",
+            "Aquarius": "innovation, groups, and humanitarian ideals",
+            "Pisces": "spirituality, imagination, and compassion"
+        }
+        
+        # House stelliums
+        for house, planets in house_planets.items():
+            if len(planets) >= 3:
+                themes = house_themes.get(house, "various themes")
+                interpretations.append(
+                    f"A concentration of {len(planets)} planets ({', '.join(planets)}) in the {house}th house "
+                    f"indicates a strong focus on {themes} in this lifetime."
+                )
+        
+        # Sign stelliums
+        for sign, planets in sign_planets.items():
+            if len(planets) >= 3:
+                themes = sign_themes.get(sign, "various qualities")
+                interpretations.append(
+                    f"A stellium of {len(planets)} planets ({', '.join(planets)}) in {sign} "
+                    f"emphasizes {themes} in your life expression."
+                )
+        
+        return interpretations
+
+    def generate_interpretation(self, request: InterpretationRequest) -> InterpretationResponse:
+        """Generate interpretation based on request parameters."""
+        birth_chart = request.birth_chart
+        area = request.area
+        level = request.level
+        
+        interpretations = []
+        
+        # Add chart overview
+        sun_data = birth_chart["planets"].get("Sun", {})
+        asc_data = birth_chart["angles"].get("Asc", {})
+        if sun_data and asc_data:
+            overview_template = self.templates["reading_structure"]["overview"]["template"]
+            interpretations.append(overview_template.format(
+                sun_sign=sun_data["sign"],
+                ascendant_sign=asc_data["sign"],
+                personality_blend=f"{sun_data['sign']} and {asc_data['sign']}",
+                chart_ruler="Mars" if asc_data["sign"] == "Scorpio" else "Venus",  # Simplified ruler assignment
+                chart_ruler_house=sun_data["house"],
+                chart_ruler_interpretation="focus on personal resources and values"  # Simplified interpretation
+            ))
+        
+        # Add area-specific interpretations
+        if area == "career":
+            interpretations.extend(self._interpret_career(birth_chart, level))
+        elif area == "relationships":
+            interpretations.extend(self._interpret_relationships(birth_chart, level))
+        elif area == "health":
+            interpretations.extend(self._interpret_health(birth_chart, level))
+        elif area == "spirituality":
+            interpretations.extend(self._interpret_spirituality(birth_chart, level))
+        elif area == "personal_growth":
+            interpretations.extend(self._interpret_personal_growth(birth_chart, level))
+        
+        # Add special configurations if detailed level
+        if level == "detailed":
+            interpretations.extend(self._get_special_configurations(birth_chart))
+        
+        return InterpretationResponse(
+            status="success",
+            data={
+                "interpretations": interpretations,
+                "techniques_used": self.techniques.get(area, [])
+            }
         )
 
-        return {
-            "text": overview,
-            "key_points": {
-                "sun_sign": sun_sign,
-                "ascendant": ascendant_sign,
-                "chart_ruler": chart_ruler,
-                "chart_ruler_house": chart_ruler_house
-            }
-        }
-
-    def _generate_personality_analysis(self, planets: dict, houses: dict, angles: dict) -> dict:
-        """Generate a detailed personality analysis."""
-        sun_data = planets.get("Sun", {})
-        moon_data = planets.get("Moon", {})
-        ascendant_data = angles.get("Asc", {})
-
-        template = self.templates["reading_structure"]["personality"]["template"]
-        analysis = template.format(
-            sun_sign=sun_data.get("sign"),
-            sun_house=sun_data.get("house"),
-            sun_house_themes=self._get_house_themes(sun_data.get("house")),
-            ascendant_sign=ascendant_data.get("sign"),
-            ascendant_qualities=self._get_sign_qualities(ascendant_data.get("sign")),
-            moon_sign=moon_data.get("sign"),
-            moon_house=moon_data.get("house"),
-            moon_interpretation=self._interpret_moon_placement(moon_data)
-        )
-
-        return {
-            "text": analysis,
-            "components": {
-                "sun": sun_data,
-                "moon": moon_data,
-                "ascendant": ascendant_data
-            }
-        }
-
-    def _identify_special_patterns(self, planets: dict, aspects: list) -> dict:
-        """Identify and interpret special chart patterns."""
-        patterns = {
-            "stelliums": self._find_stelliums(planets),
-            "aspect_patterns": self._find_aspect_patterns(aspects)
-        }
+    def _interpret_career(self, birth_chart: Dict[str, Any], level: str) -> List[str]:
+        """Generate career-related interpretations."""
+        interpretations = []
         
-        return patterns
-
-    def _interpret_area(
-        self,
-        area: InterpretationArea,
-        planets: dict,
-        houses: dict,
-        aspects: list,
-        level: InterpretationLevel
-    ) -> dict:
-        """Generate interpretation for a specific life area."""
-        area_interpretations = {
-            InterpretationArea.CAREER: self._interpret_career(planets, houses, aspects, level),
-            InterpretationArea.RELATIONSHIPS: self._interpret_relationships(planets, houses, aspects, level),
-            InterpretationArea.PERSONAL_GROWTH: self._interpret_personal_growth(planets, houses, aspects, level),
-            # Add other area interpretations as needed
-        }
-        
-        return area_interpretations.get(area, {"text": "Area interpretation not implemented"})
-
-    def _get_chart_ruler(self, ascendant_sign: str) -> str:
-        """Get the ruling planet of the Ascendant sign."""
-        for planet, ruled_signs in self.planetary_dignities["dignities"]["rulership"].items():
-            if ascendant_sign in ruled_signs:
-                return planet
-        return "Unknown"
-
-    def _blend_sun_ascendant(self, sun_sign: str, ascendant_sign: str) -> str:
-        """Create a description of the personality blend between Sun and Ascendant signs."""
-        sun_qualities = self.signs[sun_sign.lower()]["qualities"][:3]
-        asc_qualities = self.signs[ascendant_sign.lower()]["qualities"][:3]
-        
-        return f"{', '.join(sun_qualities)} with a {', '.join(asc_qualities)} approach"
-
-    def _get_house_themes(self, house_number: int) -> str:
-        """Get the main themes of a house."""
-        house_key = f"house{house_number}"
-        return self.houses[house_key]["qualities"][0]
-
-    def _get_sign_qualities(self, sign: str) -> str:
-        """Get the main qualities of a sign."""
-        return ", ".join(self.signs[sign.lower()]["qualities"][:3])
-
-    def _interpret_moon_placement(self, moon_data: dict) -> str:
-        """Interpret the Moon's placement in sign and house."""
-        sign = moon_data.get("sign", "").lower()
-        house = moon_data.get("house")
-        
-        sign_qualities = self.signs[sign]["qualities"][:2]
-        house_themes = self._get_house_themes(house)
-        
-        return f"{', '.join(sign_qualities)} in matters of {house_themes}"
-
-    def _find_stelliums(self, planets: dict) -> list:
-        """Find stelliums (3 or more planets in the same sign or house)."""
-        sign_groups = {}
-        house_groups = {}
-        
-        for planet, data in planets.items():
-            sign = data.get("sign")
-            house = data.get("house")
+        # Analyze Sun position
+        sun = birth_chart["planets"].get("Sun")
+        if sun:
+            interpretations.append(self._get_planet_interpretation(
+                "Sun", sun["sign"], sun["house"]
+            ))
             
-            if sign:
-                sign_groups.setdefault(sign, []).append(planet)
-            if house:
-                house_groups.setdefault(house, []).append(planet)
+        # Analyze 10th house
+        mc = birth_chart["angles"].get("MC")
+        if mc:
+            interpretations.append(self._get_house_interpretation(
+                10, mc["sign"]
+            ))
+            
+        # Analyze aspects to MC
+        for planet, data in birth_chart["planets"].items():
+            for aspect in data.get("aspects", []):
+                if aspect["planet"] == "MC":
+                    interpretations.append(self._get_aspect_interpretation(
+                        planet, "MC", aspect["type"]
+                    ))
         
-        stelliums = []
-        for sign, planets_list in sign_groups.items():
-            if len(planets_list) >= 3:
-                stelliums.append({
-                    "type": "sign",
-                    "location": sign,
-                    "planets": planets_list
-                })
+        return interpretations
+
+    def _interpret_relationships(self, birth_chart: Dict[str, Any], level: str) -> List[str]:
+        """Generate relationship-related interpretations."""
+        interpretations = []
         
-        for house, planets_list in house_groups.items():
-            if len(planets_list) >= 3:
-                stelliums.append({
-                    "type": "house",
-                    "location": house,
-                    "planets": planets_list
-                })
+        # Analyze Venus position
+        venus = birth_chart["planets"].get("Venus")
+        if venus:
+            interpretations.append(self._get_planet_interpretation(
+                "Venus", venus["sign"], venus["house"]
+            ))
+            
+        # Analyze 7th house
+        desc = birth_chart["angles"].get("DESC")
+        if desc:
+            interpretations.append(self._get_house_interpretation(
+                7, desc["sign"]
+            ))
+            
+        # Analyze aspects to Venus
+        for planet, data in birth_chart["planets"].items():
+            for aspect in data.get("aspects", []):
+                if aspect["planet"] == "Venus":
+                    interpretations.append(self._get_aspect_interpretation(
+                        planet, "Venus", aspect["type"]
+                    ))
         
-        return stelliums
+        return interpretations
 
-    def _find_aspect_patterns(self, aspects: list) -> list:
-        """Identify major aspect patterns (grand trines, T-squares, etc.)."""
-        # This is a placeholder for more complex aspect pattern detection
-        patterns = []
-        # Implementation would involve graph theory to detect patterns
-        return patterns
+    def _interpret_health(self, birth_chart: Dict[str, Any], level: str) -> List[str]:
+        """Generate health-related interpretations."""
+        interpretations = []
+        
+        # Analyze Mars position
+        mars = birth_chart["planets"].get("Mars")
+        if mars:
+            interpretations.append(self._get_planet_interpretation(
+                "Mars", mars["sign"], mars["house"]
+            ))
+            
+        # Analyze 6th house
+        house6 = birth_chart["houses"].get(6)
+        if house6:
+            interpretations.append(self._get_house_interpretation(
+                6, house6["sign"]
+            ))
+            
+        # Analyze aspects to Mars
+        for planet, data in birth_chart["planets"].items():
+            for aspect in data.get("aspects", []):
+                if aspect["planet"] == "Mars":
+                    interpretations.append(self._get_aspect_interpretation(
+                        planet, "Mars", aspect["type"]
+                    ))
+        
+        return interpretations
 
-    def _interpret_planet_in_house(self, planet: str, house: int) -> str:
-        """Interpret a planet's placement in a house."""
-        house_key = f"house{house}"
-        if planet in self.templates["house_planet_combinations"]:
-            return self.templates["house_planet_combinations"][planet][house_key]
-        return f"focus on {self.houses[house_key]['qualities'][0]}"
+    def _interpret_spirituality(self, birth_chart: Dict[str, Any], level: str) -> List[str]:
+        """Generate spirituality-related interpretations."""
+        interpretations = []
+        
+        # Analyze Neptune position
+        neptune = birth_chart["planets"].get("Neptune")
+        if neptune:
+            interpretations.append(self._get_planet_interpretation(
+                "Neptune", neptune["sign"], neptune["house"]
+            ))
+            
+        # Analyze 12th house
+        house12 = birth_chart["houses"].get(12)
+        if house12:
+            interpretations.append(self._get_house_interpretation(
+                12, house12["sign"]
+            ))
+            
+        # Analyze aspects to Neptune
+        for planet, data in birth_chart["planets"].items():
+            for aspect in data.get("aspects", []):
+                if aspect["planet"] == "Neptune":
+                    interpretations.append(self._get_aspect_interpretation(
+                        planet, "Neptune", aspect["type"]
+                    ))
+        
+        return interpretations
 
-    # Area-specific interpretation methods
-    def _interpret_career(self, planets: dict, houses: dict, aspects: list, level: InterpretationLevel) -> dict:
-        """Generate career-focused interpretation."""
-        # Implementation would focus on 2nd, 6th, and 10th houses, plus relevant planets
-        return {"text": "Career interpretation placeholder"}
-
-    def _interpret_relationships(self, planets: dict, houses: dict, aspects: list, level: InterpretationLevel) -> dict:
-        """Generate relationship-focused interpretation."""
-        # Implementation would focus on 5th, 7th, and 8th houses, plus Venus/Mars aspects
-        return {"text": "Relationships interpretation placeholder"}
-
-    def _interpret_personal_growth(self, planets: dict, houses: dict, aspects: list, level: InterpretationLevel) -> dict:
-        """Generate personal growth-focused interpretation."""
-        # Implementation would focus on 1st, 9th, and 12th houses, plus outer planets
-        return {"text": "Personal growth interpretation placeholder"}
-
-    def _interpret_transits(self, birth_chart_data: dict) -> dict:
-        """Interpret current transits to the natal chart."""
-        # This would require current planetary positions to be passed in
-        return {"text": "Transit interpretation placeholder"} 
+    def _interpret_personal_growth(self, birth_chart: Dict[str, Any], level: str) -> List[str]:
+        """Generate personal growth-related interpretations."""
+        interpretations = []
+        
+        # Analyze Moon position
+        moon = birth_chart["planets"].get("Moon")
+        if moon:
+            interpretations.append(self._get_planet_interpretation(
+                "Moon", moon["sign"], moon["house"]
+            ))
+            
+        # Analyze 1st house
+        asc = birth_chart["angles"].get("ASC")
+        if asc:
+            interpretations.append(self._get_house_interpretation(
+                1, asc["sign"]
+            ))
+            
+        # Analyze aspects to Moon
+        for planet, data in birth_chart["planets"].items():
+            for aspect in data.get("aspects", []):
+                if aspect["planet"] == "Moon":
+                    interpretations.append(self._get_aspect_interpretation(
+                        planet, "Moon", aspect["type"]
+                    ))
+        
+        return interpretations 
