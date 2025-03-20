@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 import json
 from typing import Dict, Any
+import pytz
 
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
@@ -142,49 +143,49 @@ class BirthChartService:
             "dignities": self.dignities_data.get(obj.id, {})
         }
 
-    def calculate_birth_chart(self, date_of_birth: str, latitude: float, longitude: float) -> Dict[str, Any]:
+    def calculate_birth_chart(self, date_of_birth: str, latitude: float, longitude: float, timezone: str = "UTC") -> Dict[str, Any]:
         """Calculate a birth chart for the given date and location."""
         try:
-            # Validate date format and range
-            try:
-                if isinstance(date_of_birth, str):
-                    date = datetime.fromisoformat(date_of_birth.replace('Z', '+00:00'))
-                else:
-                    date = date_of_birth
-                    
-                # Check if date is reasonable (not too far in past or future)
-                current_year = datetime.now().year
-                if date.year < 1900 or date.year > current_year + 1:
-                    return {
-                        "status": "error",
-                        "error": f"Date must be between 1900 and {current_year + 1}"
-                    }
-            except ValueError:
-                return {
-                    "status": "error",
-                    "error": "Invalid date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"
-                }
-                
-            # Format date for flatlib
-            date_str = date.strftime("%Y/%m/%d")
-            time_str = date.strftime("%H:%M")
-            flatlib_date = Datetime(date_str, time_str, '+00:00')
+            # Parse the input date as UTC
+            dt = datetime.fromisoformat(date_of_birth.replace('Z', '+00:00'))
             
-            # Validate coordinates
-            if not (-90 <= latitude <= 90):
-                return {
-                    "status": "error",
-                    "error": "Latitude must be between -90 and 90 degrees"
-                }
-            if not (-180 <= longitude <= 180):
-                return {
-                    "status": "error",
-                    "error": "Longitude must be between -180 and 180 degrees"
-                }
+            # Convert to the specified timezone
+            if timezone != "UTC":
+                tz = pytz.timezone(timezone)
+                dt = dt.astimezone(tz)
             
-            # Create flatlib chart
+            # Format date and time for flatlib
+            date_str = dt.strftime("%Y/%m/%d")
+            time_str = dt.strftime("%H:%M")
+            
+            # Convert timezone to offset for flatlib
+            tz_offset = dt.utcoffset()
+            if tz_offset:
+                hours = int(tz_offset.total_seconds() / 3600)
+                minutes = int((tz_offset.total_seconds() % 3600) / 60)
+                tz_str = f"{hours:+03d}{minutes:02d}"
+            else:
+                tz_str = "+0000"
+            
+            # Create flatlib objects
             pos = GeoPos(float(latitude), float(longitude))
-            chart = Chart(flatlib_date, pos)
+            date = Datetime(date_str, time_str, tz_str)
+            chart = Chart(date, pos)
+            
+            # Extract house cusps
+            houses = {}
+            for i in range(1, 13):
+                try:
+                    house = chart.get(f"House{i}")
+                    if house:
+                        houses[str(i)] = {
+                            "sign": house.sign,
+                            "degree": round(house.lon, 2),
+                            "size": round(house.size, 2)
+                        }
+                except (KeyError, AttributeError) as e:
+                    logger.warning(f"Error calculating house {i}: {str(e)}")
+                    continue
             
             # Extract planetary positions with validation
             planets = {}
@@ -203,6 +204,28 @@ class BirthChartService:
                     logger.warning(f"Planet {planet} not found in chart")
                     continue
             
+            # Extract angles with validation
+            for angle in ["ASC", "MC"]:
+                try:
+                    obj = chart.get(getattr(const, angle))
+                    if obj:
+                        house_num = 1 if angle == "ASC" else 10  # ASC is house 1, MC is house 10
+                        planets[angle] = {
+                            "sign": obj.sign,
+                            "degree": round(obj.lon, 2),  # Round to 2 decimal places
+                            "house": house_num,
+                            "retrograde": False  # Angles don't have retrograde motion
+                        }
+                except (KeyError, AttributeError):
+                    logger.warning(f"Angle {angle} not found in chart")
+                    continue
+            
+            # Map ASC to Ascendant in the output
+            if "ASC" in planets:
+                planets["Ascendant"] = planets.pop("ASC")
+            if "MC" in planets:
+                planets["Midheaven"] = planets.pop("MC")
+            
             # Validate minimum required planets
             required_planets = ["Sun", "Moon", "Ascendant"]
             missing_planets = [p for p in required_planets if p not in planets]
@@ -212,38 +235,12 @@ class BirthChartService:
                     "error": f"Missing required planets: {', '.join(missing_planets)}"
                 }
             
-            # Extract house cusps with validation
-            houses = {}
-            for i in range(1, 13):
-                try:
-                    house = chart.getHouse(i)
-                    houses[str(i)] = {
-                        "sign": house.sign,
-                        "degree": round(house.lon, 2)  # Round to 2 decimal places
-                    }
-                except (KeyError, AttributeError):
-                    logger.warning(f"House {i} not found in chart")
-                    continue
-            
             # Validate minimum required houses
             if len(houses) < 10:  # Allow some flexibility but require most houses
                 return {
                     "status": "error",
                     "error": "Insufficient house data calculated"
                 }
-            
-            # Extract angles with validation
-            angles = {}
-            for angle in ["ASC", "MC"]:
-                try:
-                    obj = chart.get(getattr(const, angle))
-                    angles[angle] = {
-                        "sign": obj.sign,
-                        "degree": round(obj.lon, 2)  # Round to 2 decimal places
-                    }
-                except (KeyError, AttributeError):
-                    logger.warning(f"Angle {angle} not found in chart")
-                    continue
             
             # Calculate aspects with validation
             chart_aspects = []
@@ -268,9 +265,9 @@ class BirthChartService:
             chart_data = {
                 "planets": planets,
                 "houses": houses,
-                "angles": angles,
+                "angles": {},
                 "aspects": chart_aspects,
-                "calculation_date": date.isoformat(),
+                "calculation_date": dt.isoformat(),
                 "location": {
                     "latitude": latitude,
                     "longitude": longitude
