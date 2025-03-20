@@ -1,83 +1,86 @@
 {
   "conjunction": {
-    "symbol": "☌",
     "angle": 0,
     "orb": 8,
-    "nature": "neutral",
-    "description": "Planets are at approximately the same degree",
-    "interpretation": "Combines the energies of the planets involved, creating a unified force",
-    "strength": "strong"
+    "nature": "major",
+    "type": "harmonious",
+    "keywords": ["unity", "focus", "new beginnings", "intensity"],
+    "interpretation": {
+      "general": "Merging of energies, intensifying the qualities of both planets",
+      "harmonious": "Strong focus and concentrated energy",
+      "challenging": "Potential overwhelm or excess"
+    }
   },
   "sextile": {
-    "symbol": "⚹",
     "angle": 60,
     "orb": 6,
-    "nature": "harmonious",
-    "description": "Planets are 60 degrees apart",
-    "interpretation": "Creates opportunities for growth and development through harmonious interaction",
-    "strength": "moderate"
+    "nature": "minor",
+    "type": "harmonious",
+    "keywords": ["opportunity", "flow", "ease", "growth"],
+    "interpretation": {
+      "general": "Easy flow of energy between planets, creating opportunities",
+      "harmonious": "Productive cooperation and development",
+      "challenging": "May require active engagement to benefit"
+    }
   },
   "square": {
-    "symbol": "□",
     "angle": 90,
     "orb": 8,
-    "nature": "challenging",
-    "description": "Planets are 90 degrees apart",
-    "interpretation": "Creates tension and challenges that require resolution and growth",
-    "strength": "strong"
+    "nature": "major",
+    "type": "challenging",
+    "keywords": ["tension", "challenge", "growth", "action"],
+    "interpretation": {
+      "general": "Dynamic tension between planets, forcing growth through challenges",
+      "harmonious": "Motivation for change and development",
+      "challenging": "Internal or external conflicts"
+    }
   },
   "trine": {
-    "symbol": "△",
     "angle": 120,
     "orb": 8,
-    "nature": "harmonious",
-    "description": "Planets are 120 degrees apart",
-    "interpretation": "Creates natural flow and ease between the planets involved",
-    "strength": "strong"
+    "nature": "major",
+    "type": "harmonious",
+    "keywords": ["harmony", "flow", "talent", "ease"],
+    "interpretation": {
+      "general": "Natural harmony and flow between planets",
+      "harmonious": "Innate talents and abilities",
+      "challenging": "May lead to complacency"
+    }
   },
   "opposition": {
-    "symbol": "☍",
     "angle": 180,
     "orb": 8,
-    "nature": "challenging",
-    "description": "Planets are 180 degrees apart",
-    "interpretation": "Creates tension between opposing forces that need to be balanced",
-    "strength": "strong"
-  },
-  "semisextile": {
-    "symbol": "⚺",
-    "angle": 30,
-    "orb": 3,
-    "nature": "neutral",
-    "description": "Planets are 30 degrees apart",
-    "interpretation": "Creates subtle connections and minor opportunities",
-    "strength": "weak"
-  },
-  "semisquare": {
-    "symbol": "⚻",
-    "angle": 45,
-    "orb": 4,
-    "nature": "challenging",
-    "description": "Planets are 45 degrees apart",
-    "interpretation": "Creates minor tension and friction",
-    "strength": "weak"
-  },
-  "sesquisquare": {
-    "symbol": "⚼",
-    "angle": 135,
-    "orb": 4,
-    "nature": "challenging",
-    "description": "Planets are 135 degrees apart",
-    "interpretation": "Creates internal tension and stress",
-    "strength": "weak"
+    "nature": "major",
+    "type": "challenging",
+    "keywords": ["awareness", "balance", "relationship", "tension"],
+    "interpretation": {
+      "general": "Awareness through polarity, need for integration",
+      "harmonious": "Objective awareness and perspective",
+      "challenging": "Internal conflicts and projection"
+    }
   },
   "quincunx": {
-    "symbol": "⚻",
     "angle": 150,
     "orb": 3,
-    "nature": "neutral",
-    "description": "Planets are 150 degrees apart",
-    "interpretation": "Creates adjustment and adaptation needs",
-    "strength": "weak"
+    "nature": "minor",
+    "type": "challenging",
+    "keywords": ["adjustment", "paradox", "health", "service"],
+    "interpretation": {
+      "general": "Need for adjustment and adaptation",
+      "harmonious": "Ability to make necessary changes",
+      "challenging": "Difficulty finding resolution"
+    }
+  },
+  "semi_sextile": {
+    "angle": 30,
+    "orb": 3,
+    "nature": "minor",
+    "type": "harmonious",
+    "keywords": ["subtle", "growth", "learning", "adjustment"],
+    "interpretation": {
+      "general": "Subtle connections and minor opportunities",
+      "harmonious": "Gentle support and growth",
+      "challenging": "May be barely noticeable"
+    }
   }
 } 

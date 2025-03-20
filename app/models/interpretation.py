@@ -10,6 +10,7 @@ class InterpretationLevel(str, Enum):
 
 
 class InterpretationArea(str, Enum):
+    GENERAL = "general"
     CAREER = "career"
     RELATIONSHIPS = "relationships"
     HEALTH = "health"

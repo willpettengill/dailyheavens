@@ -1,110 +1,158 @@
 {
-  "house1": {
+  "1": {
     "name": "First House",
-    "qualities": ["personality", "physical body", "early environment", "appearance"],
-    "natural_sign": "Aries",
-    "natural_planet": "Mars",
-    "angularity": "Angular",
-    "element": "Fire",
-    "modality": "Cardinal"
+    "type": "angular",
+    "keywords": ["self", "identity", "appearance", "beginnings"],
+    "qualities": {
+      "general": "self-expression and personality",
+      "career": "leadership style",
+      "relationships": "approach to relationships",
+      "health": "physical vitality",
+      "spirituality": "spiritual identity",
+      "personal_growth": "self-awareness"
+    }
   },
-  "house2": {
+  "2": {
     "name": "Second House",
-    "qualities": ["money", "possessions", "earning ability", "self-esteem"],
-    "natural_sign": "Taurus",
-    "natural_planet": "Venus",
-    "angularity": "Succedent",
-    "element": "Earth",
-    "modality": "Fixed"
+    "type": "succedent",
+    "keywords": ["values", "resources", "possessions", "security"],
+    "qualities": {
+      "general": "material resources and values",
+      "career": "earning potential",
+      "relationships": "material security",
+      "health": "physical resources",
+      "spirituality": "spiritual values",
+      "personal_growth": "self-worth"
+    }
   },
-  "house3": {
+  "3": {
     "name": "Third House",
-    "qualities": ["communication", "lower mind", "short journeys", "siblings"],
-    "natural_sign": "Gemini",
-    "natural_planet": "Mercury",
-    "angularity": "Cadent",
-    "element": "Air",
-    "modality": "Mutable"
+    "type": "cadent",
+    "keywords": ["communication", "learning", "siblings", "local environment"],
+    "qualities": {
+      "general": "communication and learning",
+      "career": "skills development",
+      "relationships": "communication style",
+      "health": "nervous system",
+      "spirituality": "mental spirituality",
+      "personal_growth": "mental development"
+    }
   },
-  "house4": {
+  "4": {
     "name": "Fourth House",
-    "qualities": ["home", "family lands", "unconscious", "past"],
-    "natural_sign": "Cancer",
-    "natural_planet": "Moon",
-    "angularity": "Angular",
-    "element": "Water",
-    "modality": "Cardinal"
+    "type": "angular",
+    "keywords": ["home", "family", "roots", "foundation"],
+    "qualities": {
+      "general": "home and emotional security",
+      "career": "work from home",
+      "relationships": "family bonds",
+      "health": "emotional well-being",
+      "spirituality": "inner sanctuary",
+      "personal_growth": "emotional foundation"
+    }
   },
-  "house5": {
+  "5": {
     "name": "Fifth House",
-    "qualities": ["pleasures", "social life", "children", "creativity"],
-    "natural_sign": "Leo",
-    "natural_planet": "Sun",
-    "angularity": "Succedent",
-    "element": "Fire",
-    "modality": "Fixed"
+    "type": "succedent",
+    "keywords": ["creativity", "pleasure", "romance", "self-expression"],
+    "qualities": {
+      "general": "creativity and joy",
+      "career": "creative work",
+      "relationships": "romance and dating",
+      "health": "vitality",
+      "spirituality": "creative spirituality",
+      "personal_growth": "self-expression"
+    }
   },
-  "house6": {
+  "6": {
     "name": "Sixth House",
-    "qualities": ["service", "health", "work", "competence", "skill"],
-    "natural_sign": "Virgo",
-    "natural_planet": "Mercury",
-    "angularity": "Cadent",
-    "element": "Earth",
-    "modality": "Mutable"
+    "type": "cadent",
+    "keywords": ["service", "health", "work", "routine"],
+    "qualities": {
+      "general": "daily work and health",
+      "career": "job duties",
+      "relationships": "work relationships",
+      "health": "health habits",
+      "spirituality": "practical spirituality",
+      "personal_growth": "self-improvement"
+    }
   },
-  "house7": {
+  "7": {
     "name": "Seventh House",
-    "qualities": ["partnership", "identification with others", "counseling", "open enemies"],
-    "natural_sign": "Libra",
-    "natural_planet": "Venus",
-    "angularity": "Angular",
-    "element": "Air",
-    "modality": "Cardinal"
+    "type": "angular",
+    "keywords": ["partnerships", "relationships", "contracts", "open enemies"],
+    "qualities": {
+      "general": "partnerships and relationships",
+      "career": "business partnerships",
+      "relationships": "committed relationships",
+      "health": "relationship health",
+      "spirituality": "spiritual partnerships",
+      "personal_growth": "relationship growth"
+    }
   },
-  "house8": {
+  "8": {
     "name": "Eighth House",
-    "qualities": ["death", "instinct", "sexuality", "regeneration", "others money"],
-    "natural_sign": "Scorpio",
-    "natural_planet": "Mars",
-    "angularity": "Succedent",
-    "element": "Water",
-    "modality": "Fixed"
+    "type": "succedent",
+    "keywords": ["transformation", "shared resources", "intimacy", "mystery"],
+    "qualities": {
+      "general": "transformation and power",
+      "career": "shared resources",
+      "relationships": "intimate bonds",
+      "health": "regeneration",
+      "spirituality": "occult wisdom",
+      "personal_growth": "deep transformation"
+    }
   },
-  "house9": {
+  "9": {
     "name": "Ninth House",
-    "qualities": ["long trips", "adventure", "higher mind", "philosophy", "religion"],
-    "natural_sign": "Sagittarius",
-    "natural_planet": "Jupiter",
-    "angularity": "Cadent",
-    "element": "Fire",
-    "modality": "Mutable"
+    "type": "cadent",
+    "keywords": ["higher learning", "philosophy", "travel", "expansion"],
+    "qualities": {
+      "general": "higher learning and beliefs",
+      "career": "teaching and publishing",
+      "relationships": "cultural connections",
+      "health": "philosophical well-being",
+      "spirituality": "belief systems",
+      "personal_growth": "wisdom development"
+    }
   },
-  "house10": {
+  "10": {
     "name": "Tenth House",
-    "qualities": ["career", "status", "reputation", "destiny"],
-    "natural_sign": "Capricorn",
-    "natural_planet": "Saturn",
-    "angularity": "Angular",
-    "element": "Earth",
-    "modality": "Cardinal"
+    "type": "angular",
+    "keywords": ["career", "public image", "authority", "achievement"],
+    "qualities": {
+      "general": "career and public image",
+      "career": "professional goals",
+      "relationships": "public partnerships",
+      "health": "public health",
+      "spirituality": "spiritual authority",
+      "personal_growth": "life purpose"
+    }
   },
-  "house11": {
+  "11": {
     "name": "Eleventh House",
-    "qualities": ["friends", "groups", "future", "wishes", "goals"],
-    "natural_sign": "Aquarius",
-    "natural_planet": "Saturn",
-    "angularity": "Succedent",
-    "element": "Air",
-    "modality": "Fixed"
+    "type": "succedent",
+    "keywords": ["groups", "friends", "hopes", "humanitarian ideals"],
+    "qualities": {
+      "general": "groups and aspirations",
+      "career": "networking",
+      "relationships": "friendships",
+      "health": "group support",
+      "spirituality": "spiritual community",
+      "personal_growth": "social contribution"
+    }
   },
-  "house12": {
+  "12": {
     "name": "Twelfth House",
-    "qualities": ["limitations", "repression", "karma", "self-unfolding", "secret enemies"],
-    "natural_sign": "Pisces",
-    "natural_planet": "Jupiter",
-    "angularity": "Cadent",
-    "element": "Water",
-    "modality": "Mutable"
+    "type": "cadent",
+    "keywords": ["spirituality", "unconscious", "isolation", "service"],
+    "qualities": {
+      "general": "spirituality and unconscious",
+      "career": "behind-the-scenes work",
+      "relationships": "karmic connections",
+      "health": "mental health",
+      "spirituality": "mystical experiences",
+      "personal_growth": "spiritual growth"
+    }
   }
 } 

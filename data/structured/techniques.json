@@ -1,0 +1,24 @@
+{
+    "house_systems": {
+        "placidus": {
+            "description": "Most commonly used house system in modern astrology",
+            "characteristics": ["Unequal house sizes", "Based on time", "Accurate for high latitudes"]
+        },
+        "whole_sign": {
+            "description": "Traditional house system with equal 30-degree houses",
+            "characteristics": ["Equal house sizes", "Simple to use", "Traditional approach"]
+        }
+    },
+    "aspect_patterns": {
+        "grand_trine": {
+            "description": "Three planets forming trines to each other",
+            "interpretation": "Natural talent and ease in related areas",
+            "strength": "Very harmonious"
+        },
+        "t_square": {
+            "description": "Two planets in opposition, both square to a third planet",
+            "interpretation": "Challenge leading to growth and resolution",
+            "strength": "Strong tension"
+        }
+    }
+} 

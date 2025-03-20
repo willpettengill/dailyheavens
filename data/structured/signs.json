@@ -1,76 +1,170 @@
 {
   "aries": {
-    "name": "Aries",
-    "symbol": "♈",
-    "element": "Fire",
-    "modality": "Cardinal",
-    "polarity": "Masculine",
-    "ruling_planet": "Mars",
-    "qualities": ["impulsive", "energetic", "courageous", "determined", "confident", "enthusiastic", "optimistic", "honest", "passionate"],
-    "lucky_day": "Tuesday",
-    "lucky_number": "9",
-    "birthstone": "Diamond",
-    "special_color": "Red",
-    "cities": ["Florence", "Naples", "Marseille", "Birmingham", "Leicester", "Strasbourg", "Krakow", "Singapore", "Hong Kong", "Kuwait City"],
-    "countries": ["England", "Poland", "Germany", "Syria", "Israel", "Burma", "Japan", "Canada", "Lithuania", "Denmark"],
-    "flowers": ["Thistle", "Honeysuckle", "Ginger"],
-    "trees": ["Pine", "Holly", "Thorn"],
-    "metals": ["Iron", "Steel"],
-    "animals": ["Ram", "Tiger", "Hawk"],
-    "best_traits": ["Leadership", "Courage", "Determination", "Confidence", "Enthusiasm", "Optimism", "Honesty", "Passion"],
-    "decanates": {
-      "first": {
-        "degrees": "0-10",
-        "planet": "Mars",
-        "qualities": ["Most energetic and impulsive", "Natural leadership", "Strong willpower"]
-      },
-      "second": {
-        "degrees": "10-20",
-        "planet": "Sun",
-        "qualities": ["Creative expression", "Warm personality", "Generous spirit"]
-      },
-      "third": {
-        "degrees": "20-30",
-        "planet": "Jupiter",
-        "qualities": ["Optimistic outlook", "Expansive nature", "Philosophical mind"]
-      }
-    }
+    "element": "fire",
+    "modality": "cardinal",
+    "ruling_planet": "mars",
+    "qualities": {
+      "general": "pioneering and assertive",
+      "career": "leadership and initiative",
+      "relationships": "passion and independence",
+      "health": "vitality and energy",
+      "spirituality": "spiritual courage",
+      "personal_growth": "self-assertion"
+    },
+    "compatible_signs": ["leo", "sagittarius", "gemini", "libra"]
   },
   "taurus": {
-    "name": "Taurus",
-    "symbol": "♉",
-    "element": "Earth",
-    "modality": "Fixed",
-    "polarity": "Feminine",
-    "ruling_planet": "Venus",
-    "qualities": ["reliable", "patient", "practical", "devoted", "responsible", "stable", "determined", "loyal", "stubborn"],
-    "lucky_day": "Friday",
-    "lucky_number": "6",
-    "birthstone": "Emerald",
-    "special_color": "Green",
-    "cities": ["Dublin", "Parma", "Leipzig", "St. Louis", "Pasadena", "Lucerne", "Eastbourne", "Mantua", "Palermo", "Santa Barbara"],
-    "countries": ["Ireland", "Switzerland", "Cyprus", "Greece", "Iran", "Turkey", "Iraq", "Holland", "Poland", "Russia"],
-    "flowers": ["Rose", "Poppy", "Daisy"],
-    "trees": ["Apple", "Cypress", "Ash"],
-    "metals": ["Copper", "Bronze"],
-    "animals": ["Bull", "Bear", "Beaver"],
-    "best_traits": ["Reliability", "Patience", "Practicality", "Devotion", "Responsibility", "Stability", "Determination", "Loyalty"],
-    "decanates": {
-      "first": {
-        "degrees": "0-10",
-        "planet": "Venus",
-        "qualities": ["Most sensual and pleasure-loving", "Strong aesthetic sense", "Natural charm"]
-      },
-      "second": {
-        "degrees": "10-20",
-        "planet": "Mercury",
-        "qualities": ["Practical communication", "Resourceful mind", "Adaptable nature"]
-      },
-      "third": {
-        "degrees": "20-30",
-        "planet": "Saturn",
-        "qualities": ["Strong work ethic", "Disciplined approach", "Long-term planning"]
-      }
-    }
+    "element": "earth",
+    "modality": "fixed",
+    "ruling_planet": "venus",
+    "qualities": {
+      "general": "stable and sensual",
+      "career": "practical and determined",
+      "relationships": "loyalty and comfort",
+      "health": "physical endurance",
+      "spirituality": "earthly wisdom",
+      "personal_growth": "self-worth"
+    },
+    "compatible_signs": ["virgo", "capricorn", "cancer", "pisces"]
+  },
+  "gemini": {
+    "element": "air",
+    "modality": "mutable",
+    "ruling_planet": "mercury",
+    "qualities": {
+      "general": "versatile and communicative",
+      "career": "adaptability and learning",
+      "relationships": "intellectual connection",
+      "health": "nervous energy",
+      "spirituality": "mental exploration",
+      "personal_growth": "self-expression"
+    },
+    "compatible_signs": ["libra", "aquarius", "aries", "leo"]
+  },
+  "cancer": {
+    "element": "water",
+    "modality": "cardinal",
+    "ruling_planet": "moon",
+    "qualities": {
+      "general": "nurturing and protective",
+      "career": "emotional intelligence",
+      "relationships": "deep bonding",
+      "health": "emotional well-being",
+      "spirituality": "intuitive wisdom",
+      "personal_growth": "emotional security"
+    },
+    "compatible_signs": ["scorpio", "pisces", "taurus", "virgo"]
+  },
+  "leo": {
+    "element": "fire",
+    "modality": "fixed",
+    "ruling_planet": "sun",
+    "qualities": {
+      "general": "creative and confident",
+      "career": "leadership and performance",
+      "relationships": "romance and drama",
+      "health": "vitality and heart",
+      "spirituality": "divine creativity",
+      "personal_growth": "self-expression"
+    },
+    "compatible_signs": ["aries", "sagittarius", "gemini", "libra"]
+  },
+  "virgo": {
+    "element": "earth",
+    "modality": "mutable",
+    "ruling_planet": "mercury",
+    "qualities": {
+      "general": "analytical and practical",
+      "career": "attention to detail",
+      "relationships": "service and improvement",
+      "health": "health consciousness",
+      "spirituality": "practical spirituality",
+      "personal_growth": "self-improvement"
+    },
+    "compatible_signs": ["taurus", "capricorn", "cancer", "scorpio"]
+  },
+  "libra": {
+    "element": "air",
+    "modality": "cardinal",
+    "ruling_planet": "venus",
+    "qualities": {
+      "general": "harmonious and diplomatic",
+      "career": "partnerships and balance",
+      "relationships": "harmony and fairness",
+      "health": "balance and beauty",
+      "spirituality": "spiritual harmony",
+      "personal_growth": "self-balance"
+    },
+    "compatible_signs": ["gemini", "aquarius", "leo", "sagittarius"]
+  },
+  "scorpio": {
+    "element": "water",
+    "modality": "fixed",
+    "ruling_planet": "pluto",
+    "qualities": {
+      "general": "intense and transformative",
+      "career": "investigation and power",
+      "relationships": "depth and passion",
+      "health": "regeneration",
+      "spirituality": "occult wisdom",
+      "personal_growth": "self-transformation"
+    },
+    "compatible_signs": ["cancer", "pisces", "virgo", "capricorn"]
+  },
+  "sagittarius": {
+    "element": "fire",
+    "modality": "mutable",
+    "ruling_planet": "jupiter",
+    "qualities": {
+      "general": "adventurous and philosophical",
+      "career": "expansion and learning",
+      "relationships": "freedom and growth",
+      "health": "optimism and activity",
+      "spirituality": "higher learning",
+      "personal_growth": "self-discovery"
+    },
+    "compatible_signs": ["aries", "leo", "libra", "aquarius"]
+  },
+  "capricorn": {
+    "element": "earth",
+    "modality": "cardinal",
+    "ruling_planet": "saturn",
+    "qualities": {
+      "general": "ambitious and disciplined",
+      "career": "achievement and structure",
+      "relationships": "commitment and tradition",
+      "health": "endurance and bones",
+      "spirituality": "practical wisdom",
+      "personal_growth": "self-mastery"
+    },
+    "compatible_signs": ["taurus", "virgo", "scorpio", "pisces"]
+  },
+  "aquarius": {
+    "element": "air",
+    "modality": "fixed",
+    "ruling_planet": "uranus",
+    "qualities": {
+      "general": "innovative and humanitarian",
+      "career": "originality and technology",
+      "relationships": "friendship and independence",
+      "health": "circulation and innovation",
+      "spirituality": "universal consciousness",
+      "personal_growth": "self-liberation"
+    },
+    "compatible_signs": ["gemini", "libra", "sagittarius", "aries"]
+  },
+  "pisces": {
+    "element": "water",
+    "modality": "mutable",
+    "ruling_planet": "neptune",
+    "qualities": {
+      "general": "intuitive and compassionate",
+      "career": "creativity and service",
+      "relationships": "empathy and romance",
+      "health": "immune system and feet",
+      "spirituality": "mystical connection",
+      "personal_growth": "self-transcendence"
+    },
+    "compatible_signs": ["cancer", "scorpio", "taurus", "capricorn"]
   }
 } 

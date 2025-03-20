@@ -1,0 +1,94 @@
+{
+    "planet_interpretations": {
+        "sun": {
+            "basic": {
+                "aries": "Strong leadership qualities and pioneering spirit",
+                "taurus": "Steady determination and practical approach",
+                "gemini": "Versatile expression and quick thinking",
+                "cancer": "Nurturing leadership and emotional depth",
+                "leo": "Natural confidence and creative power",
+                "virgo": "Practical efficiency and analytical mind",
+                "libra": "Diplomatic leadership and balanced approach",
+                "scorpio": "Powerful presence and transformative energy",
+                "sagittarius": "Expansive vision and philosophical nature",
+                "capricorn": "Ambitious drive and structured approach",
+                "aquarius": "Innovative thinking and humanitarian goals",
+                "pisces": "Compassionate vision and spiritual connection"
+            },
+            "detailed": {
+                "aries": "Your core identity expresses through bold initiative and courageous leadership. You naturally take charge and inspire others with your pioneering spirit.",
+                "taurus": "Your essential nature manifests through practical determination and material mastery. You build lasting foundations and value stability.",
+                "gemini": "Your fundamental self expresses through versatile communication and intellectual curiosity. You adapt easily and share knowledge naturally.",
+                "cancer": "Your basic identity flows through emotional sensitivity and nurturing instincts. You lead through care and protective energy.",
+                "leo": "Your core self shines through creative expression and natural authority. You radiate confidence and inspire loyalty.",
+                "virgo": "Your essential nature manifests through practical service and analytical precision. You excel in improving systems and helping others.",
+                "libra": "Your fundamental identity expresses through diplomatic harmony and aesthetic appreciation. You naturally create balance and fairness.",
+                "scorpio": "Your basic self channels through intense transformation and deep investigation. You powerfully influence others and seek truth.",
+                "sagittarius": "Your core nature expresses through philosophical exploration and optimistic vision. You inspire growth and expand horizons.",
+                "capricorn": "Your essential identity manifests through disciplined ambition and structured achievement. You build lasting legacies.",
+                "aquarius": "Your fundamental self flows through innovative thinking and humanitarian vision. You bring unique perspectives and progressive change.",
+                "pisces": "Your basic nature channels through spiritual connection and universal compassion. You intuitively understand and heal others."
+            }
+        }
+    },
+    "house_interpretations": {
+        "1": {
+            "basic": {
+                "aries": "Direct and energetic approach to life",
+                "taurus": "Steady and reliable self-presentation",
+                "gemini": "Adaptable and communicative personality",
+                "cancer": "Sensitive and protective demeanor",
+                "leo": "Confident and dramatic self-expression",
+                "virgo": "Practical and analytical approach",
+                "libra": "Diplomatic and balanced presentation",
+                "scorpio": "Intense and magnetic presence",
+                "sagittarius": "Optimistic and adventurous outlook",
+                "capricorn": "Serious and ambitious demeanor",
+                "aquarius": "Unique and progressive approach",
+                "pisces": "Intuitive and compassionate presence"
+            }
+        }
+    },
+    "aspect_interpretations": {
+        "sun_moon": {
+            "conjunction": "Your emotional nature and basic personality are unified, creating a strong sense of self.",
+            "opposition": "You must work to balance your conscious needs with your emotional ones.",
+            "trine": "There is natural harmony between your conscious self and emotional needs.",
+            "square": "You may experience internal tension between your will and your emotions."
+        },
+        "sun_ascendant": {
+            "conjunction": "You project yourself naturally and confidently.",
+            "opposition": "You might present yourself differently from your true nature.",
+            "trine": "Your personality flows easily into your outer expression.",
+            "square": "You may struggle between being yourself and meeting others' expectations."
+        }
+    },
+    "pattern_interpretations": {
+        "element_emphasis": {
+            "fire": "Strong drive and enthusiasm",
+            "earth": "Practical and grounded nature",
+            "air": "Intellectual and communicative focus",
+            "water": "Deep emotional sensitivity"
+        },
+        "modality_emphasis": {
+            "cardinal": "Natural leadership and initiative",
+            "fixed": "Stability and determination",
+            "mutable": "Adaptability and flexibility"
+        },
+        "configurations": {
+            "grand_trine": "A harmonious flow of energy between three planets, indicating natural talent and ease in the areas ruled by these planets. This configuration suggests innate abilities and smooth expression of the planets' qualities.",
+            "t_square": "A dynamic configuration indicating tension and challenge, with two planets in opposition and a third planet square to both. This creates a powerful drive for growth and transformation, though it may manifest as internal or external conflict.",
+            "grand_cross": "A complex configuration of four planets forming two oppositions and four squares, creating a powerful crucible for growth. This indicates significant challenges and opportunities for transformation across multiple life areas.",
+            "yod": "A unique configuration where two planets in sextile aspect both form quincunx aspects to a third planet. This creates a special focus or destiny point, often indicating a specific life purpose or area of special attention.",
+            "stellium": "Three or more planets in the same sign, creating a powerful concentration of energy in that sign's qualities. This indicates a strong emphasis on the themes and characteristics of that sign in the person's life."
+        }
+    },
+    "combination_interpretations": {
+        "sun_moon": {
+            "fire_fire": "Dynamic and energetic emotional expression",
+            "earth_earth": "Stable and practical emotional nature",
+            "air_air": "Intellectual and communicative emotional style",
+            "water_water": "Deep and intuitive emotional connection"
+        }
+    }
+} 
