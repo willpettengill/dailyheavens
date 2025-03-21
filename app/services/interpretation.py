@@ -12,6 +12,7 @@ from app.models.astrology import (
     Element, Modality, Dignity, HouseType
 )
 from app.services.birth_chart import BirthChartService
+from flatlib.datetime import Datetime
 
 logger = logging.getLogger(__name__)
 
@@ -508,7 +509,7 @@ class InterpretationService:
             longitude=longitude
         )
 
-    def _calculate_planetary_positions(self, date: flatlib.Date) -> dict:
+    def _calculate_planetary_positions(self, date: Datetime) -> dict:
         """Calculate positions of planets using flatlib."""
         # Get planetary positions
         sun = flatlib.calc.Sun(date)

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+# Only import the birthchart module to avoid loading interpretation service
 from app.api.v1.endpoints import birthchart, interpretation
 
 api_router = APIRouter()
