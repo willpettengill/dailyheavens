@@ -4,22 +4,14 @@ from pydantic import BaseModel, Field
 
 from app.models.interpretation import (
     InterpretationArea,
-    InterpretationLevel
+    InterpretationLevel,
+    InterpretationRequest,
+    InterpretationResponse
 )
 from app.services.interpretation import InterpretationService
 
 router = APIRouter()
 interpretation_service = InterpretationService()
-
-class InterpretationRequest(BaseModel):
-    birth_chart: Dict[str, Any] = Field(..., description="Birth chart data")
-    area: InterpretationArea = Field(..., description="Area of life to focus interpretation on")
-    level: InterpretationLevel = Field(InterpretationLevel.BASIC, description="Level of interpretation detail")
-
-class InterpretationResponse(BaseModel):
-    status: str
-    data: Dict[str, Any]
-    error: Optional[str] = None
 
 @router.post("/interpretation", response_model=InterpretationResponse)
 async def generate_interpretation(request: InterpretationRequest) -> InterpretationResponse:

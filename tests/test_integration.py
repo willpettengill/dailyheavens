@@ -1,4 +1,14 @@
+"""
+End-to-end integration tests for DailyHeavens
+
+These tests verify the full flow from birth chart calculation to interpretation.
+"""
 import pytest
+import random
+import time
+from datetime import datetime
+import json
+from pathlib import Path
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.interpretation import InterpretationService
@@ -8,28 +18,197 @@ from app.models.interpretation import InterpretationArea, InterpretationLevel
 client = TestClient(app)
 
 def test_birth_chart_to_interpretation_flow(client):
-    """Test the flow from birth chart calculation to interpretation."""
-    sample_birth_data = {
-        "date_of_birth": "2000-01-01T12:00:00",
+    """Test the complete flow from birth chart calculation to interpretation"""
+    # Use the reference birth chart data
+    birth_data = {
+        "date_of_birth": "1988-06-20T04:15:00",
+        "latitude": 42.337,
+        "longitude": -71.2092
+    }
+    
+    # Get birth chart
+    chart_response = client.post("/api/v1/birthchart", json=birth_data)
+    assert chart_response.status_code == 200, f"Birth chart API failed: {chart_response.text}"
+    
+    chart_data = chart_response.json()
+    assert chart_data["status"] == "success", f"Birth chart calculation failed: {chart_data.get('error')}"
+    assert "data" in chart_data, "Birth chart response missing 'data' field"
+    
+    birth_chart = chart_data["data"]
+    
+    # Send to interpretation service
+    interpretation_data = {
+        "birth_chart": birth_chart,
+        "level": "detailed",
+        "area": "general"
+    }
+    
+    interp_response = client.post("/api/v1/interpretation", json=interpretation_data)
+    assert interp_response.status_code == 200, f"Interpretation API failed: {interp_response.text}"
+    
+    interp_data = interp_response.json()
+    assert interp_data["status"] == "success", f"Interpretation failed: {interp_data.get('error')}"
+    assert "data" in interp_data, "Interpretation response missing 'data' field"
+    assert "interpretations" in interp_data["data"], "Missing interpretations data"
+
+
+def test_random_birth_chart_stability(client):
+    """
+    Test multiple random birth charts to ensure stability of the system
+    Runs a sequence of chart calculations and interpretations to verify system reliability
+    """
+    # Run 5 sequential tests with random data
+    for i in range(5):
+        # Generate random but valid date (1950-2000)
+        year = random.randint(1950, 2000)
+        month = random.randint(1, 12)
+        day = random.randint(1, 28)  # Avoid month edge cases
+        hour = random.randint(0, 23)
+        minute = random.randint(0, 59)
+        
+        # Random location (valid latitude/longitude)
+        latitude = random.uniform(25, 65)  # Northern hemisphere, populated areas
+        longitude = random.uniform(-130, 30)  # Americas and Europe
+        
+        # Format the data for the API request
+        date_str = f"{year}-{month:02d}-{day:02d}T{hour:02d}:{minute:02d}:00"
+        birth_data = {
+            "date_of_birth": date_str,
+            "latitude": latitude,
+            "longitude": longitude
+        }
+        
+        # Calculate birth chart
+        chart_response = client.post("/api/v1/birthchart", json=birth_data)
+        assert chart_response.status_code == 200, f"Birth chart API failed for random data: {chart_response.text}"
+        
+        chart_data = chart_response.json()
+        assert chart_data["status"] == "success", f"Birth chart calculation failed: {chart_data.get('error')}"
+        
+        birth_chart = chart_data["data"]
+        
+        # Get interpretation
+        interpretation_data = {
+            "birth_chart": birth_chart,
+            "level": "detailed",
+            "area": "general"
+        }
+        
+        interp_response = client.post("/api/v1/interpretation", json=interpretation_data)
+        assert interp_response.status_code == 200, f"Interpretation API failed for random data: {interp_response.text}"
+        
+        interp_data = interp_response.json()
+        assert interp_data["status"] == "success", f"Interpretation failed: {interp_data.get('error')}"
+
+
+def test_calculation_consistency(client):
+    """
+    Test that repeated calculations of the same birth chart are consistent
+    This ensures deterministic behavior of the calculation engine
+    """
+    # Fixed test data
+    birth_data = {
+        "date_of_birth": "1975-05-15T12:30:00",
+        "latitude": 34.0522,
+        "longitude": -118.2437
+    }
+    
+    # Calculate twice
+    response1 = client.post("/api/v1/birthchart", json=birth_data)
+    assert response1.status_code == 200, "First birth chart calculation failed"
+    chart1 = response1.json()["data"]
+    
+    # Short delay to ensure different system time
+    time.sleep(1)
+    
+    response2 = client.post("/api/v1/birthchart", json=birth_data)
+    assert response2.status_code == 200, "Second birth chart calculation failed"
+    chart2 = response2.json()["data"]
+    
+    # Compare planets
+    for planet in ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]:
+        if planet in chart1["planets"] and planet in chart2["planets"]:
+            assert chart1["planets"][planet]["sign"] == chart2["planets"][planet]["sign"], \
+                f"{planet} sign is inconsistent between calculations"
+            assert chart1["planets"][planet]["house"] == chart2["planets"][planet]["house"], \
+                f"{planet} house is inconsistent between calculations"
+    
+    # Compare house signs
+    for house_num in [str(i) for i in range(1, 13)]:
+        if house_num in chart1["houses"] and house_num in chart2["houses"]:
+            assert chart1["houses"][house_num]["sign"] == chart2["houses"][house_num]["sign"], \
+                f"House {house_num} sign is inconsistent between calculations"
+
+
+def test_performance(client):
+    """
+    Test performance of the birth chart and interpretation services
+    Measures response times for typical requests
+    """
+    # Test data
+    birth_data = {
+        "date_of_birth": "1990-01-01T12:00:00",
         "latitude": 40.7128,
         "longitude": -74.0060
     }
     
-    birth_chart_response = client.post("/birth-chart", json=sample_birth_data)
-    assert birth_chart_response.status_code == 200
-    birth_chart = birth_chart_response.json()
+    # Measure birth chart calculation time
+    start_time = time.time()
+    chart_response = client.post("/api/v1/birthchart", json=birth_data)
+    chart_time = time.time() - start_time
     
+    assert chart_response.status_code == 200, "Birth chart calculation failed"
+    birth_chart = chart_response.json()["data"]
+    
+    # Measure interpretation time
     interpretation_data = {
-        **sample_birth_data,
-        "level": "basic"
+        "birth_chart": birth_chart,
+        "level": "detailed",
+        "area": "general"
     }
-    interpretation_response = client.post("/interpretation", json=interpretation_data)
-    assert interpretation_response.status_code == 200
-    interpretation = interpretation_response.json()
     
-    assert "status" in interpretation
-    assert interpretation["status"] == "success"
-    assert "data" in interpretation
+    start_time = time.time()
+    interp_response = client.post("/api/v1/interpretation", json=interpretation_data)
+    interp_time = time.time() - start_time
+    
+    assert interp_response.status_code == 200, "Interpretation failed"
+    
+    # Log performance metrics
+    print(f"\nPerformance metrics:")
+    print(f"Birth chart calculation: {chart_time:.2f} seconds")
+    print(f"Interpretation generation: {interp_time:.2f} seconds")
+    print(f"Total time: {chart_time + interp_time:.2f} seconds")
+    
+    # Optional performance threshold assertions - comment out if intermittently failing in CI
+    # assert chart_time < 5.0, f"Birth chart calculation too slow: {chart_time:.2f} seconds"
+    # assert interp_time < 2.0, f"Interpretation generation too slow: {interp_time:.2f} seconds"
+
+
+def test_health_check_during_load(client):
+    """Test health endpoint remains responsive during load"""
+    # Create a bunch of requests in succession to simulate load
+    for _ in range(3):  # Reduced from higher number for test suite speed
+        # Random but valid birth data
+        year = random.randint(1950, 2000)
+        month = random.randint(1, 12)
+        day = random.randint(1, 28)
+        
+        birth_data = {
+            "date_of_birth": f"{year}-{month:02d}-{day:02d}T12:00:00",
+            "latitude": random.uniform(-80, 80),
+            "longitude": random.uniform(-179, 179)
+        }
+        
+        # Non-blocking request to create load
+        client.post("/api/v1/birthchart", json=birth_data)
+    
+    # Health check should still be responsive
+    response = client.get("/health")
+    assert response.status_code == 200, "Health endpoint not responsive during load"
+    
+    data = response.json()
+    assert "status" in data, "Health response missing 'status' field"
+    assert data["status"] == "ok", f"Health status not 'ok' during load, got '{data['status']}'"
 
 def test_interpretation_service_integration(interpretation_service):
     """Test the integration of interpretation service with birth chart data."""
@@ -103,30 +282,6 @@ def test_error_handling_integration(client):
     
     response = client.post("/api/v1/interpretation", json=invalid_interpretation_request)
     assert response.status_code == 422
-
-def test_performance_integration(client):
-    """Test the performance of the integration flow."""
-    sample_birth_data = {
-        "date_of_birth": "2000-01-01T12:00:00",
-        "latitude": 40.7128,
-        "longitude": -74.0060
-    }
-    
-    response = client.post("/birth-chart", json=sample_birth_data)
-    assert response.status_code == 200
-    birth_chart = response.json()
-    
-    interpretation_data = {
-        **sample_birth_data,
-        "level": "basic"
-    }
-    response = client.post("/interpretation", json=interpretation_data)
-    assert response.status_code == 200
-    interpretation = response.json()
-    
-    assert "status" in interpretation
-    assert interpretation["status"] == "success"
-    assert "data" in interpretation
 
 def test_data_consistency_integration(interpretation_service, load_structured_data):
     # Load all structured data

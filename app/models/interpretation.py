@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -35,15 +35,17 @@ class InterpretationResponse(BaseModel):
     status: str
     data: Dict[str, Any] = Field(
         default_factory=lambda: {
-            "interpretations": [],
-            "patterns": {
-                "elemental": None,
-                "modality": None,
-                "sun_moon": None,
-                "sun_rising": None,
-                "moon_rising": None,
-                "house_emphasis": None
+            "interpretations": {
+                "planets": [],
+                "houses": [],
+                "aspects": [],
+                "patterns": [],
+                "configurations": []
             },
-            "techniques_used": []
+            "patterns": [],
+            "combinations": {},
+            "house_emphasis": {},
+            "special_configurations": []
         }
-    ) 
+    )
+    error: Optional[str] = None 
