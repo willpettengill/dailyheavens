@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/health",
+      "dest": "index.py"
+    },
+    {
+      "src": "/birth-chart",
+      "dest": "index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "index.py"
+    }
+  ],
+  "env": {
+    "APP_ENV": "production",
+    "BIRTH_CHART_API_URL": "https://daily-heavens-birth-chart.vercel.app/api/v1/birthchart",
+    "INTERPRETATION_API_URL": "https://daily-heavens-interpretation.vercel.app/api/v1/interpretation"
+  }
+} 
