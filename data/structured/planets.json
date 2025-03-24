@@ -1,0 +1,142 @@
+{
+  "sun": {
+    "name": "Sun",
+    "symbol": "☉",
+    "ruling_planet": "sun",
+    "keywords": ["identity", "vitality", "ego", "purpose"],
+    "qualities": {
+      "general": "leadership and vitality",
+      "career": "ambition and authority",
+      "relationships": "romance and partnership",
+      "health": "vitality and energy",
+      "spirituality": "consciousness and purpose",
+      "personal_growth": "identity and self-expression"
+    }
+  },
+  "moon": {
+    "name": "Moon",
+    "symbol": "☽",
+    "ruling_planet": "moon",
+    "keywords": ["emotions", "instincts", "habits", "security"],
+    "qualities": {
+      "general": "emotions and instincts",
+      "career": "emotional satisfaction",
+      "relationships": "emotional needs",
+      "health": "emotional well-being",
+      "spirituality": "intuition and receptivity",
+      "personal_growth": "emotional awareness"
+    }
+  },
+  "mercury": {
+    "name": "Mercury",
+    "symbol": "☿",
+    "ruling_planet": "mercury",
+    "keywords": ["communication", "thinking", "learning", "information"],
+    "qualities": {
+      "general": "communication and intellect",
+      "career": "skills and analysis",
+      "relationships": "mental connection",
+      "health": "nervous system",
+      "spirituality": "mental understanding",
+      "personal_growth": "learning and adaptation"
+    }
+  },
+  "venus": {
+    "name": "Venus",
+    "symbol": "♀",
+    "ruling_planet": "venus",
+    "keywords": ["love", "beauty", "harmony", "values"],
+    "qualities": {
+      "general": "love and beauty",
+      "career": "artistic expression",
+      "relationships": "romance and attraction",
+      "health": "comfort and pleasure",
+      "spirituality": "divine love",
+      "personal_growth": "self-worth"
+    }
+  },
+  "mars": {
+    "name": "Mars",
+    "symbol": "♂",
+    "ruling_planet": "mars",
+    "keywords": ["action", "energy", "drive", "passion"],
+    "qualities": {
+      "general": "action and energy",
+      "career": "initiative and drive",
+      "relationships": "passion and desire",
+      "health": "physical energy",
+      "spirituality": "spiritual warrior",
+      "personal_growth": "self-assertion"
+    }
+  },
+  "jupiter": {
+    "name": "Jupiter",
+    "symbol": "♃",
+    "ruling_planet": "jupiter",
+    "keywords": ["expansion", "growth", "wisdom", "abundance"],
+    "qualities": {
+      "general": "expansion and wisdom",
+      "career": "opportunities and growth",
+      "relationships": "generosity and trust",
+      "health": "growth and healing",
+      "spirituality": "faith and wisdom",
+      "personal_growth": "self-improvement"
+    }
+  },
+  "saturn": {
+    "name": "Saturn",
+    "symbol": "♄",
+    "ruling_planet": "saturn",
+    "keywords": ["structure", "discipline", "responsibility", "limitation"],
+    "qualities": {
+      "general": "structure and discipline",
+      "career": "achievement and authority",
+      "relationships": "commitment and duty",
+      "health": "bones and longevity",
+      "spirituality": "spiritual discipline",
+      "personal_growth": "self-mastery"
+    }
+  },
+  "uranus": {
+    "name": "Uranus",
+    "symbol": "♅",
+    "ruling_planet": "uranus",
+    "keywords": ["change", "innovation", "freedom", "originality"],
+    "qualities": {
+      "general": "innovation and freedom",
+      "career": "originality and technology",
+      "relationships": "independence and excitement",
+      "health": "nervous system and change",
+      "spirituality": "awakening and insight",
+      "personal_growth": "liberation"
+    }
+  },
+  "neptune": {
+    "name": "Neptune",
+    "symbol": "♆",
+    "ruling_planet": "neptune",
+    "keywords": ["spirituality", "imagination", "inspiration", "illusion"],
+    "qualities": {
+      "general": "spirituality and imagination",
+      "career": "inspiration and creativity",
+      "relationships": "idealism and compassion",
+      "health": "immune system and sensitivity",
+      "spirituality": "mystical connection",
+      "personal_growth": "transcendence"
+    }
+  },
+  "pluto": {
+    "name": "Pluto",
+    "symbol": "♇",
+    "ruling_planet": "pluto",
+    "keywords": ["transformation", "power", "regeneration", "intensity"],
+    "qualities": {
+      "general": "transformation and power",
+      "career": "influence and control",
+      "relationships": "depth and intensity",
+      "health": "regeneration and healing",
+      "spirituality": "soul evolution",
+      "personal_growth": "empowerment"
+    }
+  }
+} 

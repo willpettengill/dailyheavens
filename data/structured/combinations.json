@@ -1,0 +1,17 @@
+{
+    "sun_moon_combinations": {
+        "same_element": "Natural harmony between conscious and emotional needs",
+        "compatible_elements": "Good balance between different aspects of personality",
+        "incompatible_elements": "Challenge to integrate different needs and approaches"
+    },
+    "sun_rising_combinations": {
+        "same_sign": "Strong and consistent self-expression",
+        "compatible_signs": "Balanced approach to life",
+        "incompatible_signs": "Complex personality with different expressions"
+    },
+    "moon_rising_combinations": {
+        "same_sign": "Emotional nature matches outward expression",
+        "compatible_signs": "Emotional needs align with life approach",
+        "incompatible_signs": "Inner feelings may differ from outer expression"
+    }
+} 

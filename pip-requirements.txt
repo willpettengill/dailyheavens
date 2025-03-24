@@ -1,8 +1,0 @@
-google_api_python_client==2.98.0
-gspread==5.11.1
-matplotlib==3.7.2
-pandas==2.1.0
-protobuf==4.24.3
-seaborn==0.12.2
-streamlit==1.26.0
-uszipcode==1.0.1

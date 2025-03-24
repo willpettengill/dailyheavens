@@ -1,0 +1,64 @@
+{
+    "planets": {
+        "sun": {
+            "domicile": "leo",
+            "exaltation": "aries",
+            "detriment": "aquarius",
+            "fall": "libra"
+        },
+        "moon": {
+            "domicile": "cancer",
+            "exaltation": "taurus",
+            "detriment": "capricorn",
+            "fall": "scorpio"
+        },
+        "mercury": {
+            "domicile": ["gemini", "virgo"],
+            "exaltation": "virgo",
+            "detriment": ["sagittarius", "pisces"],
+            "fall": "pisces"
+        },
+        "venus": {
+            "domicile": ["taurus", "libra"],
+            "exaltation": "pisces",
+            "detriment": ["scorpio", "aries"],
+            "fall": "virgo"
+        },
+        "mars": {
+            "domicile": ["aries", "scorpio"],
+            "exaltation": "capricorn",
+            "detriment": ["libra", "taurus"],
+            "fall": "cancer"
+        },
+        "jupiter": {
+            "domicile": ["sagittarius", "pisces"],
+            "exaltation": "cancer",
+            "detriment": ["gemini", "virgo"],
+            "fall": "capricorn"
+        },
+        "saturn": {
+            "domicile": ["capricorn", "aquarius"],
+            "exaltation": "libra",
+            "detriment": ["cancer", "leo"],
+            "fall": "aries"
+        },
+        "uranus": {
+            "domicile": "aquarius",
+            "exaltation": "scorpio",
+            "detriment": "leo",
+            "fall": "taurus"
+        },
+        "neptune": {
+            "domicile": "pisces",
+            "exaltation": "cancer",
+            "detriment": "virgo",
+            "fall": "capricorn"
+        },
+        "pluto": {
+            "domicile": "scorpio",
+            "exaltation": "leo",
+            "detriment": "taurus",
+            "fall": "aquarius"
+        }
+    }
+} 

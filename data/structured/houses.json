@@ -1,0 +1,158 @@
+{
+  "1": {
+    "name": "First House",
+    "type": "angular",
+    "keywords": ["self", "identity", "appearance", "beginnings"],
+    "qualities": {
+      "general": "self-expression and personality",
+      "career": "leadership style",
+      "relationships": "approach to relationships",
+      "health": "physical vitality",
+      "spirituality": "spiritual identity",
+      "personal_growth": "self-awareness"
+    }
+  },
+  "2": {
+    "name": "Second House",
+    "type": "succedent",
+    "keywords": ["values", "resources", "possessions", "security"],
+    "qualities": {
+      "general": "material resources and values",
+      "career": "earning potential",
+      "relationships": "material security",
+      "health": "physical resources",
+      "spirituality": "spiritual values",
+      "personal_growth": "self-worth"
+    }
+  },
+  "3": {
+    "name": "Third House",
+    "type": "cadent",
+    "keywords": ["communication", "learning", "siblings", "local environment"],
+    "qualities": {
+      "general": "communication and learning",
+      "career": "skills development",
+      "relationships": "communication style",
+      "health": "nervous system",
+      "spirituality": "mental spirituality",
+      "personal_growth": "mental development"
+    }
+  },
+  "4": {
+    "name": "Fourth House",
+    "type": "angular",
+    "keywords": ["home", "family", "roots", "foundation"],
+    "qualities": {
+      "general": "home and emotional security",
+      "career": "work from home",
+      "relationships": "family bonds",
+      "health": "emotional well-being",
+      "spirituality": "inner sanctuary",
+      "personal_growth": "emotional foundation"
+    }
+  },
+  "5": {
+    "name": "Fifth House",
+    "type": "succedent",
+    "keywords": ["creativity", "pleasure", "romance", "self-expression"],
+    "qualities": {
+      "general": "creativity and joy",
+      "career": "creative work",
+      "relationships": "romance and dating",
+      "health": "vitality",
+      "spirituality": "creative spirituality",
+      "personal_growth": "self-expression"
+    }
+  },
+  "6": {
+    "name": "Sixth House",
+    "type": "cadent",
+    "keywords": ["service", "health", "work", "routine"],
+    "qualities": {
+      "general": "daily work and health",
+      "career": "job duties",
+      "relationships": "work relationships",
+      "health": "health habits",
+      "spirituality": "practical spirituality",
+      "personal_growth": "self-improvement"
+    }
+  },
+  "7": {
+    "name": "Seventh House",
+    "type": "angular",
+    "keywords": ["partnerships", "relationships", "contracts", "open enemies"],
+    "qualities": {
+      "general": "partnerships and relationships",
+      "career": "business partnerships",
+      "relationships": "committed relationships",
+      "health": "relationship health",
+      "spirituality": "spiritual partnerships",
+      "personal_growth": "relationship growth"
+    }
+  },
+  "8": {
+    "name": "Eighth House",
+    "type": "succedent",
+    "keywords": ["transformation", "shared resources", "intimacy", "mystery"],
+    "qualities": {
+      "general": "transformation and power",
+      "career": "shared resources",
+      "relationships": "intimate bonds",
+      "health": "regeneration",
+      "spirituality": "occult wisdom",
+      "personal_growth": "deep transformation"
+    }
+  },
+  "9": {
+    "name": "Ninth House",
+    "type": "cadent",
+    "keywords": ["higher learning", "philosophy", "travel", "expansion"],
+    "qualities": {
+      "general": "higher learning and beliefs",
+      "career": "teaching and publishing",
+      "relationships": "cultural connections",
+      "health": "philosophical well-being",
+      "spirituality": "belief systems",
+      "personal_growth": "wisdom development"
+    }
+  },
+  "10": {
+    "name": "Tenth House",
+    "type": "angular",
+    "keywords": ["career", "public image", "authority", "achievement"],
+    "qualities": {
+      "general": "career and public image",
+      "career": "professional goals",
+      "relationships": "public partnerships",
+      "health": "public health",
+      "spirituality": "spiritual authority",
+      "personal_growth": "life purpose"
+    }
+  },
+  "11": {
+    "name": "Eleventh House",
+    "type": "succedent",
+    "keywords": ["groups", "friends", "hopes", "humanitarian ideals"],
+    "qualities": {
+      "general": "groups and aspirations",
+      "career": "networking",
+      "relationships": "friendships",
+      "health": "group support",
+      "spirituality": "spiritual community",
+      "personal_growth": "social contribution"
+    }
+  },
+  "12": {
+    "name": "Twelfth House",
+    "type": "cadent",
+    "keywords": ["spirituality", "unconscious", "isolation", "service"],
+    "qualities": {
+      "general": "spirituality and unconscious",
+      "career": "behind-the-scenes work",
+      "relationships": "karmic connections",
+      "health": "mental health",
+      "spirituality": "mystical experiences",
+      "personal_growth": "spiritual growth"
+    }
+  }
+} 

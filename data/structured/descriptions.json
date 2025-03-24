@@ -1,0 +1,62 @@
+{
+  "aries": {
+    "sun_sign": "Aries represents the pure energy of creation and new beginnings. As the first sign of the zodiac, Aries embodies initiative, courage, and leadership. This fire sign's core traits include independence, assertiveness, and a pioneering spirit. Aries individuals are natural leaders who thrive on challenges and taking action.",
+    "moon_sign": "Your emotional nature is direct and passionate. You process feelings quickly and express them openly. Independence is crucial to your emotional well-being, and you need freedom to pursue your own interests. While you can be impulsive, your emotional honesty and courage are admirable.",
+    "rising_sign": "You project confidence and enthusiasm. Your presence is dynamic and engaging, often making you the natural leader in social situations. While you can be direct and assertive, your warmth and spontaneity make you approachable. You're known for your initiative and ability to take charge."
+  },
+  "taurus": {
+    "sun_sign": "Taurus embodies stability, practicality, and determination. As an earth sign, Taurus represents material security, sensuality, and steadfastness. This sign's core traits include reliability, patience, and a strong connection to physical pleasures. Taurus individuals are known for their persistence and appreciation of beauty.",
+    "moon_sign": "Your emotional nature is steady and grounded. You seek security and comfort in your relationships and surroundings. While you can be slow to change, your loyalty and dependability are unwavering. You process feelings methodically and value stability in your emotional life.",
+    "rising_sign": "You project calmness and reliability. Your presence is soothing and reassuring to others. While you can be stubborn, your practical approach and steady demeanor make you a trusted confidant. You're known for your patience and ability to create a sense of security."
+  },
+  "gemini": {
+    "sun_sign": "Gemini represents duality, communication, and intellectual curiosity. As an air sign, Gemini embodies adaptability, wit, and social interaction. This sign's core traits include versatility, quick thinking, and a love of learning. Gemini individuals are known for their ability to connect ideas and people.",
+    "moon_sign": "Your emotional nature is curious and adaptable. You process feelings through communication and intellectual understanding. While you can be inconsistent, your ability to see multiple perspectives is valuable. You need mental stimulation and variety in your emotional life.",
+    "rising_sign": "You project intelligence and charm. Your presence is light and engaging, making you naturally sociable. While you can be scattered, your wit and versatility make you fascinating to others. You're known for your ability to adapt to any social situation."
+  },
+  "cancer": {
+    "sun_sign": "Cancer represents nurturing, emotional depth, and home. As a water sign, Cancer embodies intuition, protection, and family bonds. This sign's core traits include sensitivity, loyalty, and a strong connection to tradition. Cancer individuals are known for their caring nature and emotional intelligence.",
+    "moon_sign": "Your emotional nature is deeply sensitive and intuitive. You process feelings through nurturing and emotional connection. While you can be moody, your empathy and understanding are profound. You need emotional security and close relationships to feel fulfilled.",
+    "rising_sign": "You project warmth and protectiveness. Your presence is nurturing and comforting to others. While you can be defensive, your emotional intelligence and caring nature make you approachable. You're known for your ability to create a sense of home and belonging."
+  },
+  "leo": {
+    "sun_sign": "Leo represents creativity, leadership, and self-expression. As a fire sign, Leo embodies confidence, generosity, and charisma. This sign's core traits include pride, warmth, and a desire for recognition. Leo individuals are known for their dramatic flair and natural leadership abilities.",
+    "moon_sign": "Your emotional nature is warm and generous. You process feelings through creative expression and recognition. While you can be prideful, your loyalty and generosity are remarkable. You need appreciation and opportunities to shine in your emotional life.",
+    "rising_sign": "You project charisma and confidence. Your presence is magnetic and inspiring to others. While you can be dramatic, your warmth and generosity make you beloved. You're known for your ability to bring joy and creativity to any situation."
+  },
+  "virgo": {
+    "sun_sign": "Virgo represents service, analysis, and practical intelligence. As an earth sign, Virgo embodies efficiency, organization, and attention to detail. This sign's core traits include precision, helpfulness, and a desire for improvement. Virgo individuals are known for their analytical minds and dedication to service.",
+    "moon_sign": "Your emotional nature is analytical and practical. You process feelings through service and problem-solving. While you can be critical, your helpfulness and attention to detail are valuable. You need order and purpose in your emotional life.",
+    "rising_sign": "You project competence and helpfulness. Your presence is organized and efficient. While you can be reserved, your practical approach and attention to detail make you reliable. You're known for your ability to improve and perfect any situation."
+  },
+  "libra": {
+    "sun_sign": "Libra represents balance, harmony, and relationships. As an air sign, Libra embodies diplomacy, fairness, and social grace. This sign's core traits include charm, justice, and a desire for partnership. Libra individuals are known for their ability to create harmony and see multiple perspectives.",
+    "moon_sign": "Your emotional nature is diplomatic and balanced. You process feelings through relationships and harmony. While you can be indecisive, your fairness and charm are admirable. You need partnership and beauty in your emotional life.",
+    "rising_sign": "You project grace and charm. Your presence is balanced and harmonious. While you can be superficial, your diplomatic skills and sense of fairness make you well-liked. You're known for your ability to bring balance to any situation."
+  },
+  "scorpio": {
+    "sun_sign": "Scorpio represents transformation, power, and emotional depth. As a water sign, Scorpio embodies intensity, mystery, and regeneration. This sign's core traits include passion, determination, and psychological insight. Scorpio individuals are known for their emotional power and ability to transform situations.",
+    "moon_sign": "Your emotional nature is intense and transformative. You process feelings through deep emotional experiences. While you can be secretive, your emotional depth and insight are profound. You need emotional intensity and transformation in your life.",
+    "rising_sign": "You project mystery and power. Your presence is magnetic and intense. While you can be intimidating, your emotional depth and determination make you fascinating. You're known for your ability to transform and regenerate situations."
+  },
+  "sagittarius": {
+    "sun_sign": "Sagittarius represents adventure, philosophy, and expansion. As a fire sign, Sagittarius embodies optimism, freedom, and truth-seeking. This sign's core traits include enthusiasm, honesty, and a love of learning. Sagittarius individuals are known for their adventurous spirit and philosophical nature.",
+    "moon_sign": "Your emotional nature is optimistic and adventurous. You process feelings through exploration and understanding. While you can be blunt, your enthusiasm and honesty are refreshing. You need freedom and growth in your emotional life.",
+    "rising_sign": "You project optimism and enthusiasm. Your presence is adventurous and inspiring. While you can be reckless, your honesty and sense of adventure make you exciting. You're known for your ability to expand horizons and seek truth."
+  },
+  "capricorn": {
+    "sun_sign": "Capricorn represents ambition, responsibility, and achievement. As an earth sign, Capricorn embodies discipline, practicality, and long-term planning. This sign's core traits include determination, reliability, and a strong work ethic. Capricorn individuals are known for their ability to achieve goals through persistence.",
+    "moon_sign": "Your emotional nature is disciplined and responsible. You process feelings through achievement and structure. While you can be reserved, your reliability and determination are admirable. You need accomplishment and security in your emotional life.",
+    "rising_sign": "You project authority and competence. Your presence is professional and reliable. While you can be cold, your discipline and ambition make you respected. You're known for your ability to achieve and maintain long-term success."
+  },
+  "aquarius": {
+    "sun_sign": "Aquarius represents innovation, independence, and humanitarian ideals. As an air sign, Aquarius embodies originality, progress, and social consciousness. This sign's core traits include uniqueness, inventiveness, and a desire for freedom. Aquarius individuals are known for their forward-thinking ideas and humanitarian spirit.",
+    "moon_sign": "Your emotional nature is independent and innovative. You process feelings through intellectual understanding and social causes. While you can be detached, your originality and humanitarian spirit are inspiring. You need freedom and progress in your emotional life.",
+    "rising_sign": "You project uniqueness and independence. Your presence is progressive and unconventional. While you can be eccentric, your innovative ideas and humanitarian ideals make you fascinating. You're known for your ability to bring new perspectives and social change."
+  },
+  "pisces": {
+    "sun_sign": "Pisces represents compassion, spirituality, and artistic expression. As a water sign, Pisces embodies intuition, empathy, and transcendence. This sign's core traits include sensitivity, creativity, and a connection to the divine. Pisces individuals are known for their artistic talents and spiritual awareness.",
+    "moon_sign": "Your emotional nature is compassionate and intuitive. You process feelings through artistic expression and spiritual connection. While you can be escapist, your empathy and creativity are profound. You need spiritual connection and artistic expression in your emotional life.",
+    "rising_sign": "You project sensitivity and creativity. Your presence is gentle and artistic. While you can be elusive, your compassion and spiritual awareness make you inspiring. You're known for your ability to bring beauty and healing to any situation."
+  }
+} 

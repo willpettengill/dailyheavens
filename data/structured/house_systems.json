@@ -1,0 +1,215 @@
+{
+  "systems": {
+    "placidus": {
+      "name": "Placidus",
+      "description": "Most commonly used house system in Western astrology",
+      "calculation": "Based on time taken for a point to rise from below to above the horizon",
+      "strengths": [
+        "Works well in middle latitudes",
+        "Good for psychological analysis",
+        "Most familiar to Western astrologers",
+        "Reliable for most birth locations"
+      ],
+      "weaknesses": [
+        "Becomes distorted at high latitudes",
+        "Houses can vary greatly in size",
+        "Not suitable for locations near poles"
+      ],
+      "characteristics": [
+        "Unequal house sizes",
+        "Based on time",
+        "Accurate for birth times",
+        "Good for predictive work"
+      ],
+      "calculation_method": "Time-based division of the ecliptic",
+      "popularity": "Very high",
+      "best_for": ["Birth charts", "Predictive astrology", "Modern interpretations"]
+    },
+    "koch": {
+      "name": "Koch",
+      "description": "Based on the division of space rather than time",
+      "calculation": "Uses trisection of diurnal arc in space",
+      "strengths": [
+        "Good for psychological analysis",
+        "More accurate at middle latitudes",
+        "Popular in German-speaking countries",
+        "Sensitive to birth time"
+      ],
+      "weaknesses": [
+        "Complex calculations",
+        "Problems at high latitudes",
+        "Less historical precedent"
+      ],
+      "characteristics": [
+        "Unequal house sizes",
+        "Based on time and location",
+        "Accurate for birth times",
+        "Good for psychological astrology"
+      ],
+      "calculation_method": "Time and location-based division",
+      "popularity": "High",
+      "best_for": ["Psychological astrology", "Birth charts", "Modern interpretations"]
+    },
+    "campanus": {
+      "name": "Campanus",
+      "description": "Based on the prime vertical circle",
+      "calculation": "Divides the prime vertical into equal parts",
+      "strengths": [
+        "Mathematically elegant",
+        "Works well for event timing",
+        "Good for mundane astrology",
+        "Consistent house sizes"
+      ],
+      "weaknesses": [
+        "Complex mathematical basis",
+        "Less commonly used",
+        "May not reflect personal experience"
+      ],
+      "characteristics": [
+        "Equal house sizes",
+        "Based on space",
+        "Good for rectification",
+        "Traditional approach"
+      ],
+      "calculation_method": "Division of the prime vertical",
+      "popularity": "Medium",
+      "best_for": ["Traditional astrology", "Rectification", "Equal house division"]
+    },
+    "equal": {
+      "name": "Equal House",
+      "description": "Divides the zodiac into 12 equal segments of 30 degrees each",
+      "calculation": "Each house is exactly 30 degrees, starting from the Ascendant",
+      "strengths": [
+        "Simple and straightforward",
+        "Works at all latitudes",
+        "Equal emphasis on all houses",
+        "Good for beginners"
+      ],
+      "weaknesses": [
+        "May not reflect actual rising times",
+        "Intermediate house cusps may be less accurate",
+        "Less emphasis on natural phenomena"
+      ],
+      "characteristics": [
+        "Equal house sizes",
+        "Simple calculation",
+        "Traditional approach",
+        "Good for missing birth times"
+      ],
+      "calculation_method": "Equal 30-degree divisions from Ascendant",
+      "popularity": "Medium",
+      "best_for": ["Traditional astrology", "Missing birth times", "Simple interpretations"]
+    },
+    "whole_sign": {
+      "name": "Whole Sign",
+      "description": "Each house corresponds to one complete zodiac sign",
+      "calculation": "The rising sign becomes the first house, subsequent signs follow in order",
+      "strengths": [
+        "Historically authentic",
+        "Simple to calculate",
+        "Works at all latitudes",
+        "Clear sign-house correspondence"
+      ],
+      "weaknesses": [
+        "Does not account for varying planetary motion",
+        "May oversimplify house positions",
+        "Less precise timing for events"
+      ],
+      "characteristics": [
+        "Equal house sizes",
+        "Ancient approach",
+        "Simple calculation",
+        "Traditional method"
+      ],
+      "calculation_method": "Whole sign divisions from Ascendant",
+      "popularity": "Growing",
+      "best_for": ["Hellenistic astrology", "Traditional astrology", "Ancient techniques"]
+    },
+    "regiomontanus": {
+      "name": "Regiomontanus",
+      "description": "Based on the celestial equator",
+      "calculation": "Divides the celestial equator into equal parts",
+      "strengths": [
+        "Good for horary astrology",
+        "Historical importance",
+        "Works well for timing",
+        "Popular in medieval astrology"
+      ],
+      "weaknesses": [
+        "Less intuitive",
+        "House sizes vary",
+        "Not ideal for psychological analysis"
+      ]
+    }
+  },
+  "house_qualities": {
+    "angular": {
+      "houses": [1, 4, 7, 10],
+      "characteristics": [
+        "Most powerful houses",
+        "Active and dynamic",
+        "Initiative and action",
+        "External manifestation"
+      ],
+      "strength": "Strongest"
+    },
+    "succedent": {
+      "houses": [2, 5, 8, 11],
+      "characteristics": [
+        "Stable and fixed",
+        "Resource management",
+        "Support and maintenance",
+        "Internal strength"
+      ],
+      "strength": "Medium"
+    },
+    "cadent": {
+      "houses": [3, 6, 9, 12],
+      "characteristics": [
+        "Mutable and adaptable",
+        "Learning and communication",
+        "Service and adjustment",
+        "Internal processes"
+      ],
+      "strength": "Weakest"
+    }
+  },
+  "house_elements": {
+    "fire": {
+      "houses": [1, 5, 9],
+      "characteristics": [
+        "Spirit and inspiration",
+        "Creative expression",
+        "Personal growth",
+        "Higher mind"
+      ]
+    },
+    "earth": {
+      "houses": [2, 6, 10],
+      "characteristics": [
+        "Material resources",
+        "Practical skills",
+        "Career and status",
+        "Physical manifestation"
+      ]
+    },
+    "air": {
+      "houses": [3, 7, 11],
+      "characteristics": [
+        "Communication",
+        "Relationships",
+        "Social networks",
+        "Mental processes"
+      ]
+    },
+    "water": {
+      "houses": [4, 8, 12],
+      "characteristics": [
+        "Emotional security",
+        "Transformation",
+        "Collective resources",
+        "Spiritual growth"
+      ]
+    }
+  }
+} 

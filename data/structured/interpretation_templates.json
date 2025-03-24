@@ -1,0 +1,87 @@
+{
+  "reading_structure": {
+    "overview": {
+      "template": "The birth chart shows {sun_sign} energy with {ascendant_sign} rising, giving a {personality_blend} personality. The chart ruler, {chart_ruler}, is in {chart_ruler_house} house, indicating {chart_ruler_interpretation}.",
+      "required_data": ["sun_sign", "ascendant_sign", "chart_ruler", "chart_ruler_house"]
+    },
+    "personality": {
+      "template": "With {sun_sign} Sun in the {sun_house} house, you express yourself through {sun_house_themes}. Your {ascendant_sign} Ascendant shows you approach life with {ascendant_qualities}, while your {moon_sign} Moon in the {moon_house} house reveals your emotional nature as {moon_interpretation}.",
+      "required_data": ["sun_sign", "sun_house", "ascendant_sign", "moon_sign", "moon_house"]
+    }
+  },
+  "aspect_interpretations": {
+    "sun_moon": {
+      "conjunction": "Your emotional nature and basic personality are unified, creating a strong sense of self.",
+      "trine": "There is natural harmony between your conscious self and emotional needs.",
+      "square": "You may experience internal tension between your will and your emotions.",
+      "opposition": "You must work to balance your conscious needs with your emotional ones."
+    },
+    "sun_ascendant": {
+      "conjunction": "You project yourself naturally and confidently.",
+      "trine": "Your personality flows easily into your outer expression.",
+      "square": "You may struggle between being yourself and meeting others' expectations.",
+      "opposition": "You might present yourself differently from your true nature."
+    }
+  },
+  "house_planet_combinations": {
+    "sun": {
+      "house1": "Strong self-expression, natural leadership abilities, and a powerful presence.",
+      "house2": "Identity tied to resources and values, strong financial instincts.",
+      "house3": "Communication and learning are central to identity, natural teacher.",
+      "house4": "Strong connection to home and family, emotional security important.",
+      "house5": "Creative self-expression, natural performer, strong with children.",
+      "house6": "Identity through service and work, health-conscious.",
+      "house7": "Identity through relationships, natural diplomat.",
+      "house8": "Transformative personality, deep investigator.",
+      "house9": "Philosophical nature, love of higher learning and travel.",
+      "house10": "Natural leader, career-focused, public recognition important.",
+      "house11": "Humanitarian interests, group leadership, future-oriented.",
+      "house12": "Spiritual nature, works behind scenes, strong intuition."
+    }
+  },
+  "planet_sign_interpretations": {
+    "format": "{planet} in {sign} suggests {interpretation}",
+    "examples": {
+      "sun_in_aries": "leadership qualities and a pioneering spirit",
+      "moon_in_cancer": "deep emotional sensitivity and strong nurturing instincts",
+      "mercury_in_gemini": "quick thinking and excellent communication skills"
+    }
+  },
+  "synthesis_guidelines": {
+    "priority_factors": [
+      "Chart ruler and its condition",
+      "Sun, Moon, and Ascendant (The Big Three)",
+      "Stelliums (3+ planets in one sign/house)",
+      "Major aspects to personal planets",
+      "Angular house placements"
+    ],
+    "interpretation_flow": [
+      "Overall chart pattern and energy distribution",
+      "The Big Three analysis",
+      "House and sign placements of personal planets",
+      "Major aspect patterns",
+      "Specific house/planet combinations",
+      "Synthesis of themes and patterns"
+    ]
+  },
+  "special_configurations": {
+    "stellium": {
+      "definition": "Three or more planets in the same sign or house",
+      "interpretation_template": "With {planets} in {sign_or_house}, there is a strong focus on {themes}."
+    },
+    "grand_trine": {
+      "definition": "Three planets in trine aspect (120°) to each other",
+      "interpretation_template": "The grand trine between {planets} in {signs} creates a harmonious flow in areas of {life_areas}."
+    },
+    "t_square": {
+      "definition": "Two planets in opposition with both square to a third planet",
+      "interpretation_template": "The T-square between {planets} creates dynamic tension that can be resolved through {resolution_point}."
+    }
+  },
+  "timing_techniques": {
+    "transits": {
+      "interpretation_template": "As {transiting_planet} moves through your {house_number} house, expect {interpretation}.",
+      "priority_transits": ["Outer planet transits to angles", "Saturn return", "Jupiter return", "Progressed Moon phases"]
+    }
+  }
+} 
