@@ -1,6 +1,102 @@
-# Daily Heavens
+# Daily Heavens: Astrology Platform
 
-An astrological interpretation service that provides detailed birth chart and horoscope interpretations.
+Daily Heavens is a full-stack astrology platform that provides birth chart calculations, interpretations, and forecasts.
+
+## Project Structure
+
+The project consists of three main parts:
+
+1. **Backend Services**:
+   - Birth Chart Calculation (Python/FastAPI)
+   - Astrological Interpretation (Python/FastAPI)
+
+2. **Frontend**:
+   - Next.js application with interactive UI
+
+3. **Integration Layer**:
+   - Adapter service that connects frontend and backend
+
+## Key Features
+
+- Accurate birth chart calculations using Flatlib
+- Comprehensive astrological interpretations
+- Responsive, modern UI built with Next.js
+- Easy deployment to Vercel
+
+## Getting Started
+
+### Backend Setup
+
+```bash
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the birth chart service
+uvicorn app.birth_chart_server:app --host 0.0.0.0 --port 8001
+
+# In a separate terminal, run the interpretation service
+uvicorn app.main:app --host 0.0.0.0 --port 8002
+```
+
+### Integration Adapter Setup
+
+```bash
+# Install dependencies for the adapter
+cd integration
+pip install -r requirements.txt
+
+# Run the adapter
+uvicorn birth_chart_adapter:app --host 0.0.0.0 --port 8000
+```
+
+### Frontend Setup
+
+```bash
+# Navigate to the frontend directory
+cd frontend
+
+# Install dependencies
+pnpm install
+
+# Start the development server
+pnpm dev
+```
+
+## Docker Compose (Alternative)
+
+You can use Docker Compose to run all services together:
+
+```bash
+docker-compose up
+```
+
+This will start:
+- Birth Chart Service at http://localhost:8001
+- Interpretation Service at http://localhost:8002
+- Frontend Adapter at http://localhost:8000
+- Next.js Frontend at http://localhost:3000
+
+## Detailed Documentation
+
+- [Backend API Documentation](http://localhost:8001/api/docs) - Available when running the birth chart service
+- [Integration Guide](./README-INTEGRATION.md) - Detailed guide for connecting frontend and backend
+- [Frontend Documentation](./frontend/README.md) - Next.js frontend documentation
+
+## Deployment
+
+### Vercel Deployment (Recommended)
+
+1. Connect your GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy
+
+### Alternative Deployment
+
+You can also deploy the backend services separately on any provider that supports Python/FastAPI applications.
 
 ## Development Setup
 
