@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "birth_chart_adapter.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "birth_chart_adapter.py"
+    }
+  ],
+  "env": {
+    "BIRTH_CHART_API_URL": "",
+    "INTERPRETATION_API_URL": ""
+  }
+} 
