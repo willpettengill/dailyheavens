@@ -457,36 +457,88 @@ class InterpretationService:
                 "combinations": {}
             }
             
-            # Generate simple planet interpretations
+            # Generate enhanced planet interpretations
             for planet_name, planet_data in birth_chart.get("planets", {}).items():
                 sign = planet_data.get("sign", "")
                 house = planet_data.get("house")
                 retrograde = planet_data.get("retrograde", False)
                 
                 if sign and house is not None:
-                    planet_string = f"{planet_name} in {sign} (house {house})"
+                    # Get planet qualities based on area of focus
+                    planet_quality = ""
+                    normalized_planet = planet_name.lower()
+                    if normalized_planet in self.planets_data:
+                        qualities = self.planets_data[normalized_planet].get("qualities", {})
+                        planet_quality = qualities.get(area, qualities.get("general", ""))
+                    
+                    # Get sign qualities
+                    sign_quality = ""
+                    normalized_sign = sign.lower()
+                    if normalized_sign in self.signs_data:
+                        qualities = self.signs_data[normalized_sign].get("qualities", {})
+                        sign_quality = qualities.get("general", "")
+                    
+                    # Get house meaning
+                    house_meaning = ""
+                    if str(house) in self.houses_data:
+                        house_meaning = self.houses_data[str(house)].get("keywords", [""])[0]
+                    
+                    # Create interpretation
+                    base_interpretation = f"{planet_name} in {sign} (House {house})"
                     if retrograde:
-                        planet_string += ", retrograde"
+                        base_interpretation += " Retrograde"
+                    
+                    detailed_interpretation = f"{base_interpretation}: "
+                    
+                    # Enhance with qualities if available
+                    if planet_quality and sign_quality:
+                        detailed_interpretation += f"Your {planet_quality} expresses through {sign_quality} "
+                        detailed_interpretation += f"in the area of life related to {house_meaning}."
+                    else:
+                        detailed_interpretation += f"This placement influences your personality and life experience."
+                    
+                    # Add retrograde interpretation if applicable
+                    if retrograde:
+                        detailed_interpretation += f" With {planet_name} retrograde, these energies may be more internalized or require deeper personal work."
                     
                     interpretations["planets"].append({
                         "planet": planet_name,
                         "sign": sign,
                         "house": house,
                         "retrograde": retrograde,
-                        "interpretation": f"{planet_string}: This combination influences your personality and life experience."
+                        "interpretation": detailed_interpretation
                     })
             
-            # Generate simple house interpretations
+            # Generate enhanced house interpretations
             for house_num, house_data in birth_chart.get("houses", {}).items():
                 sign = house_data.get("sign", "")
                 if sign:
+                    # Get house qualities
+                    house_keywords = []
+                    if house_num in self.houses_data:
+                        house_keywords = self.houses_data[house_num].get("keywords", [])
+                    house_description = ", ".join(house_keywords[:3]) if house_keywords else "this area of your life"
+                    
+                    # Get sign qualities
+                    sign_quality = ""
+                    normalized_sign = sign.lower()
+                    if normalized_sign in self.signs_data:
+                        qualities = self.signs_data[normalized_sign].get("qualities", {})
+                        sign_quality = qualities.get("general", "")
+                    
+                    house_interpretation = f"House {house_num} in {sign}: "
+                    if sign_quality:
+                        house_interpretation += f"The energy of {sign} ({sign_quality}) influences {house_description}."
+                    else:
+                        house_interpretation += f"This placement affects {house_description}."
+                    
                     interpretations["houses"].append({
                         "house": house_num,
                         "sign": sign,
-                        "interpretation": f"House {house_num} in {sign}: This placement affects this area of your life."
+                        "interpretation": house_interpretation
                     })
             
-            # Generate simple aspect interpretations
+            # Generate enhanced aspect interpretations
             for aspect in birth_chart.get("aspects", []):
                 planet1 = aspect.get("planet1", "")
                 planet2 = aspect.get("planet2", "")
@@ -503,20 +555,45 @@ class InterpretationService:
                         180: "opposition"
                     }.get(aspect_type, str(aspect_type))
                     
+                    # Get aspect quality
+                    aspect_quality = ""
+                    if aspect_name in self.aspects_data:
+                        aspect_quality = self.aspects_data[aspect_name].get("quality", "")
+                    
+                    # Create enhanced interpretation
+                    aspect_interpretation = f"{planet1} {aspect_name} {planet2} "
+                    if aspect_quality:
+                        aspect_interpretation += f"({orb}° orb): This {aspect_quality} aspect "
+                        aspect_interpretation += f"suggests an interaction between your {planet1.lower()} and {planet2.lower()} energies."
+                    else:
+                        aspect_interpretation += f"(orb {orb}°): This aspect influences how these planetary energies interact."
+                    
                     interpretations["aspects"].append({
                         "planet1": planet1,
                         "planet2": planet2,
                         "type": aspect_name,
                         "orb": orb,
-                        "interpretation": f"{planet1} {aspect_name} {planet2}: This aspect influences how these planetary energies interact."
+                        "interpretation": aspect_interpretation
                     })
             
-            # Return successful result
+            # Add element balance analysis if level is 'detailed' or higher
+            element_balance = {}
+            if level != "basic":
+                element_balance = self._analyze_simple_element_balance(birth_chart)
+            
+            # Add pattern analysis if level is 'detailed' or higher
+            patterns = []
+            if level != "basic":
+                patterns = self._analyze_simple_patterns(birth_chart)
+                interpretations["patterns"] = patterns
+            
+            # Return successful result with enhanced data
             return {
                 "status": "success",
                 "data": {
                     "interpretations": interpretations,
-                    "birth_chart": birth_chart
+                    "birth_chart": birth_chart,
+                    "element_balance": element_balance
                 }
             }
             
@@ -2109,3 +2186,230 @@ class InterpretationService:
         except Exception as e:
             self.logger.error(f"Error creating base aspect interpretation: {str(e)}")
             return ""
+
+    def _analyze_simple_element_balance(self, birth_chart: Dict) -> Dict[str, Any]:
+        """Analyze the elemental balance in the birth chart.
+        
+        This is a simplified version of the element analysis.
+        
+        Args:
+            birth_chart: Dictionary containing birth chart data
+            
+        Returns:
+            Dictionary with element counts and interpretation
+        """
+        try:
+            # Initialize element counts
+            elements = {
+                "fire": 0,
+                "earth": 0, 
+                "air": 0,
+                "water": 0
+            }
+            
+            # Count planets in each element
+            planets_by_element = {
+                "fire": [],
+                "earth": [],
+                "air": [],
+                "water": []
+            }
+            
+            # Process planets
+            for planet, data in birth_chart.get("planets", {}).items():
+                sign = data.get("sign", "").lower()
+                
+                # Skip if no sign data
+                if not sign:
+                    continue
+                    
+                # Get element for this sign
+                element = ""
+                if sign in self._sign_cache:
+                    element = self._sign_cache[sign].get("element", "").lower()
+                    
+                if element in elements:
+                    elements[element] += 1
+                    planets_by_element[element].append(planet)
+            
+            # Calculate percentages
+            total_planets = sum(elements.values())
+            percentages = {}
+            if total_planets > 0:
+                percentages = {
+                    element: (count / total_planets * 100)
+                    for element, count in elements.items()
+                }
+            
+            # Determine dominant and lacking elements
+            dominant_elements = []
+            lacking_elements = []
+            
+            if total_planets > 0:
+                max_count = max(elements.values())
+                min_count = min(elements.values())
+                
+                dominant_elements = [e for e, c in elements.items() if c == max_count and c > 0]
+                lacking_elements = [e for e, c in elements.items() if c == min_count and c == 0]
+            
+            # Generate interpretation
+            interpretation = self._get_simple_element_interpretation(
+                elements, percentages, dominant_elements, lacking_elements, planets_by_element
+            )
+            
+            return {
+                "counts": elements,
+                "percentages": percentages,
+                "dominant": dominant_elements,
+                "lacking": lacking_elements,
+                "planets_by_element": planets_by_element,
+                "interpretation": interpretation
+            }
+        except Exception as e:
+            self.logger.error(f"Error analyzing element balance: {str(e)}", exc_info=True)
+            return {
+                "counts": {},
+                "percentages": {},
+                "dominant": [],
+                "lacking": [],
+                "planets_by_element": {},
+                "interpretation": "Element balance analysis unavailable."
+            }
+    
+    def _get_simple_element_interpretation(
+        self, 
+        elements: Dict[str, int],
+        percentages: Dict[str, float],
+        dominant_elements: List[str],
+        lacking_elements: List[str],
+        planets_by_element: Dict[str, List[str]]
+    ) -> str:
+        """Generate interpretation for element balance.
+        
+        Args:
+            elements: Counts of planets in each element
+            percentages: Percentage of planets in each element
+            dominant_elements: List of dominant elements
+            lacking_elements: List of lacking elements
+            planets_by_element: Dictionary mapping elements to lists of planets
+            
+        Returns:
+            Interpretation string
+        """
+        interpretation_parts = []
+        
+        # Add dominant element interpretation
+        if dominant_elements:
+            dominant_element = dominant_elements[0]
+            dominant_count = elements[dominant_element]
+            dominant_percent = round(percentages[dominant_element])
+            dominant_planets = ", ".join(planets_by_element[dominant_element])
+            
+            element_qualities = {
+                "fire": "energetic, passionate, and action-oriented",
+                "earth": "practical, grounded, and reliable",
+                "air": "intellectual, communicative, and social",
+                "water": "emotional, intuitive, and sensitive"
+            }
+            
+            dominant_quality = element_qualities.get(dominant_element, "")
+            if dominant_quality:
+                interpretation_parts.append(
+                    f"Your chart has a strong {dominant_element} element influence ({dominant_percent}%) "
+                    f"with {dominant_planets} in {dominant_element} signs. This makes you {dominant_quality}."
+                )
+        
+        # Add lacking element interpretation
+        if lacking_elements:
+            lacking_element = lacking_elements[0]
+            element_challenges = {
+                "fire": "initiating action and maintaining enthusiasm",
+                "earth": "practicality and grounding yourself",
+                "air": "objectivity and communication",
+                "water": "emotional processing and intuition"
+            }
+            
+            lacking_challenge = element_challenges.get(lacking_element, "")
+            if lacking_challenge:
+                interpretation_parts.append(
+                    f"Your chart lacks planets in {lacking_element} signs, which may create challenges with {lacking_challenge}."
+                )
+        
+        # Create final interpretation
+        if interpretation_parts:
+            return " ".join(interpretation_parts)
+        else:
+            return "Your chart shows a relatively balanced distribution of elements."
+
+    def _analyze_simple_patterns(self, birth_chart: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Find simple aspect patterns in the birth chart.
+        
+        This is a simplified version of pattern analysis that looks for some
+        basic aspect combinations.
+        
+        Args:
+            birth_chart: Dictionary containing birth chart data
+            
+        Returns:
+            List of pattern dictionaries with type, planets, and interpretation
+        """
+        try:
+            aspects = birth_chart.get("aspects", [])
+            patterns = []
+            
+            # Map numeric aspect types to names
+            aspect_mapping = {
+                0: "conjunction",
+                60: "sextile",
+                90: "square",
+                120: "trine",
+                180: "opposition"
+            }
+            
+            # Create an easier-to-use aspect structure
+            aspect_list = []
+            for aspect in aspects:
+                planet1 = aspect.get("planet1", "")
+                planet2 = aspect.get("planet2", "")
+                aspect_type = aspect.get("type", "")
+                
+                if not (planet1 and planet2 and aspect_type):
+                    continue
+                
+                aspect_name = aspect_mapping.get(aspect_type, str(aspect_type))
+                aspect_list.append({
+                    "planet1": planet1.lower(),
+                    "planet2": planet2.lower(),
+                    "type": aspect_name
+                })
+            
+            # Look for simple stelliums (3+ planets in conjunction)
+            planets_with_conjunctions = {}
+            for aspect in aspect_list:
+                if aspect["type"] == "conjunction":
+                    planet1 = aspect["planet1"]
+                    planet2 = aspect["planet2"]
+                    
+                    if planet1 not in planets_with_conjunctions:
+                        planets_with_conjunctions[planet1] = set()
+                    planets_with_conjunctions[planet1].add(planet2)
+                    
+                    if planet2 not in planets_with_conjunctions:
+                        planets_with_conjunctions[planet2] = set()
+                    planets_with_conjunctions[planet2].add(planet1)
+            
+            # Find planets with 2+ conjunctions (potential stellium center)
+            for planet, connected in planets_with_conjunctions.items():
+                if len(connected) >= 2:
+                    stellium_planets = [planet.title()] + [p.title() for p in connected]
+                    
+                    patterns.append({
+                        "type": "stellium",
+                        "planets": stellium_planets,
+                        "interpretation": f"Stellium of {', '.join(stellium_planets)}: This concentrated energy creates a powerful focus in your chart."
+                    })
+            
+            return patterns
+        except Exception as e:
+            self.logger.error(f"Error analyzing patterns: {str(e)}", exc_info=True)
+            return []
