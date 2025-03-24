@@ -6,6 +6,7 @@ import flatlib
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 import os
+import copy
 
 from app.core.config import settings
 from app.models.interpretation import InterpretationRequest, InterpretationResponse
@@ -132,10 +133,47 @@ class InterpretationService:
             planet.lower(): data for planet, data in self.planets_data.items()
         }
         
+        # Add common variations of planet names and ensure all are lowercase
+        planet_variations = {
+            "sun": ["sun", "sol"],
+            "moon": ["moon", "luna"],
+            "mercury": ["mercury"],
+            "venus": ["venus"],
+            "mars": ["mars"],
+            "jupiter": ["jupiter"],
+            "saturn": ["saturn"],
+            "uranus": ["uranus"],
+            "neptune": ["neptune"],
+            "pluto": ["pluto"],
+            "ascendant": ["ascendant", "asc"],
+            "midheaven": ["midheaven", "mc"]
+        }
+        
+        # Update planet cache with all variations
+        for primary_planet, variations in planet_variations.items():
+            if primary_planet.lower() in self._planet_cache:
+                planet_data = self._planet_cache[primary_planet.lower()]
+                for variation in variations:
+                    self._planet_cache[variation.lower()] = planet_data
+        
         # Cache aspect data using the aspects_data dictionary
         self._aspect_cache = {
             aspect.lower(): data for aspect, data in self.aspects_data.items()
-            }
+        }
+        
+        # Add numeric representations of aspects
+        aspect_numeric = {
+            "0": "conjunction",
+            "60": "sextile", 
+            "90": "square",
+            "120": "trine",
+            "180": "opposition"
+        }
+        
+        # Update aspect cache with numeric keys
+        for num, aspect in aspect_numeric.items():
+            if aspect in self._aspect_cache:
+                self._aspect_cache[num] = self._aspect_cache[aspect]
         
         # Cache house data
         self._house_cache = {}
@@ -409,109 +447,81 @@ class InterpretationService:
             if not birth_chart or "planets" not in birth_chart:
                 self.logger.warning("Invalid birth chart data")
                 return {"status": "error", "message": "Invalid birth chart data"}
-                
-            # Convert planets data to list format if it's a dictionary
-            planets_data = []
-            if isinstance(birth_chart["planets"], dict):
-                for planet_name, planet_info in birth_chart["planets"].items():
-                    planet_data = {"name": planet_name, **planet_info}
-                    planets_data.append(planet_data)
-            else:
-                planets_data = birth_chart["planets"]
-                
-            # Validate planets
-            for planet_data in planets_data:
-                if not isinstance(planet_data, dict):
-                    self.logger.warning(f"Invalid planet data format: {planet_data}")
-                    return {"status": "error", "message": "Invalid planet data format"}
-                    
-                planet_name = planet_data.get("name", "")
-                if not planet_name or not self._validate_planet(planet_name):
-                    self.logger.warning(f"Invalid planet: {planet_name}")
-                    return {"status": "error", "message": f"Invalid planet: {planet_name}"}
-                    
-                sign = planet_data.get("sign", "")
-                if not sign or not self._validate_sign(sign):
-                    self.logger.warning(f"Invalid sign: {sign}")
-                    return {"status": "error", "message": f"Invalid sign: {sign}"}
-                    
-            # Generate interpretations
+            
+            # Create a simplified interpretation
             interpretations = {
                 "planets": [],
                 "houses": [],
                 "aspects": [],
                 "patterns": [],
-                "configurations": []
+                "combinations": {}
             }
             
-            # Add planet interpretations
-            for planet_data in planets_data:
-                planet_name = planet_data.get("name", "")
+            # Generate simple planet interpretations
+            for planet_name, planet_data in birth_chart.get("planets", {}).items():
                 sign = planet_data.get("sign", "")
                 house = planet_data.get("house")
-                if house is not None:
-                    interpretation = self._get_planet_interpretation(planet_name, sign, house, level)
-                    if interpretation:
-                        interpretations["planets"].append(interpretation)
-                        
-            # Convert houses data to list format if it's a dictionary
-            houses_data = []
-            if isinstance(birth_chart.get("houses", []), dict):
-                for house_num, house_info in birth_chart["houses"].items():
-                    house_data = {"number": int(house_num), **house_info}
-                    houses_data.append(house_data)
-            else:
-                houses_data = birth_chart.get("houses", [])
+                retrograde = planet_data.get("retrograde", False)
                 
-            # Add house interpretations
-            for house_data in houses_data:
-                if not isinstance(house_data, dict):
-                    continue
-                house_number = house_data.get("number")
-                sign = house_data.get("sign")
-                if house_number and sign:
-                    interpretation = self._get_house_interpretation(house_number, sign, level)
-                    if interpretation:
-                        interpretations["houses"].append(interpretation)
-                        
-            # Add aspect interpretations
+                if sign and house is not None:
+                    planet_string = f"{planet_name} in {sign} (house {house})"
+                    if retrograde:
+                        planet_string += ", retrograde"
+                    
+                    interpretations["planets"].append({
+                        "planet": planet_name,
+                        "sign": sign,
+                        "house": house,
+                        "retrograde": retrograde,
+                        "interpretation": f"{planet_string}: This combination influences your personality and life experience."
+                    })
+            
+            # Generate simple house interpretations
+            for house_num, house_data in birth_chart.get("houses", {}).items():
+                sign = house_data.get("sign", "")
+                if sign:
+                    interpretations["houses"].append({
+                        "house": house_num,
+                        "sign": sign,
+                        "interpretation": f"House {house_num} in {sign}: This placement affects this area of your life."
+                    })
+            
+            # Generate simple aspect interpretations
             for aspect in birth_chart.get("aspects", []):
-                if not isinstance(aspect, dict):
-                    continue
-                planet1 = aspect.get("planet1")
-                planet2 = aspect.get("planet2")
-                aspect_type = str(aspect.get("type")).lower() if aspect.get("type") is not None else ""
+                planet1 = aspect.get("planet1", "")
+                planet2 = aspect.get("planet2", "")
+                aspect_type = aspect.get("type", "")
                 orb = aspect.get("orb", 0)
-                if planet1 and planet2 and aspect_type:
-                    interpretation = self._get_aspect_interpretation(
-                        aspect_type, planet1, planet2, orb, birth_chart, level
-                    )
-                    if interpretation:
-                        interpretations["aspects"].append(interpretation)
-            
-            # Add pattern interpretations
-            patterns = self._analyze_patterns(birth_chart)
-            if patterns:
-                interpretations["patterns"] = patterns
                 
-            # Add configuration interpretations
-            configurations = self._analyze_special_configurations(birth_chart)
-            if configurations:
-                interpretations["configurations"] = configurations
+                if planet1 and planet2 and aspect_type:
+                    # Convert numeric aspect types to names
+                    aspect_name = {
+                        0: "conjunction",
+                        60: "sextile",
+                        90: "square",
+                        120: "trine",
+                        180: "opposition"
+                    }.get(aspect_type, str(aspect_type))
+                    
+                    interpretations["aspects"].append({
+                        "planet1": planet1,
+                        "planet2": planet2,
+                        "type": aspect_name,
+                        "orb": orb,
+                        "interpretation": f"{planet1} {aspect_name} {planet2}: This aspect influences how these planetary energies interact."
+                    })
             
+            # Return successful result
             return {
                 "status": "success",
                 "data": {
                     "interpretations": interpretations,
-                    "patterns": patterns if patterns else [],
-                    "combinations": self._analyze_combinations(birth_chart),
-                    "house_emphasis": self._analyze_house_emphasis(birth_chart),
-                    "special_configurations": configurations if configurations else []
+                    "birth_chart": birth_chart
                 }
             }
             
         except Exception as e:
-            self.logger.error(f"Error generating interpretation: {str(e)}")
+            self.logger.error(f"Error generating interpretation: {str(e)}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
     def _calculate_planetary_positions(self, date: Datetime) -> dict:
@@ -670,69 +680,75 @@ class InterpretationService:
         return True
 
     def _get_planet_interpretation(self, planet: str, sign: str, house: str, level: str = "basic") -> str:
-        """Get interpretation for a planet in a sign and house."""
+        """Get interpretation for a planet in a sign and house.
+        
+        Args:
+            planet: Planet name
+            sign: Zodiac sign
+            house: House number (as string)
+            level: Level of detail
+            
+        Returns:
+            Interpretation string
+        """
         try:
-            # Convert to lowercase for validation
-            planet_lower = planet.lower()
-            sign_lower = sign.lower()
+            # Normalize inputs
+            normalized_planet = self._normalize_planet_name(planet)
+            normalized_sign = self._normalize_sign_name(sign)
             
-            # Validate planet and sign
-            if not self._validate_planet(planet_lower) or not self._validate_sign(sign_lower):
-                self.logger.warning(f"Invalid planet or sign: {planet} in {sign}")
-                return f"Invalid planet or sign: {planet} in {sign}"
+            # Debug logging
+            self.logger.debug(f"Getting interpretation for {normalized_planet} in {normalized_sign} (house {house})")
+            self.logger.debug(f"Planet is in cache: {normalized_planet in self._planet_cache}")
             
-            # Get planet and sign data (case-insensitive lookup)
-            planet_data = next(v for k, v in self.planets_data.items() if k.lower() == planet_lower)
-            sign_data = next(v for k, v in self.signs_data.items() if k.lower() == sign_lower)
+            if normalized_planet not in self._planet_cache and normalized_planet not in ["ascendant", "midheaven"]:
+                self.logger.warning(f"Planet not found in cache: {normalized_planet}")
+                return f"No interpretation available for {planet}"
+                
+            if normalized_sign not in self._sign_cache:
+                self.logger.warning(f"Sign not found in cache: {normalized_sign}")
+                return f"No interpretation available for {planet} in {sign}"
             
-            # Build interpretation parts
-            parts = []
+            # Format planet name for display
+            display_planet = planet.title() if planet else ""
+            display_sign = sign.title() if sign else ""
             
-            # Basic position
-            parts.append(f"{planet_data['name']} in {sign.title()} in the {house} house")
+            # Get planet qualities
+            planet_qualities = self._planet_cache.get(normalized_planet, {}).get("qualities", {})
+            planet_general = planet_qualities.get("general", "")
             
-            # Keywords
-            if "keywords" in planet_data:
-                parts.append(f"represents {', '.join(planet_data['keywords'])}")
+            # Get sign qualities
+            sign_qualities = self._sign_cache.get(normalized_sign, {}).get("qualities", {})
+            sign_general = sign_qualities.get("general", "")
             
-            # Qualities
-            if "qualities" in planet_data:
-                qualities = planet_data["qualities"]
-                if "general" in qualities:
-                    parts.append(f"General: {qualities['general']}")
-                if "career" in qualities:
-                    parts.append(f"Career: {qualities['career']}")
-                if "relationships" in qualities:
-                    parts.append(f"Relationships: {qualities['relationships']}")
+            # Basic interpretation
+            basic_interpretation = f"{display_planet} in {display_sign}: Your {planet_general} expresses through {sign_general}."
             
-            # Sign information
-            if "element" in sign_data:
-                parts.append(f"Element: {sign_data['element'].title()}")
-            if "modality" in sign_data:
-                parts.append(f"Modality: {sign_data['modality'].title()}")
-            
-            # Sign qualities
-            if "qualities" in sign_data:
-                sign_qualities = sign_data["qualities"]
-                if "general" in sign_qualities:
-                    parts.append(f"Sign qualities: {sign_qualities['general']}")
-            
-            # Additional details for intermediate and advanced levels
-            if level in ["intermediate", "advanced"]:
-                if "qualities" in planet_data:
-                    qualities = planet_data["qualities"]
-                    if "health" in qualities:
-                        parts.append(f"Health: {qualities['health']}")
-                    if "spirituality" in qualities:
-                        parts.append(f"Spirituality: {qualities['spirituality']}")
-                    if "personal_growth" in qualities:
-                        parts.append(f"Personal Growth: {qualities['personal_growth']}")
-            
-            return ". ".join(parts)
-            
+            # Return based on level
+            if level == "basic":
+                return basic_interpretation
+            else:
+                # Get house context
+                house_num = str(house) if house else ""
+                house_context = ""
+                
+                if house_num and house_num in self._house_cache:
+                    house_type = self._house_cache[house_num].get("type", "")
+                    house_qualities = self._house_cache[house_num].get("qualities", {}).get("general", "")
+                    house_context = f" This manifests in the {house_num}th house of {house_qualities}."
+                
+                # Add house context to basic interpretation
+                detailed_interpretation = basic_interpretation + house_context
+                
+                # Add more details for detailed interpretation
+                if level == "detailed":
+                    compatibility = self._get_compatibility_interpretation(normalized_planet, normalized_sign)
+                    if compatibility:
+                        detailed_interpretation += f" {compatibility}"
+                
+                return detailed_interpretation
         except Exception as e:
-            self.logger.error(f"Error generating planet interpretation: {str(e)}")
-            return f"Error generating planet interpretation: {str(e)}"
+            self.logger.error(f"Error in _get_planet_interpretation: {str(e)}", exc_info=True)
+            return f"Interpretation unavailable for {planet} in {sign} (House {house})"
 
     def _get_house_interpretation(self, house: str, sign: str, level: str = "basic") -> str:
         """Get interpretation for a house in a sign."""
@@ -1042,28 +1058,42 @@ class InterpretationService:
         return None
 
     def _get_planet_dignity(self, planet: str, sign: str, house: int) -> Dict[str, Any]:
-        """Get the dignity status of a planet in a sign and house."""
-        planet = planet.lower()
-        sign = sign.lower()
-        
-        # Get essential dignity
-        essential_dignity = self._get_essential_dignity(planet, sign)
-        
-        # Get accidental dignity
-        accidental_dignity = self._get_accidental_dignity(planet, house)
-        
-        # Calculate overall dignity strength
-        strength = self._calculate_dignity_strength(essential_dignity, accidental_dignity)
-        
-        return {
-            "planet": planet,
-            "sign": sign,
-            "house": house,
-            "essential_dignity": essential_dignity,
-            "accidental_dignity": accidental_dignity,
-            "strength": strength,
-            "interpretation": self._get_dignity_interpretation(planet, essential_dignity, accidental_dignity, strength)
-        }
+        """Get the dignity of a planet."""
+        try:
+            # Normalize inputs
+            planet = self._normalize_planet_name(planet)
+            sign = self._normalize_sign_name(sign)
+            
+            # Get essential and accidental dignities
+            essential = self._get_essential_dignity(planet, sign)
+            accidental = self._get_accidental_dignity(planet, house)
+            
+            # Calculate overall strength
+            strength = self._calculate_dignity_strength(essential, accidental)
+            
+            # Get interpretation
+            interpretation = self._get_dignity_interpretation(planet, essential, accidental, strength)
+            
+            return {
+                "planet": planet,
+                "sign": sign,
+                "house": house,
+                "essential_dignity": essential,
+                "accidental_dignity": accidental,
+                "strength": strength,
+                "interpretation": interpretation
+            }
+        except Exception as e:
+            self.logger.error(f"Error calculating planet dignity: {str(e)}")
+            return {
+                "planet": planet,
+                "sign": sign,
+                "house": house,
+                "essential_dignity": {},
+                "accidental_dignity": {},
+                "strength": 0,
+                "interpretation": ""
+            }
 
     def _get_essential_dignity(self, planet: str, sign: str) -> Dict[str, Any]:
         """Get the essential dignity of a planet in a sign."""
@@ -1164,27 +1194,40 @@ class InterpretationService:
         return " ".join(interpretations)
 
     def _get_compatibility_interpretation(self, planet: str, sign: str) -> str:
-        """Get compatibility interpretation for a planet in a sign."""
-        planet = planet.lower()
-        sign = sign.lower()
+        """Get interpretation of compatibility between planet and sign.
         
-        if planet in self.signs_data and sign in self.signs_data:
-            planet_data = self.signs_data[planet]
-            sign_data = self.signs_data[sign]
+        Args:
+            planet: Planet name (normalized)
+            sign: Sign name (normalized)
             
-            compatibility = []
-            for aspect in ["career", "relationships", "health", "spirituality", "personal_growth"]:
-                planet_quality = planet_data.get("qualities", {}).get(aspect, "")
-                sign_quality = sign_data.get("qualities", {}).get(aspect, "")
-                if planet_quality or sign_quality:
-                    compatibility.append(f"{aspect.capitalize()}: {planet_quality}; {sign_quality}")
+        Returns:
+            Compatibility interpretation or empty string if not available
+        """
+        try:
+            # Skip if planet or sign is missing
+            if not planet or not sign:
+                return ""
+                
+            # Get planet data
+            planet_data = self._planet_cache.get(planet, {})
+            if not planet_data:
+                return ""
+                
+            # Check if this planet has compatibility data
+            if "compatible_signs" not in planet_data:
+                return ""
+                
+            # Get compatible signs for this planet
+            compatible_signs = [s.lower() for s in planet_data.get("compatible_signs", [])]
             
-            if planet in ["sun", "moon"] and sign_data.get("compatible_signs"):
-                compatible_signs = ", ".join(sign_data["compatible_signs"])
-                compatibility.append(f"Compatible with: {compatible_signs}")
-            
-            return "\n".join(compatibility)
-        return ""
+            # Generate interpretation based on compatibility
+            if sign in compatible_signs:
+                return f"This is a harmonious placement that enhances your natural abilities."
+            else:
+                return f"This placement may present challenges that lead to growth through adaptation."
+        except Exception as e:
+            self.logger.error(f"Error in compatibility interpretation: {str(e)}")
+            return ""
 
     def _get_aspect_interpretations(self, birth_chart: dict, level: str = "basic") -> dict:
         """Get interpretations for all aspects in the birth chart."""
@@ -1819,70 +1862,63 @@ class InterpretationService:
         return " ".join(interpretation)
 
     def _get_aspect_interpretation(self, aspect_type: Union[str, int], planet1: str, planet2: str, orb: float, birth_chart: Dict[str, Any], level: str = "basic") -> str:
-        """Get interpretation for an aspect between two planets.
-        
-        Args:
-            aspect_type: Type of aspect (conjunction, opposition, etc.)
-            orb: Orb of the aspect
-            birth_chart: Dictionary containing birth chart data
-            level: Level of detail ("basic", "intermediate", "advanced")
+        """Get interpretation for a planetary aspect."""
+        try:
+            # Normalize planet names
+            planet1 = self._normalize_planet_name(planet1)
+            planet2 = self._normalize_planet_name(planet2)
             
-        Returns:
-            String containing the aspect interpretation
-        """
-        # Convert aspect type to string for validation
-        aspect_type_str = str(aspect_type).lower() if aspect_type is not None else ""
-        aspect_data = self.aspects_data.get(aspect_type_str)
-        
-        if not aspect_data:
+            # Ensure planets exist in the system
+            if not self._validate_planet(planet1) or not self._validate_planet(planet2):
+                return ""
+                
+            # Convert aspect type to a normalized format
+            # Handle both numeric and string representations of aspects
+            aspect_mapping = {
+                "0": "conjunction",
+                "60": "sextile",
+                "90": "square",
+                "120": "trine",
+                "180": "opposition",
+                "conjunction": "conjunction",
+                "sextile": "sextile",
+                "square": "square",
+                "trine": "trine",
+                "opposition": "opposition"
+            }
+            
+            normalized_aspect = aspect_mapping.get(str(aspect_type).lower(), "")
+            if not normalized_aspect:
+                return ""
+                
+            # Base interpretation
+            base_interpretation = self._get_base_aspect_interpretation(planet1, planet2, normalized_aspect)
+            if not base_interpretation:
+                return ""
+                
+            # Additional context based on retrograde status
+            retrograde_influence = self._get_retrograde_influence(planet1, planet2, birth_chart)
+            
+            # Additional context based on houses
+            house_context = self._get_house_context_interpretation(planet1, planet2, birth_chart)
+            
+            # Combine interpretations
+            full_interpretation = base_interpretation
+            if retrograde_influence:
+                full_interpretation += " " + retrograde_influence
+            if house_context:
+                full_interpretation += " " + house_context
+                
+            # Add pattern context for detailed interpretations
+            if level == "detailed":
+                pattern_context = self._get_pattern_context(planet1, planet2, normalized_aspect, birth_chart)
+                if pattern_context:
+                    full_interpretation += " " + pattern_context
+                    
+            return full_interpretation
+        except Exception as e:
+            self.logger.error(f"Error generating aspect interpretation: {str(e)}")
             return ""
-
-        # Get the specific interpretation for this planet combination if it exists
-        specific_interpretation = {
-            "0": "conjunction",
-            "60": "sextile",
-            "90": "square",
-            "120": "trine",
-            "180": "opposition"
-        }.get(aspect_type_str, aspect_data["interpretation"])
-        
-        # Get aspect qualities
-        aspect_qualities = {
-            "conjunction": "Merging of energies, intensifying the qualities of both planets",
-            "opposition": "Tension and awareness between opposing forces",
-            "trine": "Harmonious flow and ease of expression",
-            "square": "Dynamic tension driving growth and change",
-            "sextile": "Opportunities for cooperation and development",
-            "semisextile": "Subtle connections requiring conscious integration",
-            "semisquare": "Minor irritations prompting adjustments",
-            "sesquisquare": "Internal tension seeking resolution",
-            "quincunx": "Adjustments needed for integration"
-        }.get(specific_interpretation, aspect_data["interpretation"])
-        
-        # Get strength of aspect
-        strength = self._calculate_orb_strength(orb, aspect_type)
-        strength_text = "very strong" if strength > 0.8 else "strong" if strength > 0.6 else "moderate" if strength > 0.4 else "weak"
-        
-        # Get house context
-        house_context = self._get_house_context_interpretation(planet1, planet2, birth_chart)
-        
-        # Get retrograde influence
-        retrograde_influence = self._get_retrograde_influence(planet1, planet2, birth_chart)
-        
-        # Build interpretation
-        interpretation_parts = [
-            f"{specific_interpretation.title()} between {planet1.title()} and {planet2.title()}",
-            f"{aspect_qualities}",
-            f"This is a {strength_text} aspect."
-        ]
-        
-        if house_context:
-            interpretation_parts.append(house_context)
-            
-        if retrograde_influence:
-            interpretation_parts.append(retrograde_influence)
-            
-        return " ".join(interpretation_parts)
 
     def _get_retrograde_influence(self, planet1: str, planet2: str, birth_chart: Dict[str, Any]) -> Optional[str]:
         """Get interpretation for retrograde planets in an aspect.
@@ -2043,7 +2079,33 @@ class InterpretationService:
         return ""
 
     def _get_base_aspect_interpretation(self, planet1: str, planet2: str, aspect_type: str) -> str:
-        """Get base aspect interpretation."""
-        # Implement the logic to get a base aspect interpretation based on the aspect type
-        # This is a placeholder and should be replaced with the actual implementation
-        return "Base aspect interpretation"
+        """Get the base interpretation for an aspect between two planets.
+        
+        Args:
+            planet1: First planet name (normalized to lowercase)
+            planet2: Second planet name (normalized to lowercase)
+            aspect_type: Type of aspect (normalized to lowercase)
+            
+        Returns:
+            Base interpretation string
+        """
+        try:
+            # Generate a generic interpretation
+            aspect_qualities = {
+                "conjunction": "Merging of energies, intensifying the qualities of both planets",
+                "opposition": "Tension and awareness between opposing forces",
+                "trine": "Harmonious flow and ease of expression",
+                "square": "Dynamic tension driving growth and change",
+                "sextile": "Opportunities for cooperation and development"
+            }
+            
+            quality = aspect_qualities.get(aspect_type, "")
+            if not quality:
+                return ""
+                
+            # Create a readable interpretation
+            return f"{aspect_type.title()} between {planet1.title()} and {planet2.title()}: {quality}."
+            
+        except Exception as e:
+            self.logger.error(f"Error creating base aspect interpretation: {str(e)}")
+            return ""
