@@ -1,31 +1,19 @@
 {
   "version": 2,
+  "public": true,
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/next"
-    },
-    {
-      "src": "integration/birth_chart_adapter.py",
+      "src": "app/birth_chart_server.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/birth-chart",
-      "dest": "integration/birth_chart_adapter.py"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "frontend/app/api/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "frontend/$1"
+      "dest": "app/birth_chart_server.py"
     }
   ],
   "env": {
-    "BIRTH_CHART_API_URL": "",
-    "INTERPRETATION_API_URL": ""
+    "PYTHON_VERSION": "3.9"
   }
 } 
