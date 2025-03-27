@@ -1,4 +1,4 @@
-@import "tailwindcss/preflight";
+@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -46,24 +46,23 @@
 :root {
   --radius: 0.625rem;
   --background: 0 0% 10%;
-  --foreground: 0 0% 100%;
-  --card: 0 0% 10%;
-  --card-foreground: 0 0% 100%;
-  --popover: 0 0% 10%;
-  --popover-foreground: 0 0% 100%;
-  --primary: 324 100% 71%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 264 100% 71%;
-  --secondary-foreground: 0 0% 100%;
-  --muted: 0 0% 80%;
-  --muted-foreground: 0 0% 80%;
-  --accent: 164 100% 50%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 20%;
-  --input: 0 0% 20%;
-  --ring: 324 100% 71%;
+  --foreground: 0 0% 98%;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -113,29 +112,31 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+@tailwind base;
+@tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 324 100% 71%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 264 100% 71%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 80%;
-    --muted-foreground: 0 0% 80%;
-    --accent: 164 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 324 100% 71%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
   }
  
@@ -167,7 +168,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-raleway;
+    @apply bg-background text-foreground;
   }
 }
 
@@ -187,58 +188,4 @@
 
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
-}
-
-@layer utilities {
-  .neon-border {
-    @apply border border-accent-pink shadow-neon-pink;
-  }
-  
-  .neon-border-purple {
-    @apply border border-accent-purple shadow-neon-purple;
-  }
-  
-  .neon-border-teal {
-    @apply border border-accent-teal shadow-neon-teal;
-  }
-}
-
-/* Base styles */
-h1, h2, h3, h4, h5, h6 {
-  @apply font-montserrat font-bold;
-}
-
-code, pre {
-  @apply font-fira-code;
-}
-
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-background;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-accent-purple rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-accent-pink;
-}
-
-/* Neon text effects */
-.text-glow-pink {
-  text-shadow: 0 0 5px #FF6EC7, 0 0 10px #FF6EC7;
-}
-
-.text-glow-purple {
-  text-shadow: 0 0 5px #9D6AFF, 0 0 10px #9D6AFF;
-}
-
-.text-glow-teal {
-  text-shadow: 0 0 5px #00FFD1, 0 0 10px #00FFD1;
 }

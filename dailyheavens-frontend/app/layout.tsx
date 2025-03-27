@@ -6,16 +6,19 @@ import "./globals.css";
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
+  display: "swap",
 });
 
 const raleway = Raleway({
   subsets: ["latin"],
   variable: "--font-raleway",
+  display: "swap",
 });
 
 const firaCode = Fira_Code({
   subsets: ["latin"],
   variable: "--font-fira-code",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,12 +28,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${raleway.variable} ${firaCode.variable} font-sans bg-background text-foreground antialiased`}>
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${montserrat.variable} ${raleway.variable} ${firaCode.variable} font-sans bg-background text-foreground antialiased`}>
         <MainNav />
         <main className="min-h-screen">
           {children}
