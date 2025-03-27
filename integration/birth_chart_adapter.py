@@ -235,15 +235,27 @@ async def calculate_birth_chart(request: FrontendBirthChartRequest = Body(...)):
             aspects = []
             for aspect_data in backend_data.get("aspects", []):
                 aspect_type = aspect_data.get("type", "")
-                # Convert aspect type to string before calling lower()
-                aspect_type_str = str(aspect_type) if aspect_type is not None else ""
-                aspects.append({
-                    "planet1": aspect_data.get("planet1", ""),
-                    "planet2": aspect_data.get("planet2", ""),
-                    "aspect": aspect_type_str.lower(),
-                    "orb": float(aspect_data.get("orb", 0)),
-                    "nature": aspect_data.get("nature", "neutral")
-                })
+                # Convert numeric aspect types to string names
+                aspect_names = {
+                    0: "conjunction",
+                    60: "sextile",
+                    90: "square",
+                    120: "trine",
+                    180: "opposition",
+                    150: "quincunx"
+                }
+                
+                if isinstance(aspect_type, (int, float)):
+                    aspect_type = aspect_names.get(int(aspect_type), str(aspect_type))
+                
+                if aspect_type:
+                    aspects.append({
+                        "planet1": aspect_data.get("planet1", ""),
+                        "planet2": aspect_data.get("planet2", ""),
+                        "aspect": aspect_type,
+                        "orb": float(aspect_data.get("orb", 0)),
+                        "nature": aspect_data.get("nature", "neutral")
+                    })
             
             # Final frontend response format
             frontend_response = {
