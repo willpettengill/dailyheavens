@@ -2717,3 +2717,114 @@ class InterpretationService:
             
         except Exception as e:
             self.logger.error(f"Error loading sun qualities: {str(e)}", exc_info=True)
+
+    def _analyze_simple_patterns(self, birth_chart: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Analyze birth chart for simple astrological patterns.
+        
+        Args:
+            birth_chart: Dictionary containing birth chart data
+            
+        Returns:
+            List of pattern interpretations
+        """
+        patterns = []
+        
+        try:
+            planets = birth_chart.get("planets", {})
+            aspects = birth_chart.get("aspects", [])
+            
+            # Find stelliums (3 or more planets in the same sign)
+            sign_planets = {}
+            for planet_name, planet_data in planets.items():
+                if isinstance(planet_data, dict) and "sign" in planet_data:
+                    sign = planet_data["sign"]
+                    if sign not in sign_planets:
+                        sign_planets[sign] = []
+                    sign_planets[sign].append(planet_name)
+            
+            for sign, planets_list in sign_planets.items():
+                if len(planets_list) >= 3:
+                    patterns.append({
+                        "type": "stellium",
+                        "sign": sign,
+                        "planets": planets_list,
+                        "interpretation": self._get_stellium_interpretation(sign, planets_list)
+                    })
+            
+            # Find T-squares (two planets in opposition, both square to a third)
+            for aspect in aspects:
+                if str(aspect["type"]) == "180":  # Opposition
+                    planet1 = aspect["planet1"]
+                    planet2 = aspect["planet2"]
+                    
+                    # Look for squares to both planets
+                    square_planets = set()
+                    for other_aspect in aspects:
+                        if str(other_aspect["type"]) == "90":  # Square
+                            if other_aspect["planet1"] in [planet1, planet2]:
+                                square_planets.add(other_aspect["planet2"])
+                            elif other_aspect["planet2"] in [planet1, planet2]:
+                                square_planets.add(other_aspect["planet1"])
+                    
+                    for apex_planet in square_planets:
+                        patterns.append({
+                            "type": "t_square",
+                            "planets": [planet1, planet2, apex_planet],
+                            "apex": apex_planet,
+                            "interpretation": self._get_t_square_interpretation([planet1, planet2, apex_planet])
+                        })
+            
+            # Find Grand Trines (three planets in trine to each other)
+            trine_pairs = {}
+            for aspect in aspects:
+                if str(aspect["type"]) == "120":  # Trine
+                    planet1 = aspect["planet1"]
+                    planet2 = aspect["planet2"]
+                    if planet1 not in trine_pairs:
+                        trine_pairs[planet1] = set()
+                    if planet2 not in trine_pairs:
+                        trine_pairs[planet2] = set()
+                    trine_pairs[planet1].add(planet2)
+                    trine_pairs[planet2].add(planet1)
+            
+            for planet1, trines in trine_pairs.items():
+                for planet2 in trines:
+                    for planet3 in trine_pairs.get(planet2, set()):
+                        if planet3 in trine_pairs.get(planet1, set()):
+                            planets_list = sorted([planet1, planet2, planet3])
+                            pattern_key = "-".join(planets_list)
+                            if not any(p["type"] == "grand_trine" and "-".join(sorted(p["planets"])) == pattern_key for p in patterns):
+                                patterns.append({
+                                    "type": "grand_trine",
+                                    "planets": planets_list,
+                                    "element": self._get_trine_element(planets_list),
+                                    "interpretation": self._get_grand_trine_interpretation(planets_list)
+                                })
+            
+            # Find Yods (two planets in sextile, both quincunx to a third)
+            for aspect in aspects:
+                if str(aspect["type"]) == "60":  # Sextile
+                    planet1 = aspect["planet1"]
+                    planet2 = aspect["planet2"]
+                    
+                    # Look for quincunxes to both planets
+                    quincunx_planets = set()
+                    for other_aspect in aspects:
+                        if str(other_aspect["type"]) == "150":  # Quincunx
+                            if other_aspect["planet1"] in [planet1, planet2]:
+                                quincunx_planets.add(other_aspect["planet2"])
+                            elif other_aspect["planet2"] in [planet1, planet2]:
+                                quincunx_planets.add(other_aspect["planet1"])
+                    
+                    for apex_planet in quincunx_planets:
+                        patterns.append({
+                            "type": "yod",
+                            "planets": [planet1, planet2, apex_planet],
+                            "apex": apex_planet,
+                            "interpretation": self._get_yod_interpretation([planet1, planet2, apex_planet])
+                        })
+        
+        except Exception as e:
+            self.logger.error(f"Error analyzing patterns: {str(e)}")
+        
+        return patterns
