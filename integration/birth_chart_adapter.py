@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from typing import Dict, Any, Optional
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
@@ -22,6 +22,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Create API router
+api_router = APIRouter(prefix="/api")
 
 # Configuration
 BIRTH_CHART_API_URL = os.environ.get("BIRTH_CHART_API_URL", "http://localhost:8001/api/v1/birthchart")
@@ -123,7 +126,7 @@ def get_coordinates_from_zip(zip_code: str) -> Dict[str, Any]:
     return DEFAULT_COORDINATES
 
 # Main birth chart endpoint
-@app.post("/birth-chart")
+@api_router.post("/birth-chart")
 async def calculate_birth_chart(request: FrontendBirthChartRequest = Body(...)):
     """Calculate a birth chart based on frontend request format."""
     try:
@@ -166,7 +169,7 @@ async def calculate_birth_chart(request: FrontendBirthChartRequest = Body(...)):
             backend_data = birth_chart_data.get("data", {})
             
             # Transform to frontend format
-            planets_data = backend_data.get("planets", {})
+            planets_data = {k.lower(): v for k, v in backend_data.get("planets", {}).items()}
             houses_data = backend_data.get("houses", {})
             angles_data = backend_data.get("angles", {})
             
@@ -278,6 +281,9 @@ async def root():
         "version": "1.0.0",
         "status": "operational"
     }
+
+# Include API router
+app.include_router(api_router)
 
 # If run directly, start the server
 if __name__ == "__main__":
