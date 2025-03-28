@@ -3,140 +3,195 @@
     "name": "Sun",
     "symbol": "☉",
     "ruling_planet": "sun",
-    "keywords": ["identity", "vitality", "ego", "purpose"],
+    "keywords": ["essence", "vitality", "purpose", "consciousness", "individuality"],
     "qualities": {
-      "general": "leadership and vitality",
-      "career": "ambition and authority",
-      "relationships": "romance and partnership",
-      "health": "vitality and energy",
-      "spirituality": "consciousness and purpose",
-      "personal_growth": "identity and self-expression"
-    }
+      "general": "core identity and life force",
+      "career": "ambition, authority, and recognition",
+      "relationships": "creative self-expression and authentic connection",
+      "health": "vitality, heart, and immune system",
+      "spirituality": "divine consciousness and soul purpose",
+      "personal_growth": "authentic self-expression and personal radiance"
+    },
+    "description": "The Sun represents your essential self and core identity—the conscious ego that actively engages with the world. It governs your vitality, willpower, and sense of purpose, illuminating the unique path you're meant to follow. As the central luminary of our solar system, the Sun symbolizes both your highest aspirations and the integrating force that unifies all aspects of your personality."
   },
   "moon": {
     "name": "Moon",
     "symbol": "☽",
     "ruling_planet": "moon",
-    "keywords": ["emotions", "instincts", "habits", "security"],
+    "keywords": ["emotions", "instincts", "needs", "nurturing", "unconscious patterns"],
     "qualities": {
-      "general": "emotions and instincts",
-      "career": "emotional satisfaction",
-      "relationships": "emotional needs",
-      "health": "emotional well-being",
-      "spirituality": "intuition and receptivity",
-      "personal_growth": "emotional awareness"
-    }
+      "general": "emotional nature and subconscious mind",
+      "career": "emotional fulfillment and nurturing capacities",
+      "relationships": "emotional needs and domestic harmony",
+      "health": "emotional well-being and hormonal balance",
+      "spirituality": "intuitive wisdom and soul memory",
+      "personal_growth": "emotional intelligence and inner security"
+    },
+    "description": "The Moon reflects your inner emotional landscape—the subconscious patterns, feelings, and instinctive responses that lie beneath conscious awareness. It represents your most fundamental needs for security, belonging, and nurturing. Just as the Moon waxes and wanes, your emotional nature ebbs and flows in rhythmic cycles, connecting you to ancestral patterns and the collective unconscious."
   },
   "mercury": {
     "name": "Mercury",
     "symbol": "☿",
     "ruling_planet": "mercury",
-    "keywords": ["communication", "thinking", "learning", "information"],
+    "keywords": ["communication", "perception", "learning", "adaptability", "analysis"],
     "qualities": {
-      "general": "communication and intellect",
-      "career": "skills and analysis",
-      "relationships": "mental connection",
-      "health": "nervous system",
-      "spirituality": "mental understanding",
-      "personal_growth": "learning and adaptation"
-    }
+      "general": "mental processes and communication style",
+      "career": "analytical skills, learning capacity, and verbal abilities",
+      "relationships": "intellectual connection and communication patterns",
+      "health": "nervous system, respiratory function, and coordination",
+      "spirituality": "intellectual understanding of spiritual concepts",
+      "personal_growth": "mental versatility and information processing"
+    },
+    "description": "Mercury governs your mind and all forms of communication—how you perceive, process, and transmit information. As the messenger of the gods, Mercury represents your verbal abilities, writing skills, and learning style. It illuminates your thought patterns, problem-solving approach, and capacity for making connections between ideas, revealing how you navigate the intellectual realm."
   },
   "venus": {
     "name": "Venus",
     "symbol": "♀",
     "ruling_planet": "venus",
-    "keywords": ["love", "beauty", "harmony", "values"],
+    "keywords": ["love", "beauty", "harmony", "values", "pleasure", "attraction"],
     "qualities": {
-      "general": "love and beauty",
-      "career": "artistic expression",
-      "relationships": "romance and attraction",
-      "health": "comfort and pleasure",
-      "spirituality": "divine love",
-      "personal_growth": "self-worth"
-    }
+      "general": "affections, aesthetic sensibilities, and values",
+      "career": "artistic expression, social skills, and financial acumen",
+      "relationships": "romantic attraction and capacity for intimacy",
+      "health": "sensory pleasure, skin, and hormonal balance",
+      "spirituality": "divine love, beauty, and harmonious connection",
+      "personal_growth": "self-worth and capacity for joy"
+    },
+    "description": "Venus embodies your capacity for love, beauty, and pleasure—the qualities that draw you toward harmonious relationships and aesthetic experiences. It reveals what you value and how you express affection. Venus governs not only romantic attachments but also your relationship with beauty, art, and sensory pleasures, reflecting your ability to receive and appreciate the richness of life."
   },
   "mars": {
     "name": "Mars",
     "symbol": "♂",
     "ruling_planet": "mars",
-    "keywords": ["action", "energy", "drive", "passion"],
+    "keywords": ["action", "desire", "courage", "assertion", "physical energy", "initiative"],
     "qualities": {
-      "general": "action and energy",
-      "career": "initiative and drive",
-      "relationships": "passion and desire",
-      "health": "physical energy",
-      "spirituality": "spiritual warrior",
-      "personal_growth": "self-assertion"
-    }
+      "general": "drive, assertiveness, and physical energy",
+      "career": "ambition, competitive spirit, and leadership",
+      "relationships": "passion, desire, and conflict resolution",
+      "health": "muscular strength, adrenaline, and physical vitality",
+      "spirituality": "spiritual warrior archetype and transformative will",
+      "personal_growth": "courage, healthy boundaries, and self-assertion"
+    },
+    "description": "Mars represents your personal power and how you assert yourself to achieve your desires. As the cosmic warrior, it governs your courage, physical energy, and sexual drive. Mars shows how you take initiative, face challenges, and handle conflict, revealing the raw vitality and primal force that propels you into action and helps you overcome obstacles."
   },
   "jupiter": {
     "name": "Jupiter",
     "symbol": "♃",
     "ruling_planet": "jupiter",
-    "keywords": ["expansion", "growth", "wisdom", "abundance"],
+    "keywords": ["expansion", "wisdom", "abundance", "faith", "optimism", "meaning"],
     "qualities": {
-      "general": "expansion and wisdom",
-      "career": "opportunities and growth",
-      "relationships": "generosity and trust",
-      "health": "growth and healing",
-      "spirituality": "faith and wisdom",
-      "personal_growth": "self-improvement"
-    }
+      "general": "growth, wisdom, and philosophical outlook",
+      "career": "opportunities, recognition, and professional expansion",
+      "relationships": "generosity, trust, and shared exploration",
+      "health": "liver function, growth processes, and overall well-being",
+      "spirituality": "faith, meaning, and higher understanding",
+      "personal_growth": "vision, wisdom, and expanding consciousness"
+    },
+    "description": "Jupiter embodies the principle of expansion—your quest for meaning, growth, and abundance in life. Known as the Greater Benefic, Jupiter reveals where you experience good fortune, opportunities, and the freedom to explore. It governs your philosophical outlook, faith, and capacity for optimism, showing how you connect to the larger purpose of your existence and expand beyond perceived limitations."
   },
   "saturn": {
     "name": "Saturn",
     "symbol": "♄",
     "ruling_planet": "saturn",
-    "keywords": ["structure", "discipline", "responsibility", "limitation"],
+    "keywords": ["structure", "responsibility", "mastery", "time", "limitation", "wisdom"],
     "qualities": {
-      "general": "structure and discipline",
-      "career": "achievement and authority",
-      "relationships": "commitment and duty",
-      "health": "bones and longevity",
-      "spirituality": "spiritual discipline",
-      "personal_growth": "self-mastery"
-    }
+      "general": "discipline, responsibility, and life lessons",
+      "career": "ambition, authority, and long-term achievement",
+      "relationships": "commitment, loyalty, and enduring bonds",
+      "health": "skeletal system, teeth, and chronic conditions",
+      "spirituality": "spiritual discipline and karmic understanding",
+      "personal_growth": "maturity, integrity, and earned wisdom"
+    },
+    "description": "Saturn represents the principle of structure, discipline, and mastery through experience. As the cosmic teacher, Saturn reveals where you face your greatest challenges and where you're called to develop patience, responsibility, and enduring achievement. It governs time, boundaries, and the process of maturation, showing how you build foundations that will stand the test of time."
   },
   "uranus": {
     "name": "Uranus",
     "symbol": "♅",
     "ruling_planet": "uranus",
-    "keywords": ["change", "innovation", "freedom", "originality"],
+    "keywords": ["liberation", "innovation", "disruption", "awakening", "originality", "revolution"],
     "qualities": {
-      "general": "innovation and freedom",
-      "career": "originality and technology",
-      "relationships": "independence and excitement",
-      "health": "nervous system and change",
-      "spirituality": "awakening and insight",
-      "personal_growth": "liberation"
-    }
+      "general": "inventiveness, freedom, and revolutionary spirit",
+      "career": "technological aptitude, innovation, and unconventional paths",
+      "relationships": "independence, individuality, and sudden changes",
+      "health": "nervous system, electrical impulses, and sudden ailments",
+      "spirituality": "intuitive flashes, awakening, and cosmic consciousness",
+      "personal_growth": "authentic individuality and liberation from conditioning"
+    },
+    "description": "Uranus embodies the principle of sudden awakening and liberation from outdated structures. As the cosmic revolutionary, it reveals where you experience flashes of genius, unconventional impulses, and the need for freedom. Uranus governs innovation, technology, and radical change, showing where you break from tradition to discover your unique authenticity and contribute revolutionary ideas."
   },
   "neptune": {
     "name": "Neptune",
     "symbol": "♆",
     "ruling_planet": "neptune",
-    "keywords": ["spirituality", "imagination", "inspiration", "illusion"],
+    "keywords": ["transcendence", "imagination", "compassion", "dissolution", "mysticism", "unity"],
     "qualities": {
-      "general": "spirituality and imagination",
-      "career": "inspiration and creativity",
-      "relationships": "idealism and compassion",
-      "health": "immune system and sensitivity",
-      "spirituality": "mystical connection",
-      "personal_growth": "transcendence"
-    }
+      "general": "spiritual sensitivity, imagination, and transcendence",
+      "career": "artistic inspiration, visionary capacity, and service",
+      "relationships": "empathic connection, idealism, and spiritual bonding",
+      "health": "immune system, subtle energies, and psychosomatic conditions",
+      "spirituality": "mystical experiences, divine love, and oneness",
+      "personal_growth": "compassion, creativity, and transcending ego boundaries"
+    },
+    "description": "Neptune represents the principle of transcendence—the dissolving of boundaries between self and universe. It governs your imagination, spiritual sensitivity, and capacity for compassion and selfless love. Neptune reveals where you experience mystical connection, artistic inspiration, and the yearning to merge with something greater than yourself, but also where you may face illusion, confusion, or escapist tendencies."
   },
   "pluto": {
     "name": "Pluto",
     "symbol": "♇",
     "ruling_planet": "pluto",
-    "keywords": ["transformation", "power", "regeneration", "intensity"],
+    "keywords": ["transformation", "power", "death and rebirth", "depth", "intensity", "unconscious forces"],
     "qualities": {
-      "general": "transformation and power",
-      "career": "influence and control",
-      "relationships": "depth and intensity",
-      "health": "regeneration and healing",
-      "spirituality": "soul evolution",
-      "personal_growth": "empowerment"
-    }
+      "general": "profound transformation, personal power, and psychological depth",
+      "career": "influence, strategic thinking, and regenerative capacity",
+      "relationships": "passionate intensity, power dynamics, and soul connections",
+      "health": "regenerative processes, sexual organs, and elimination systems",
+      "spirituality": "soul evolution, occult wisdom, and psychic abilities",
+      "personal_growth": "psychological integration and empowerment through surrender"
+    },
+    "description": "Pluto embodies the principle of profound transformation—the cycle of death, rebirth, and regeneration that leads to psychological evolution. It reveals where you experience the most intense compulsions, power struggles, and opportunities for complete metamorphosis. Pluto governs the shadow aspects of consciousness, showing where healing comes through confronting hidden truths and surrendering to forces beyond ego control."
+  },
+  "chiron": {
+    "name": "Chiron",
+    "symbol": "⚷",
+    "ruling_planet": "chiron",
+    "keywords": ["wounded healer", "bridge", "mentorship", "integration", "holistic healing"],
+    "qualities": {
+      "general": "core wounds, healing gifts, and integration of polarities",
+      "career": "teaching, mentoring, and healing professions",
+      "relationships": "vulnerability, empathy, and helping others heal",
+      "health": "chronic conditions, alternative healing, and mind-body connection",
+      "spirituality": "shamanic journeying and wounded healer archetype",
+      "personal_growth": "transforming personal wounds into wisdom"
+    },
+    "description": "Chiron, the 'Wounded Healer,' represents your deepest wound and greatest healing gift. This celestial body reveals where you experience a sense of fundamental brokenness that cannot be fully healed, yet paradoxically becomes the source of your greatest wisdom and capacity to heal others. Chiron bridges the personal and transpersonal realms, showing how your vulnerability becomes your strength."
+  },
+  "north_node": {
+    "name": "North Node",
+    "symbol": "☊",
+    "ruling_planet": null,
+    "keywords": ["destiny", "growth direction", "soul evolution", "future path", "karmic purpose"],
+    "qualities": {
+      "general": "evolutionary path and destiny line",
+      "career": "soul-aligned professional growth",
+      "relationships": "evolutionary relationships and future patterns",
+      "health": "healing journey and evolutionary well-being",
+      "spirituality": "spiritual evolution and higher purpose",
+      "personal_growth": "stepping into authentic potential"
+    },
+    "description": "The North Node represents your soul's evolutionary path in this lifetime—the qualities, experiences, and skills you're meant to develop for your highest growth. Often feeling unfamiliar yet deeply fulfilling, the North Node points to your destiny and the future-oriented aspects of your journey. It reveals the path of greatest growth and soul evolution, often requiring courage to move beyond comfortable patterns."
+  },
+  "south_node": {
+    "name": "South Node",
+    "symbol": "☋",
+    "ruling_planet": null,
+    "keywords": ["past patterns", "karmic inheritance", "innate gifts", "comfort zone", "release"],
+    "qualities": {
+      "general": "past life patterns and karmic inheritance",
+      "career": "innate skills and outgrown professional patterns",
+      "relationships": "karmic relationships and familiar patterns",
+      "health": "karmic health patterns and constitutional tendencies",
+      "spirituality": "spiritual inheritance and past wisdom",
+      "personal_growth": "releasing what no longer serves growth"
+    },
+    "description": "The South Node represents your karmic inheritance—the qualities, patterns, and skills you bring from past lives or early conditioning. While representing your comfort zone and innate gifts, it also shows where you may become stagnant or overly dependent on familiar patterns. The South Node reveals what must be integrated and sometimes released to fulfill your North Node destiny."
   }
 } 

@@ -13,7 +13,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Nav } from "@/components/layout/nav"
 import { PlanetCard } from "@/components/planet-card"
 import { HouseCard } from "@/components/house-card"
-import { planetIcons, signIcons } from "@/components/ui/planet-icons"
+import { planetIcons, signIcons, planetDescriptions } from "@/components/ui/planet-icons"
+import Image from "next/image"
 
 // Component for interpretation item in personality profile view
 const InterpretationItem = ({ title, description }: { title: string; description: string }) => {
@@ -25,6 +26,18 @@ const InterpretationItem = ({ title, description }: { title: string; description
       </AccordionContent>
     </AccordionItem>
   );
+};
+
+// Add this helper function for consistent planet data access
+const getPlanetData = (planets: any, planetName: string) => {
+  // Try capitalized first (Mercury, Venus, etc.)
+  const capitalized = planetName.charAt(0).toUpperCase() + planetName.slice(1).toLowerCase();
+  
+  // Then try all lowercase (mercury, venus, etc.)
+  const lowercase = planetName.toLowerCase();
+  
+  // Return the first one that exists
+  return planets[capitalized] || planets[lowercase];
 };
 
 export default function Dashboard() {
@@ -123,9 +136,18 @@ export default function Dashboard() {
   const elementBalance = interpretation.element_balance;
   const modalityBalance = interpretation.modality_balance;
 
+  // Add debugging
+  console.log("=== Retrograde Debug ===");
+  console.log("Mercury data:", planets["Mercury"] || planets["mercury"]);
+  console.log("Venus data:", planets["Venus"] || planets["venus"]);
+  console.log("Saturn data:", planets["Saturn"] || planets["saturn"]);
+  
   // Helper to check if planet is retrograde
   const isRetrograde = (planet: string) => {
-    return planets[planet]?.movement?.toLowerCase() === "retrograde";
+    // Handle both capitalized and lowercase planet names
+    const planetData = getPlanetData(planets, planet);
+    console.log(`Checking retrograde for ${planet}:`, planetData?.retrograde);
+    return planetData?.retrograde || false;
   };
   
   // Make sure we use angle data for ascendant
@@ -168,19 +190,19 @@ export default function Dashboard() {
                     <PlanetCard
                       key="sun"
                       planet="sun"
-                      sign={planets.sun?.sign}
-                      house={planets.sun?.house}
-                      degree={planets.sun?.degree}
-                      description={planets.sun?.description}
+                      sign={getPlanetData(planets, "sun")?.sign}
+                      house={getPlanetData(planets, "sun")?.house}
+                      degree={getPlanetData(planets, "sun")?.degree}
+                      description={getPlanetData(planets, "sun")?.description}
                       retrograde={isRetrograde("sun")}
                     />
                     <PlanetCard
                       key="moon"
                       planet="moon"
-                      sign={planets.moon?.sign}
-                      house={planets.moon?.house}
-                      degree={planets.moon?.degree}
-                      description={planets.moon?.description}
+                      sign={getPlanetData(planets, "moon")?.sign}
+                      house={getPlanetData(planets, "moon")?.house}
+                      degree={getPlanetData(planets, "moon")?.degree}
+                      description={getPlanetData(planets, "moon")?.description}
                       retrograde={isRetrograde("moon")}
                     />
                     <PlanetCard
@@ -200,17 +222,20 @@ export default function Dashboard() {
                 <section>
                   <h3 className="text-lg font-semibold mb-4">Planets</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].map((planet) => (
-                      <PlanetCard
-                        key={planet}
-                        planet={planet}
-                        sign={planets[planet]?.sign}
-                        house={planets[planet]?.house}
-                        degree={planets[planet]?.degree}
-                        description={planets[planet]?.description}
-                        retrograde={isRetrograde(planet)}
-                      />
-                    ))}
+                    {["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].map((planet) => {
+                      const planetData = getPlanetData(planets, planet);
+                      return (
+                        <PlanetCard
+                          key={planet}
+                          planet={planet}
+                          sign={planetData?.sign}
+                          house={planetData?.house?.toString()}
+                          degree={planetData?.degree || 0}
+                          description={planetData?.description}
+                          retrograde={isRetrograde(planet)}
+                        />
+                      );
+                    })}
                   </div>
                 </section>
 
@@ -236,7 +261,7 @@ export default function Dashboard() {
                   <h3 className="text-lg font-semibold mb-4">Other Placements</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {["north_node", "south_node", "chiron"].map((placement) => {
-                      const placementData = planets[placement];
+                      const placementData = getPlanetData(planets, placement);
                       // Only show the card if we have some valid data for this placement
                       if (!placementData || !placementData.sign) {
                         return null;
@@ -248,7 +273,7 @@ export default function Dashboard() {
                           planet={placement}
                           sign={placementData.sign}
                           house={placementData.house?.toString()}
-                          degree={placementData.degrees || 0}
+                          degree={placementData.degree || 0}
                           description={placementData.description}
                           retrograde={isRetrograde(placement)}
                         />

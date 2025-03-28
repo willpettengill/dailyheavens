@@ -54,6 +54,9 @@ class FrontendBirthChartRequest(BaseModel):
     birth_time: str = Field(..., description="Birth time in HH:MM format (24-hour)")
     birth_place_zip: str = Field(..., description="5-digit US ZIP code")
     timezone: Optional[int] = Field(None, description="Timezone offset in hours")
+    interpretation_level: Optional[str] = Field("basic", description="Interpretation level (basic or detailed)")
+    interpretation_area: Optional[str] = Field("general", description="Interpretation area (general, career, etc.)")
+    include_interpretation: Optional[bool] = Field(False, description="Whether to include interpretation data")
 
 # Parse date and time from frontend format
 def parse_datetime(date_str: str, time_str: str, tz_offset: Optional[int] = None) -> datetime:
@@ -174,7 +177,7 @@ async def calculate_birth_chart(request: FrontendBirthChartRequest = Body(...)):
             angles_data = backend_data.get("angles", {})
             
             # Define expected planets and houses
-            expected_planets = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
+            expected_planets = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "north_node", "south_node", "chiron"]
             expected_houses = [f"house{i}" for i in range(1, 13)]
             expected_angles = ["ascendant", "midheaven", "descendant", "imum_coeli"]
             
@@ -264,6 +267,46 @@ async def calculate_birth_chart(request: FrontendBirthChartRequest = Body(...)):
                 "angles": frontend_angles,
                 "aspects": aspects
             }
+            
+            # Add interpretation if requested
+            if request.include_interpretation:
+                try:
+                    # Prepare interpretation request
+                    interpretation_request = {
+                        "birth_chart": backend_data,
+                        "level": "detailed",  # Always request detailed interpretations
+                        "area": "general"     # Always use general area which includes everything
+                    }
+                    
+                    print(f"Sending interpretation request: {interpretation_request['level']}, {interpretation_request['area']}")
+                    
+                    # Call interpretation API
+                    interp_response = await client.post(INTERPRETATION_API_URL, json=interpretation_request, timeout=30.0)
+                    
+                    print(f"Interpretation API response status: {interp_response.status_code}")
+                    
+                    if interp_response.status_code == 200:
+                        interp_data = interp_response.json()
+                        print(f"Interpretation API response: {interp_data.get('status')}")
+                        if interp_data.get("status") == "success":
+                            interpretations = interp_data.get("data", {}).get("interpretations", {})
+                            
+                            # Ensure the "summary" field is properly passed to frontend
+                            if "summary" in interpretations:
+                                print(f"Found summary field in interpretation. Length: {len(interpretations['summary'])}")
+                            else:
+                                print("No summary field found in interpretation response")
+                                
+                            frontend_response["interpretation"] = interpretations
+                        else:
+                            frontend_response["interpretation_error"] = interp_data.get("message", "Unknown error")
+                    else:
+                        frontend_response["interpretation_error"] = f"Interpretation API error: {interp_response.status_code} - {interp_response.text}"
+                except Exception as e:
+                    # Log error but don't fail the whole request
+                    error_msg = f"Error fetching interpretation: {str(e)}"
+                    print(error_msg)
+                    frontend_response["interpretation_error"] = error_msg
             
             return frontend_response
             

@@ -1,33 +1,38 @@
-import Link from "next/link"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from "next/link"
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "Birth Chart", href: "/birth-chart" },
-  { name: "Compatibility", href: "/compatibility" },
-  { name: "Daily Horoscope", href: "/horoscope-today" },
-  { name: "Personality Profile", href: "/personality-profile" },
-]
-
-export function MainNav() {
+export function Nav({ email, activeTab, onTabChange }: { 
+  email: string
+  activeTab: string
+  onTabChange: (value: string) => void 
+}) {
   return (
-    <nav className="border-b border-white/10 bg-background">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="font-medium">
-            <span className="text-neon-teal">Daily</span>
-            <span className="text-neon-pink">Heavens</span>
-          </span>
-        </Link>
+    <header className="border-b">
+      <div className="container flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="font-semibold">
+            Daily Heavens
+          </Link>
+          <Tabs value={activeTab} onValueChange={onTabChange} className="hidden md:block">
+            <TabsList>
+              <TabsTrigger value="birth-chart">Birth Chart</TabsTrigger>
+              <TabsTrigger value="interpretation">Interpretation</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" className="text-white hover:text-neon-teal">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-            </svg>
-            Login
-          </Button>
+          <Link href="/profile">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>{email.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span className="hidden md:inline-block text-sm">{email}</span>
+            </div>
+          </Link>
         </div>
       </div>
-    </nav>
+    </header>
   )
 } 

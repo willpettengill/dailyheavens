@@ -176,7 +176,7 @@ class InterpretationService:
                 self.logger.debug(f"Available signs in descriptions: {list(self.structured_data['descriptions'].keys())}")
             else:
                 self.logger.warning("Descriptions data not loaded!")
-                
+            
         except Exception as e:
             self.logger.error(f"Error loading structured data: {str(e)}", exc_info=True)
 
@@ -222,7 +222,7 @@ class InterpretationService:
             self.logger.debug("Successfully initialized caches")
         except Exception as e:
             self.logger.error(f"Error initializing caches: {str(e)}", exc_info=True)
-
+    
     def _get_element_modality_qualities_simple(self, element: str, modality: str) -> List[str]:
         """Get qualities for element-modality combination without using enums."""
         qualities = []
@@ -948,8 +948,8 @@ class InterpretationService:
                             "planets": planets,
                             "interpretation": f"{base_interp}. {sign_influence}{detailed}{planets_interp}"
                         })
-            
-            return interpretations
+                        
+        return interpretations
         except Exception as e:
             return []
 
@@ -1066,15 +1066,15 @@ class InterpretationService:
                                 # Create the T-square
                                 planets = [planet1, planet2, apex_planet]
                                 
-                                # Create a unique key for this combination
-                                key = "-".join(sorted(planets))
-                                if key not in seen_combinations:
-                                    seen_combinations.add(key)
-                                    t_squares.append({
+                                    # Create a unique key for this combination
+                                    key = "-".join(sorted(planets))
+                                    if key not in seen_combinations:
+                                        seen_combinations.add(key)
+                                        t_squares.append({
                                         "planets": planets,
                                         "apex": apex_planet
-                                    })
-                                    
+                                        })
+        
         return t_squares
 
     def _find_grand_cross(self, aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -1651,7 +1651,7 @@ class InterpretationService:
         """Analyze important planetary combinations in the birth chart."""
         combinations = {}
         try:
-            planets = birth_chart.get("planets", {})
+        planets = birth_chart.get("planets", {})
             
             # Analyze Sun-Moon combination
             if "sun" in planets and "moon" in planets:
@@ -1717,8 +1717,8 @@ class InterpretationService:
                         "type": combo_key,
                         "interpretation": self.structured_data["interpretation_combinations"]["elemental_combinations"][combo_key]["description"]
                     }
-            
-            return combinations
+        
+        return combinations
         except Exception as e:
             return {}
 
@@ -1908,7 +1908,7 @@ class InterpretationService:
             modality_influence = f" {modality_desc}"
         
         return f"Stellium in {sign} with {planet_list}. This concentration of energy in {sign} indicates a strong focus on {', '.join(qualities)}. {focus}{element_influence}{modality_influence}"
-
+    
     def _get_t_square_interpretation(self, planets: List[str]) -> str:
         """Get interpretation for a T-square."""
         planet_list = ", ".join(planets)
@@ -2047,7 +2047,7 @@ class InterpretationService:
             
             # Join all parts into a unified interpretation
             return " ".join(parts)
-            
+
         except Exception as e:
             self.logger.error(f"Error generating aspect interpretation: {str(e)}")
             return f"Aspect between {planet1} and {planet2}."
@@ -2262,10 +2262,10 @@ class InterpretationService:
             
             # Format the result
             if context_parts:
-                return " ".join(context_parts)
+            return " ".join(context_parts)
             else:
                 return ""
-                
+            
         except Exception as e:
             self.logger.error(f"Error getting pattern context: {str(e)}")
             return ""
@@ -2320,14 +2320,14 @@ class InterpretationService:
                     sign_data = self.structured_data.get("signs", {}).get(sign, {})
                     element = sign_data.get("element")
                     if element:
-                        elements[element] += 1
-                        planets_by_element[element].append(planet)
+                    elements[element] += 1
+                    planets_by_element[element].append(planet)
             
             # Calculate percentages
             total_planets = sum(elements.values())
             percentages = {}
             for element, count in elements.items():
-                if total_planets > 0:
+            if total_planets > 0:
                     percentages[element] = (count / total_planets) * 100
                 else:
                     percentages[element] = 0
@@ -2351,7 +2351,7 @@ class InterpretationService:
             }
         except Exception as e:
             return {}
-
+    
     def _get_simple_element_interpretation(
         self, 
         elements: Dict[str, int],
@@ -2368,7 +2368,7 @@ class InterpretationService:
             parts = ["Elemental Balance:"]
             
             # Add dominant elements
-            if dominant_elements:
+        if dominant_elements:
                 for element in dominant_elements:
                     element_data = pattern_data.get(f"{element}_dominant", {})
                     description = element_data.get("description", "")
@@ -2381,7 +2381,7 @@ class InterpretationService:
                     parts.append(f"Dominant {element.title()} ({percentage}) with {planets}. {description} Strengths: {strengths}. Challenges: {challenges}.")
             
             # Add lacking elements
-            if lacking_elements:
+        if lacking_elements:
                 for element in lacking_elements:
                     element_data = pattern_data.get(f"{element}_dominant", {})
                     strengths = ", ".join(element_data.get("strengths", []))
@@ -2410,14 +2410,14 @@ class InterpretationService:
                     sign_data = self.structured_data.get("signs", {}).get(sign, {})
                     modality = sign_data.get("modality")
                     if modality:
-                        modalities[modality] += 1
-                        planets_by_modality[modality].append(planet)
+                    modalities[modality] += 1
+                    planets_by_modality[modality].append(planet)
             
             # Calculate percentages
             total_planets = sum(modalities.values())
             percentages = {}
             for modality, count in modalities.items():
-                if total_planets > 0:
+            if total_planets > 0:
                     percentages[modality] = (count / total_planets) * 100
                 else:
                     percentages[modality] = 0
@@ -2441,7 +2441,7 @@ class InterpretationService:
             }
         except Exception as e:
             return {}
-
+    
     def _get_simple_modality_interpretation(
         self, 
         modalities: Dict[str, int],
@@ -2458,7 +2458,7 @@ class InterpretationService:
             parts = ["Modality Balance:"]
             
             # Add dominant modalities
-            if dominant_modalities:
+        if dominant_modalities:
                 for modality in dominant_modalities:
                     modality_data = pattern_data.get(f"{modality}_dominant", {})
                     description = modality_data.get("description", "")
@@ -2471,7 +2471,7 @@ class InterpretationService:
                     parts.append(f"Dominant {modality.title()} ({percentage}) with {planets}. {description} Strengths: {strengths}. Challenges: {challenges}.")
             
             # Add lacking modalities
-            if lacking_modalities:
+        if lacking_modalities:
                 for modality in lacking_modalities:
                     modality_data = pattern_data.get(f"{modality}_dominant", {})
                     strengths = ", ".join(modality_data.get("strengths", []))

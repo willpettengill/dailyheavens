@@ -19,6 +19,9 @@ export function PlanetCard({ planet, sign, house, degree, description, retrograd
   const signLower = sign?.toLowerCase();
   const signIcon = signLower && signIcons[signLower] ? signIcons[signLower] : '';
 
+  // Debug
+  console.log(`PlanetCard ${formattedPlanet}: retrograde=${retrograde}`);
+
   return (
     <Card>
       <CardHeader className="pb-2">
