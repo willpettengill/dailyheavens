@@ -28,6 +28,15 @@ const InterpretationItem = ({ title, description }: { title: string; description
   );
 };
 
+// Add this interface for aspects
+interface Aspect {
+  planet1: string;
+  planet2: string;
+  aspect: string;
+  orb?: number;
+  nature?: string;
+}
+
 // Add this helper function for consistent planet data access
 const getPlanetData = (planets: any, planetName: string) => {
   // Try capitalized first (Mercury, Venus, etc.)
@@ -38,6 +47,13 @@ const getPlanetData = (planets: any, planetName: string) => {
   
   // Return the first one that exists
   return planets[capitalized] || planets[lowercase];
+};
+
+// Add this helper function to handle both degree formats
+const getDegree = (data: any): number => {
+  if (!data) return 0;
+  return typeof data.degrees !== 'undefined' ? data.degrees : 
+         typeof data.degree !== 'undefined' ? data.degree : 0;
 };
 
 export default function Dashboard() {
@@ -127,20 +143,30 @@ export default function Dashboard() {
 
   // Extract data
   const { user, birth_chart, interpretation } = chartData;
-  const planets = birth_chart.planets;
-  const houses = birth_chart.houses;
-  const angles = birth_chart.angles;
-  const interpretations = interpretation.planets;
-  const aspects = interpretation.aspects || [];
-  const patterns = interpretation.patterns || [];
-  const elementBalance = interpretation.element_balance;
-  const modalityBalance = interpretation.modality_balance;
+  const planets = birth_chart?.planets || {};
+  const houses = birth_chart?.houses || {};
+  const angles = birth_chart?.angles || {};
+  const interpretations = interpretation?.planets || [];
+  const aspects = interpretation?.aspects || [];
+  const patterns = interpretation?.patterns || [];
+  const elementBalance = interpretation?.element_balance;
+  const modalityBalance = interpretation?.modality_balance;
 
   // Add debugging
   console.log("=== Retrograde Debug ===");
   console.log("Mercury data:", planets["Mercury"] || planets["mercury"]);
   console.log("Venus data:", planets["Venus"] || planets["venus"]);
   console.log("Saturn data:", planets["Saturn"] || planets["saturn"]);
+  
+  // Add debug for nodes and angles
+  console.log("=== Nodes Debug ===");
+  console.log("North Node data:", planets["North Node"] || planets["north_node"]);
+  console.log("South Node data:", planets["South Node"] || planets["south_node"]);
+  
+  console.log("=== Angles Debug ===");
+  console.log("All angles:", angles);
+  console.log("Ascendant data:", angles["ascendant"]);
+  console.log("Midheaven data:", angles["midheaven"]);
   
   // Helper to check if planet is retrograde
   const isRetrograde = (planet: string) => {
@@ -157,11 +183,11 @@ export default function Dashboard() {
       return {
         sign: angles.ascendant.sign,
         house: "1", // Ascendant is always at the start of house 1
-        degree: angles.ascendant.degrees
+        degree: angles.ascendant.degrees || 0
       };
     }
     // Otherwise fall back to planets.ascendant if it exists
-    return planets.ascendant || { sign: "Unknown", house: "1", degree: 0 };
+    return planets?.ascendant || { sign: "Unknown", house: "1", degree: 0 };
   };
   
   const ascendantData = getAscendantData();
@@ -192,27 +218,30 @@ export default function Dashboard() {
                       planet="sun"
                       sign={getPlanetData(planets, "sun")?.sign}
                       house={getPlanetData(planets, "sun")?.house}
-                      degree={getPlanetData(planets, "sun")?.degree}
+                      degree={getDegree(getPlanetData(planets, "sun"))}
                       description={getPlanetData(planets, "sun")?.description}
                       retrograde={isRetrograde("sun")}
+                      movement={getPlanetData(planets, "sun")?.movement}
                     />
                     <PlanetCard
                       key="moon"
                       planet="moon"
                       sign={getPlanetData(planets, "moon")?.sign}
                       house={getPlanetData(planets, "moon")?.house}
-                      degree={getPlanetData(planets, "moon")?.degree}
+                      degree={getDegree(getPlanetData(planets, "moon"))}
                       description={getPlanetData(planets, "moon")?.description}
                       retrograde={isRetrograde("moon")}
+                      movement={getPlanetData(planets, "moon")?.movement}
                     />
                     <PlanetCard
                       key="ascendant"
                       planet="ascendant"
                       sign={ascendantData.sign}
                       house={ascendantData.house}
-                      degree={ascendantData.degree}
+                      degree={getDegree(ascendantData)}
                       description="Your rising sign - how others see you"
                       retrograde={false}
+                      movement="Direct"
                     />
                   </div>
                 </section>
@@ -230,9 +259,10 @@ export default function Dashboard() {
                           planet={planet}
                           sign={planetData?.sign}
                           house={planetData?.house?.toString()}
-                          degree={planetData?.degree || 0}
+                          degree={getDegree(planetData)}
                           description={planetData?.description}
                           retrograde={isRetrograde(planet)}
+                          movement={planetData?.movement}
                         />
                       );
                     })}
@@ -262,8 +292,12 @@ export default function Dashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {["north_node", "south_node", "chiron"].map((placement) => {
                       const placementData = getPlanetData(planets, placement);
+                      // Debug log to see what data we have
+                      console.log(`${placement} placement data:`, placementData);
+                      
                       // Only show the card if we have some valid data for this placement
-                      if (!placementData || !placementData.sign) {
+                      if (!placementData || !placementData.sign || placementData.sign === "Unknown") {
+                        console.log(`Missing or invalid data for ${placement}:`, placementData);
                         return null;
                       }
                       
@@ -273,10 +307,123 @@ export default function Dashboard() {
                           planet={placement}
                           sign={placementData.sign}
                           house={placementData.house?.toString()}
-                          degree={placementData.degree || 0}
+                          degree={getDegree(placementData)}
                           description={placementData.description}
                           retrograde={isRetrograde(placement)}
+                          movement={placementData.movement}
                         />
+                      );
+                    })}
+                  </div>
+                </section>
+                
+                <Separator />
+                
+                <section>
+                  <h3 className="text-lg font-semibold mb-4">Angles</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {["ascendant", "midheaven", "descendant", "imum_coeli"].map((angle) => {
+                      const angleData = angles[angle] || {};
+                      console.log(`Angle ${angle} data:`, angleData);
+                      
+                      // Skip if we don't have valid data
+                      if (!angleData.sign || angleData.sign === "Unknown") {
+                        console.log(`Missing or invalid data for angle ${angle}:`, angleData);
+                        return null;
+                      }
+                      
+                      // Descriptive text for each angle
+                      const angleDescriptions = {
+                        ascendant: "Rising sign - Your outward personality and appearance",
+                        midheaven: "Career and public reputation - Your life path",
+                        descendant: "Relationship sign - How you relate to others",
+                        imum_coeli: "Inner self and home - Your foundations"
+                      };
+                      
+                      return (
+                        <PlanetCard
+                          key={angle}
+                          planet={angle}
+                          sign={angleData.sign}
+                          house={angle === "ascendant" ? "1" : angle === "midheaven" ? "10" : 
+                                 angle === "descendant" ? "7" : angle === "imum_coeli" ? "4" : ""}
+                          degree={getDegree(angleData)}
+                          description={angleDescriptions[angle as keyof typeof angleDescriptions]}
+                          retrograde={false}
+                          movement="Direct"
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+                
+                <Separator />
+                
+                <section>
+                  <h3 className="text-lg font-semibold mb-4">Key Aspects</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {aspects.slice(0, 10).map((aspect: Aspect, index: number) => {
+                      // Skip aspects without proper data
+                      if (!aspect.planet1 || !aspect.planet2 || !aspect.aspect) {
+                        return null;
+                      }
+                      
+                      // Icons for different aspect types
+                      const aspectIcons = {
+                        conjunction: "☌",
+                        opposition: "☍",
+                        trine: "△",
+                        square: "□",
+                        sextile: "⚹",
+                        quincunx: "⚻"
+                      };
+                      
+                      // Colors for different aspect types
+                      const aspectColors = {
+                        conjunction: "text-purple-400",
+                        opposition: "text-red-400",
+                        trine: "text-green-400",
+                        square: "text-orange-400",
+                        sextile: "text-blue-400",
+                        quincunx: "text-amber-400"
+                      };
+                      
+                      // Convert numeric aspect types to names if needed
+                      const aspectType = typeof aspect.aspect === 'number' ? 
+                        ({0: 'conjunction', 60: 'sextile', 90: 'square', 120: 'trine', 180: 'opposition'}[aspect.aspect] || 'other') : 
+                        aspect.aspect;
+                      
+                      const aspectIcon = aspectIcons[aspectType as keyof typeof aspectIcons] || "⚪";
+                      const aspectColor = aspectColors[aspectType as keyof typeof aspectColors] || "";
+                      
+                      // Format planet names
+                      const formatPlanetName = (name: string) => {
+                        return name.split('_').map(word => 
+                          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        ).join(' ');
+                      };
+                      
+                      const planet1Name = formatPlanetName(aspect.planet1.toLowerCase());
+                      const planet2Name = formatPlanetName(aspect.planet2.toLowerCase());
+                      
+                      return (
+                        <Card key={index} className="flex items-center p-4">
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center">
+                              <span className="text-2xl mr-2">{planetIcons[aspect.planet1.toLowerCase()]}</span>
+                              <span className="font-medium">{planet1Name}</span>
+                            </div>
+                            
+                            <div className={`mx-4 text-2xl font-bold ${aspectColor}`}>
+                              {aspectIcon}
+                            </div>
+                            
+                            <div className="flex items-center">
+                              <span className="text-2xl mr-2">{planetIcons[aspect.planet2.toLowerCase()]}</span>
+                              <span className="font-medium">{planet2Name}</span>
+                            </div>
+                          </div>
+                        </Card>
                       );
                     })}
                   </div>
@@ -396,15 +543,19 @@ export default function Dashboard() {
 
                   <div className="mb-8">
                     <h4 className="text-lg font-semibold mb-2">Planets</h4>
-                    {interpretations.map((item: any, index: number) => (
-                      <div key={index} className="mb-6">
-                        <h5 className="text-md font-medium">
-                          {item.planet} in {item.sign} (House {item.house})
-                          {item.retrograde && <Badge className="ml-2 bg-orange-600" variant="secondary">Retrograde</Badge>}
-                        </h5>
-                        <p className="text-base leading-relaxed">{item.interpretation}</p>
-                      </div>
-                    ))}
+                    {interpretations && interpretations.length > 0 ? (
+                      interpretations.map((item: any, index: number) => (
+                        <div key={index} className="mb-6">
+                          <h5 className="text-md font-medium">
+                            {item.planet} in {item.sign} (House {item.house})
+                            {item.retrograde && <Badge className="ml-2 bg-orange-600" variant="secondary">Retrograde</Badge>}
+                          </h5>
+                          <p className="text-base leading-relaxed">{item.interpretation}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No planet interpretations available.</p>
+                    )}
                   </div>
 
                   {aspects && aspects.length > 0 && (
