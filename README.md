@@ -1,31 +1,29 @@
-# Daily Heavens: Astrology Platform
+# Daily Heavens: Astrological API Services
 
-Daily Heavens is a full-stack astrology platform that provides birth chart calculations, interpretations, and forecasts.
+Daily Heavens provides robust API services for birth chart calculations and astrological interpretations.
 
 ## Project Structure
 
-The project consists of three main parts:
+The project consists of two main services:
 
-1. **Backend Services**:
-   - Birth Chart Calculation (Python/FastAPI)
-   - Astrological Interpretation (Python/FastAPI)
+1. **Birth Chart Service** (Port 8001):
+   - Calculates accurate birth charts using Flatlib
+   - Provides detailed planetary positions, houses, and aspects
+   - Endpoint: `/api/v1/birthchart`
 
-2. **Frontend**:
-   - Next.js application with interactive UI
-
-3. **Integration Layer**:
-   - Adapter service that connects frontend and backend
-
-## Key Features
-
-- Accurate birth chart calculations using Flatlib
-- Comprehensive astrological interpretations
-- Responsive, modern UI built with Next.js
-- Easy deployment to Vercel
+2. **Interpretation Service** (Port 8002):
+   - Generates detailed astrological interpretations
+   - Analyzes birth chart patterns and configurations
+   - Endpoint: `/api/v1/interpretation`
 
 ## Getting Started
 
-### Backend Setup
+### Prerequisites
+
+- Python 3.9+
+- Virtual environment (recommended)
+
+### Installation
 
 ```bash
 # Create and activate virtual environment
@@ -34,18 +32,26 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+```
 
-# Run the birth chart service (Option 1 - Direct API)
+### Running the Services
+
+1. Start the Birth Chart Service (two options available):
+
+```bash
+# Option 1 - Direct API
 uvicorn app.birth_chart_server:app --host 0.0.0.0 --port 8001
 
-# Run the birth chart service (Option 2 - V1 API with additional endpoints)
+# Option 2 - V1 API with additional endpoints
 uvicorn app.api.v1.api:api_router --host 0.0.0.0 --port 8001
+```
 
-# In a separate terminal, run the interpretation service
+2. In a separate terminal, start the Interpretation Service:
+```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8002
 ```
 
-#### Important Notes
+### Important Notes
 
 1. **Birth Chart Service Endpoints**:
    - Direct API: `POST /birthchart`
@@ -58,175 +64,90 @@ uvicorn app.main:app --host 0.0.0.0 --port 8002
    - Structured data files in `data/structured/` must be accessible
 
 3. **Known Issues**:
-   - The interpretation service requires fixing a syntax error in `app/services/interpretation.py`
    - Some planetary positions (Uranus, Neptune, Pluto, Chiron) may show as "not found" - this is expected
    - The service must be run from the project root directory to properly load modules
 
-### Integration Adapter Setup
+## API Documentation
 
-```bash
-# Install dependencies for the adapter
-cd integration
-pip install -r requirements.txt
+### Birth Chart Service
+- API Documentation: http://localhost:8001/api/docs
+- ReDoc Interface: http://localhost:8001/api/redoc
 
-# Run the adapter
-uvicorn birth_chart_adapter:app --host 0.0.0.0 --port 8000
-```
-
-### Frontend Setup
-
-```bash
-# Navigate to the frontend directory
-cd frontend
-
-# Install dependencies
-pnpm install
-
-# Start the development server
-pnpm dev
-```
-
-## Docker Compose (Alternative)
-
-You can use Docker Compose to run all services together:
-
-```bash
-docker-compose up
-```
-
-This will start:
-- Birth Chart Service at http://localhost:8001
-- Interpretation Service at http://localhost:8002
-- Frontend Adapter at http://localhost:8000
-- Next.js Frontend at http://localhost:3000
-
-## Detailed Documentation
-
-- [Backend API Documentation](http://localhost:8001/api/docs) - Available when running the birth chart service
-- [Integration Guide](./README-INTEGRATION.md) - Detailed guide for connecting frontend and backend
-- [Frontend Documentation](./frontend/README.md) - Next.js frontend documentation
-
-## Deployment
-
-### Vercel Deployment (Recommended)
-
-1. Connect your GitHub repository to Vercel
-2. Configure environment variables in Vercel dashboard
-3. Deploy
-
-### Alternative Deployment
-
-You can also deploy the backend services separately on any provider that supports Python/FastAPI applications.
+### Interpretation Service
+- API Documentation: http://localhost:8002/api/docs
+- ReDoc Interface: http://localhost:8002/api/redoc
 
 ## Development Setup
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-2. Install development dependencies:
+1. Install development dependencies:
 ```bash
 make dev-install
 ```
 
-3. Install pre-commit hooks:
+2. Install pre-commit hooks:
 ```bash
 pre-commit install
 ```
 
 ## Running Tests
 
-The project uses pytest for testing. The following commands are available:
+The project uses pytest for testing:
 
-- Run all tests:
 ```bash
+# Run all tests
 make test
-```
 
-- Run tests with coverage report:
-```bash
+# Run tests with coverage
 make test-cov
-```
 
-- Run specific test files:
-```bash
+# Run specific test files
 pytest tests/test_api_responses.py
 ```
 
-- Run tests with specific markers:
-```bash
-pytest -m api  # Run API tests only
-pytest -m integration  # Run integration tests only
-pytest -m performance  # Run performance tests only
-```
+### Test Categories
 
-## Test Structure
-
-The test suite is organized into the following categories:
-
-- `test_api_responses.py`: Tests for API response structure and validation
-- `test_data_mapping.py`: Tests for mapping between structured data and API responses
-- `test_interpretation_service.py`: Tests for the interpretation service functionality
-- `test_integration.py`: Tests for integration between different components
-- `test_performance.py`: Tests for performance and resource usage
-- `test_logging.py`: Tests for logging functionality
+- API response structure and validation
+- Data mapping between structured data and API responses
+- Interpretation service functionality
+- Performance and resource usage
+- Logging functionality
 
 ## Code Quality
 
-The project uses several tools to maintain code quality:
+Maintain code quality with:
 
-- Black for code formatting
-- isort for import sorting
-- flake8 for linting
-- mypy for type checking
-
-Run all code quality checks:
 ```bash
-make lint
-```
+# Run all checks
+make check
 
-Format code:
-```bash
+# Format code
 make format
+
+# Run linting
+make lint
 ```
 
 ## Development Workflow
 
-1. Create a new branch for your feature:
+1. Create a feature branch:
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
-2. Make your changes and commit them:
+2. Make changes and commit:
 ```bash
 git add .
-git commit -m "Description of your changes"
+git commit -m "Description of changes"
 ```
 
-3. Run tests and code quality checks:
+3. Run tests and checks:
 ```bash
 make check
 ```
 
-4. Push your changes:
+4. Push changes:
 ```bash
 git push origin feature/your-feature-name
-```
-
-5. Create a pull request
-
-## Running the Application
-
-Development mode:
-```bash
-make run
-```
-
-Production mode:
-```bash
-make run-prod
 ```
 
 ## Documentation
@@ -236,14 +157,9 @@ Generate documentation:
 make docs
 ```
 
-The documentation will be available in the `docs` directory.
-
-## Cleaning Up
-
-Remove temporary files and caches:
-```bash
-make clean
-```
+### Additional Documentation
+- [API Documentation](docs/api.md) - Detailed API endpoints and usage
+- [Troubleshooting Guide](docs/troubleshooting.md) - Common issues and their resolutions
 
 ## Contributing
 
