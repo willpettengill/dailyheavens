@@ -948,9 +948,9 @@ class InterpretationService:
                             "planets": planets,
                             "interpretation": f"{base_interp}. {sign_influence}{detailed}{planets_interp}"
                         })
-                        
-        return interpretations
+            return interpretations
         except Exception as e:
+            self.logger.error(f"Error generating house interpretations: {str(e)}")
             return []
 
     def _find_grand_trine(self, aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -1066,14 +1066,14 @@ class InterpretationService:
                                 # Create the T-square
                                 planets = [planet1, planet2, apex_planet]
                                 
-                                    # Create a unique key for this combination
-                                    key = "-".join(sorted(planets))
-                                    if key not in seen_combinations:
-                                        seen_combinations.add(key)
-                                        t_squares.append({
+                                # Create a unique key for this combination
+                                key = "-".join(sorted(planets))
+                                if key not in seen_combinations:
+                                    seen_combinations.add(key)
+                                    t_squares.append({
                                         "planets": planets,
                                         "apex": apex_planet
-                                        })
+                                    })
         
         return t_squares
 
@@ -1649,9 +1649,9 @@ class InterpretationService:
 
     def _analyze_combinations(self, birth_chart: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze important planetary combinations in the birth chart."""
-        combinations = {}
         try:
-        planets = birth_chart.get("planets", {})
+            combinations = {}
+            planets = birth_chart.get("planets", {})
             
             # Analyze Sun-Moon combination
             if "sun" in planets and "moon" in planets:
@@ -1677,49 +1677,9 @@ class InterpretationService:
                                         .get("interpretation", "")
                     }
             
-            # Analyze Sun-Rising combination if ascendant is available
-            if "sun" in planets and "ascendant" in birth_chart.get("angles", {}):
-                sun_sign = planets["sun"].get("sign")
-                rising_sign = birth_chart["angles"]["ascendant"].get("sign")
-                if sun_sign and rising_sign:
-                    if sun_sign == rising_sign:
-                        combo_type = "same_sign"
-                    else:
-                        sun_element = self.structured_data.get("signs", {}).get(sun_sign.lower(), {}).get("element")
-                        rising_element = self.structured_data.get("signs", {}).get(rising_sign.lower(), {}).get("element")
-                        if sun_element == rising_element:
-                            combo_type = "compatible_signs"
-                        else:
-                            combo_type = "challenging_signs"
-                    
-                    combinations["sun_rising"] = {
-                        "type": combo_type,
-                        "interpretation": self.structured_data.get("interpretation_combinations", {})
-                                        .get("sun_rising_combinations", {})
-                                        .get(combo_type, {})
-                                        .get("interpretation", "")
-                    }
-            
-            # Analyze elemental combinations
-            elements = {"fire": 0, "earth": 0, "air": 0, "water": 0}
-            for planet, data in planets.items():
-                sign = data.get("sign")
-                if sign:
-                    element = self.structured_data.get("signs", {}).get(sign.lower(), {}).get("element")
-                    if element:
-                        elements[element] += 1
-            
-            dominant_elements = [e for e, count in elements.items() if count >= 3]
-            if len(dominant_elements) >= 2:
-                combo_key = f"{dominant_elements[0]}_{dominant_elements[1]}"
-                if combo_key in self.structured_data.get("interpretation_combinations", {}).get("elemental_combinations", {}):
-                    combinations["elemental"] = {
-                        "type": combo_key,
-                        "interpretation": self.structured_data["interpretation_combinations"]["elemental_combinations"][combo_key]["description"]
-                    }
-        
-        return combinations
+            return combinations
         except Exception as e:
+            self.logger.error(f"Error analyzing combinations: {str(e)}")
             return {}
 
     def _analyze_house_emphasis(self, birth_chart: Dict) -> Dict[str, Any]:
@@ -2226,43 +2186,29 @@ class InterpretationService:
             return 0
 
     def _get_pattern_context(self, planet1: str, planet2: str, aspect_type: str, birth_chart: Dict[str, Any]) -> str:
-        """Generate additional context for an aspect pattern."""
+        """Get additional context for aspect pattern interpretation based on house placements."""
         try:
             context_parts = []
             
-            # Get basic compatibility interpretation
-            compatibility = self._get_compatibility_interpretation(planet1, planet2)
-            if compatibility:
-                context_parts.append(compatibility)
+            # Get house placements
+            planet1_house = birth_chart.get("planets", {}).get(planet1, {}).get("house")
+            planet2_house = birth_chart.get("planets", {}).get(planet2, {}).get("house")
             
-            # Planet dignity information
-            if "planets" in birth_chart:
-                # Planet 1 dignity
-                planet1_dignity = self._get_planet_dignity(planet1, birth_chart)
-                if planet1_dignity:
-                    dignity_level = planet1_dignity.get("dignity", "neutral")
-                    if dignity_level in ["very dignified", "dignified"]:
-                        context_parts.append(f"With {planet1} being {dignity_level}, it strengthens this aspect.")
-                    elif dignity_level in ["debilitated", "very debilitated"]:
-                        context_parts.append(f"With {planet1} being {dignity_level}, it may weaken this aspect.")
+            if planet1_house and planet2_house:
+                # Get house information
+                house1_info = self.structured_data.get("houses", {}).get(str(planet1_house), {})
+                house2_info = self.structured_data.get("houses", {}).get(str(planet2_house), {})
                 
-                # Planet 2 dignity
-                planet2_dignity = self._get_planet_dignity(planet2, birth_chart)
-                if planet2_dignity:
-                    dignity_level = planet2_dignity.get("dignity", "neutral")
-                    if dignity_level in ["very dignified", "dignified"]:
-                        context_parts.append(f"With {planet2} being {dignity_level}, it enriches this connection.")
-                    elif dignity_level in ["debilitated", "very debilitated"]:
-                        context_parts.append(f"{planet2} being {dignity_level} might create challenges in this relationship.")
-            
-            # House relationship context
-            house_context = self._get_house_context_interpretation(planet1, planet2, birth_chart)
-            if house_context:
-                context_parts.append(house_context)
+                # Add house context
+                if house1_info and house2_info:
+                    house1_name = house1_info.get("name", f"House {planet1_house}")
+                    house2_name = house2_info.get("name", f"House {planet2_house}")
+                    
+                    context_parts.append(f"This aspect connects your {house1_name} ({planet1_house}) with your {house2_name} ({planet2_house})")
             
             # Format the result
             if context_parts:
-            return " ".join(context_parts)
+                return " ".join(context_parts)
             else:
                 return ""
             
@@ -2320,81 +2266,32 @@ class InterpretationService:
                     sign_data = self.structured_data.get("signs", {}).get(sign, {})
                     element = sign_data.get("element")
                     if element:
-                    elements[element] += 1
-                    planets_by_element[element].append(planet)
+                        elements[element] += 1
+                        planets_by_element[element].append(planet)
             
             # Calculate percentages
             total_planets = sum(elements.values())
             percentages = {}
             for element, count in elements.items():
-            if total_planets > 0:
+                if total_planets > 0:
                     percentages[element] = (count / total_planets) * 100
                 else:
                     percentages[element] = 0
             
             # Determine dominant and lacking elements
-            dominant_elements = [e for e, p in percentages.items() if p >= 30]
-            lacking_elements = [e for e, p in percentages.items() if p <= 10]
-            
-            # Generate interpretation
-            interpretation = self._get_simple_element_interpretation(
-                elements, percentages, dominant_elements, lacking_elements, planets_by_element
-            )
+            dominant_elements = [e for e, count in elements.items() if count >= 3]
+            lacking_elements = [e for e, count in elements.items() if count == 0]
             
             return {
                 "elements": elements,
-                "percentages": percentages,
-                "dominant": dominant_elements,
-                "lacking": lacking_elements,
                 "planets_by_element": planets_by_element,
-                "interpretation": interpretation
+                "percentages": percentages,
+                "dominant_elements": dominant_elements,
+                "lacking_elements": lacking_elements
             }
         except Exception as e:
+            self.logger.error(f"Error analyzing element balance: {str(e)}")
             return {}
-    
-    def _get_simple_element_interpretation(
-        self, 
-        elements: Dict[str, int],
-        percentages: Dict[str, float],
-        dominant_elements: List[str],
-        lacking_elements: List[str],
-        planets_by_element: Dict[str, List[str]]
-    ) -> str:
-        """Generate a simple interpretation of the elemental balance."""
-        try:
-            pattern_data = self.structured_data.get("interpretation_patterns", {}).get("elemental_patterns", {})
-            
-            # Create the interpretation
-            parts = ["Elemental Balance:"]
-            
-            # Add dominant elements
-        if dominant_elements:
-                for element in dominant_elements:
-                    element_data = pattern_data.get(f"{element}_dominant", {})
-                    description = element_data.get("description", "")
-                    strengths = ", ".join(element_data.get("strengths", []))
-                    challenges = ", ".join(element_data.get("challenges", []))
-                    
-                    planets = ", ".join(planets_by_element[element])
-                    percentage = f"{percentages[element]:.1f}%"
-                    
-                    parts.append(f"Dominant {element.title()} ({percentage}) with {planets}. {description} Strengths: {strengths}. Challenges: {challenges}.")
-            
-            # Add lacking elements
-        if lacking_elements:
-                for element in lacking_elements:
-                    element_data = pattern_data.get(f"{element}_dominant", {})
-                    strengths = ", ".join(element_data.get("strengths", []))
-                    
-                    parts.append(f"Lacking {element.title()} ({percentages[element]:.1f}%). You may need to consciously develop {strengths}.")
-            
-            # Add balanced statement if neither dominant nor lacking
-            if not dominant_elements and not lacking_elements:
-                parts.append("Your chart shows a balanced distribution of elements, giving you versatility and adaptability.")
-            
-            return " ".join(parts)
-        except Exception as e:
-            return f"Error generating element interpretation: {str(e)}"
 
     def _analyze_simple_modality_balance(self, birth_chart: Dict) -> Dict[str, Any]:
         """Analyze the modality balance of the birth chart."""
@@ -2410,81 +2307,32 @@ class InterpretationService:
                     sign_data = self.structured_data.get("signs", {}).get(sign, {})
                     modality = sign_data.get("modality")
                     if modality:
-                    modalities[modality] += 1
-                    planets_by_modality[modality].append(planet)
+                        modalities[modality] += 1
+                        planets_by_modality[modality].append(planet)
             
             # Calculate percentages
             total_planets = sum(modalities.values())
             percentages = {}
             for modality, count in modalities.items():
-            if total_planets > 0:
+                if total_planets > 0:
                     percentages[modality] = (count / total_planets) * 100
                 else:
                     percentages[modality] = 0
             
             # Determine dominant and lacking modalities
-            dominant_modalities = [m for m, p in percentages.items() if p >= 40]
-            lacking_modalities = [m for m, p in percentages.items() if p <= 10]
-            
-            # Generate interpretation
-            interpretation = self._get_simple_modality_interpretation(
-                modalities, percentages, dominant_modalities, lacking_modalities, planets_by_modality
-            )
+            dominant_modalities = [m for m, count in modalities.items() if count >= 3]
+            lacking_modalities = [m for m, count in modalities.items() if count == 0]
             
             return {
                 "modalities": modalities,
-                "percentages": percentages,
-                "dominant": dominant_modalities,
-                "lacking": lacking_modalities,
                 "planets_by_modality": planets_by_modality,
-                "interpretation": interpretation
+                "percentages": percentages,
+                "dominant_modalities": dominant_modalities,
+                "lacking_modalities": lacking_modalities
             }
         except Exception as e:
+            self.logger.error(f"Error analyzing modality balance: {str(e)}")
             return {}
-    
-    def _get_simple_modality_interpretation(
-        self, 
-        modalities: Dict[str, int],
-        percentages: Dict[str, float],
-        dominant_modalities: List[str],
-        lacking_modalities: List[str],
-        planets_by_modality: Dict[str, List[str]]
-    ) -> str:
-        """Generate a simple interpretation of the modality balance."""
-        try:
-            pattern_data = self.structured_data.get("interpretation_patterns", {}).get("modality_patterns", {})
-            
-            # Create the interpretation
-            parts = ["Modality Balance:"]
-            
-            # Add dominant modalities
-        if dominant_modalities:
-                for modality in dominant_modalities:
-                    modality_data = pattern_data.get(f"{modality}_dominant", {})
-                    description = modality_data.get("description", "")
-                    strengths = ", ".join(modality_data.get("strengths", []))
-                    challenges = ", ".join(modality_data.get("challenges", []))
-                    
-                    planets = ", ".join(planets_by_modality[modality])
-                    percentage = f"{percentages[modality]:.1f}%"
-                    
-                    parts.append(f"Dominant {modality.title()} ({percentage}) with {planets}. {description} Strengths: {strengths}. Challenges: {challenges}.")
-            
-            # Add lacking modalities
-        if lacking_modalities:
-                for modality in lacking_modalities:
-                    modality_data = pattern_data.get(f"{modality}_dominant", {})
-                    strengths = ", ".join(modality_data.get("strengths", []))
-                    
-                    parts.append(f"Lacking {modality.title()} ({percentages[modality]:.1f}%). You may need to consciously develop {strengths}.")
-            
-            # Add balanced statement if neither dominant nor lacking
-            if not dominant_modalities and not lacking_modalities:
-                parts.append("Your chart shows a balanced distribution of modalities, giving you versatility in how you approach situations.")
-            
-            return " ".join(parts)
-        except Exception as e:
-            return f"Error generating modality interpretation: {str(e)}"
 
     def _load_sun_qualities(self):
         """Load sun qualities data from CSV file.
