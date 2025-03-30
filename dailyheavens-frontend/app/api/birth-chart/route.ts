@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 // API endpoint URLs
-const BIRTH_CHART_API_URL = process.env.BIRTH_CHART_API_URL || "http://localhost:8001/api/v1/birthchart";
-const INTERPRETATION_API_URL = process.env.INTERPRETATION_API_URL || "http://localhost:8002/api/v1/interpretation";
+const BIRTH_CHART_API_URL = process.env.NEXT_PUBLIC_BIRTH_CHART_API_URL || "http://localhost:8001/api/v1/birthchart";
+const INTERPRETATION_API_URL = process.env.NEXT_PUBLIC_INTERPRETATION_API_URL || "http://localhost:8002/api/v1/interpretation";
 
 // Helper to convert ZIP code to coordinates (mock implementation)
 const getCoordinatesFromZip = (zipcode: string) => {
