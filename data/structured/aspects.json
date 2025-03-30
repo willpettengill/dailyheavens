@@ -1,86 +1,90 @@
 {
   "conjunction": {
     "angle": 0,
-    "orb": 8,
-    "nature": "major",
-    "type": "harmonious",
-    "keywords": ["unity", "focus", "new beginnings", "intensity"],
-    "interpretation": {
-      "general": "Merging of energies, intensifying the qualities of both planets",
-      "harmonious": "Strong focus and concentrated energy",
-      "challenging": "Potential overwhelm or excess"
-    }
+    "orb": 10,
+    "nature": "variable",
+    "type": "major",
+    "keywords": ["unity", "fusion", "intensity", "beginnings", "concentration", "blending"],
+    "interpretation": "A conjunction represents a fusion of planetary energies, creating a powerful blend that intensifies and concentrates the qualities of both planets involved. This aspect marks points of new beginnings and focused energy in the chart. The nature of a conjunction—whether harmonious or challenging—depends entirely on the planets involved and their inherent compatibility. When benefic planets conjoin, they enhance each other's positive qualities; when malefics meet, they may intensify difficulties; when mixed, the more dominant planet often colors the expression of the other. The house placement of a conjunction becomes a significant focal point in the life, demanding attention and conscious integration of the planetary forces."
   },
   "sextile": {
     "angle": 60,
     "orb": 6,
-    "nature": "minor",
-    "type": "harmonious",
-    "keywords": ["opportunity", "flow", "ease", "growth"],
-    "interpretation": {
-      "general": "Easy flow of energy between planets, creating opportunities",
-      "harmonious": "Productive cooperation and development",
-      "challenging": "May require active engagement to benefit"
-    }
+    "nature": "harmonious",
+    "type": "major",
+    "keywords": ["opportunity", "ease", "flow", "communication", "learning", "development"],
+    "interpretation": "A sextile represents a flowing, harmonious connection between planets that creates opportunities for growth and learning. This aspect provides supportive energy that can be easily accessed when conscious effort is applied. Unlike the more automatic gifts of a trine, sextiles require activation through awareness and choice, offering a 'door of opportunity' rather than an automatic blessing. Planets in sextile enhance each other's expression while maintaining their distinct qualities, creating a productive dialogue between different facets of the personality. Sextiles often manifest as talents that can be developed through education, communication, and intellectual application, providing bridges between different areas of life experience."
   },
   "square": {
     "angle": 90,
     "orb": 8,
-    "nature": "major",
-    "type": "challenging",
-    "keywords": ["tension", "challenge", "growth", "action"],
-    "interpretation": {
-      "general": "Dynamic tension between planets, forcing growth through challenges",
-      "harmonious": "Motivation for change and development",
-      "challenging": "Internal or external conflicts"
-    }
+    "nature": "challenging",
+    "type": "major",
+    "keywords": ["tension", "growth", "action", "challenge", "development", "friction"],
+    "interpretation": "A square represents a dynamic tension between planets that creates internal friction and external challenges, ultimately driving growth through necessary action. This aspect generates the motivating pressure needed for personal development and achievement. Squares often manifest as conflicts between different needs or areas of life that require resolution through conscious integration and balanced expression. While initially experienced as obstacles or frustrations, squares ultimately serve as catalysts for strength-building and mastery. The tension of a square is most productive when both planetary energies are acknowledged and given appropriate expression, rather than allowing one to dominate or repress the other. Many significant accomplishments in life emerge directly from working constructively with square aspects."
   },
   "trine": {
     "angle": 120,
     "orb": 8,
-    "nature": "major",
-    "type": "harmonious",
-    "keywords": ["harmony", "flow", "talent", "ease"],
-    "interpretation": {
-      "general": "Natural harmony and flow between planets",
-      "harmonious": "Innate talents and abilities",
-      "challenging": "May lead to complacency"
-    }
+    "nature": "harmonious",
+    "type": "major",
+    "keywords": ["harmony", "flow", "talent", "ease", "innate gifts", "integration"],
+    "interpretation": "A trine represents a harmonious, flowing connection between planets of the same element, creating natural talents, innate abilities, and points of ease in the chart. This aspect provides a balanced, integrated expression of the planetary energies involved, allowing them to support and enhance each other effortlessly. Trines often manifest as gifts that come so naturally they may be taken for granted, operating as unconscious strengths or paths of least resistance. While trines bring blessings, their frictionless nature can sometimes lead to complacency without the motivating tension that drives conscious development. The element of the trine (fire, earth, air, or water) colors how this harmony expresses, whether through inspired action, practical stability, mental clarity, or emotional connection."
   },
   "opposition": {
     "angle": 180,
-    "orb": 8,
-    "nature": "major",
-    "type": "challenging",
-    "keywords": ["awareness", "balance", "relationship", "tension"],
-    "interpretation": {
-      "general": "Awareness through polarity, need for integration",
-      "harmonious": "Objective awareness and perspective",
-      "challenging": "Internal conflicts and projection"
-    }
+    "orb": 10,
+    "nature": "challenging",
+    "type": "major",
+    "keywords": ["polarity", "awareness", "balance", "tension", "relationship", "integration"],
+    "interpretation": "An opposition represents a polarity between planets that creates dynamic tension and awareness through the experience of seemingly opposing forces. This aspect illuminates the balance point between complementary energies that appear to pull in different directions but actually complete each other. Oppositions often manifest through relationships and encounters with others who embody qualities we must integrate within ourselves. The tension of an opposition is most constructive when viewed as a spectrum to be bridged rather than a conflict to be resolved. Unlike the internal friction of a square, oppositions typically externalize tension through encounters with others or between different areas of life. The axis of houses involved in an opposition indicates the life domains where this balancing act will be most prominently experienced."
   },
   "quincunx": {
     "angle": 150,
     "orb": 3,
-    "nature": "minor",
-    "type": "challenging",
-    "keywords": ["adjustment", "paradox", "health", "service"],
-    "interpretation": {
-      "general": "Need for adjustment and adaptation",
-      "harmonious": "Ability to make necessary changes",
-      "challenging": "Difficulty finding resolution"
-    }
+    "nature": "challenging",
+    "type": "minor",
+    "keywords": ["adjustment", "refinement", "incongruity", "adaptation", "paradox", "health"],
+    "interpretation": "A quincunx (also called inconjunct) represents an awkward connection between planets that creates a sense of perpetual adjustment and adaptation. This aspect brings together energies that have no natural relationship yet must coexist, creating a subtle but persistent tension that requires continual fine-tuning. Quincunxes often manifest as situations where solving one issue creates another, necessitating creative compromise rather than perfect resolution. This aspect is traditionally associated with health matters, as the body must constantly adjust to maintain homeostasis despite conflicting needs. The paradoxical nature of quincunxes can be frustrating but ultimately leads to sophisticated integration and flexibility when consciously worked with. Psychologically, quincunxes often operate as blind spots where we struggle to see how different parts of ourselves affect each other."
   },
-  "semi_sextile": {
+  "semi-sextile": {
     "angle": 30,
     "orb": 3,
-    "nature": "minor",
-    "type": "harmonious",
-    "keywords": ["subtle", "growth", "learning", "adjustment"],
-    "interpretation": {
-      "general": "Subtle connections and minor opportunities",
-      "harmonious": "Gentle support and growth",
-      "challenging": "May be barely noticeable"
-    }
+    "nature": "slightly challenging",
+    "type": "minor",
+    "keywords": ["subtle tension", "growth", "adjustment", "development", "adjacent elements"],
+    "interpretation": "A semi-sextile represents a subtle connection between planets in adjacent signs, creating a gentle friction between neighboring energies that must learn to work together despite their inherent differences. This aspect brings together elements that naturally follow each other in the zodiacal sequence yet have distinctly different qualities and modes of expression. Semi-sextiles often manifest as minor irritations or adjustments that ultimately lead to development and integration, like the grain of sand that eventually produces a pearl. This aspect frequently operates below the level of conscious awareness, creating background tensions that nonetheless influence behavior and development. The subtle nature of semi-sextiles makes them easy to overlook, yet they often represent important developmental themes that require attention for psychological integration and growth."
+  },
+  "quintile": {
+    "angle": 72,
+    "orb": 2,
+    "nature": "harmonious",
+    "type": "minor",
+    "keywords": ["creativity", "talent", "unique expression", "artistry", "innovation", "mastery"],
+    "interpretation": "A quintile represents a creative connection between planets that fosters unique talents, innovative approaches, and the development of specialized abilities. This aspect relates to the fifth harmonic, associated with creative self-expression, pleasure, and the manifestation of individual gifts. Quintiles often manifest as distinctive creative talents, particularly when connected to the Sun, Venus, or the fifth house. The energy of a quintile supports original thinking, artistic expression, and the ability to approach familiar subjects from fresh perspectives. Unlike the more common harmonious aspects, quintiles often operate in specialized domains rather than general life areas, creating pockets of excellence and mastery. This aspect can indicate where a person might display genius-level talents or develop innovative solutions that others overlook."
+  },
+  "bi-quintile": {
+    "angle": 144,
+    "orb": 2,
+    "nature": "harmonious",
+    "type": "minor",
+    "keywords": ["creative integration", "unique perspective", "innovation", "inspiration", "specialized talent"],
+    "interpretation": "A bi-quintile represents a creative connection between planets that supports the integration of seemingly unrelated talents and perspectives into innovative combinations. Like the quintile, this aspect relates to the fifth harmonic but adds a quality of inspired synthesis and unusual connections. Bi-quintiles often manifest as the ability to draw from diverse sources of inspiration and combine them in original ways that others might not envision. This aspect can indicate where a person might bring together different fields of knowledge or expression to create something greater than the sum of its parts. Bi-quintiles frequently operate in subtle ways, providing flashes of insight or moments of creative breakthrough rather than constant, obvious talents. The distinctive quality of bi-quintile energy often leads to approaches and solutions that stand apart from conventional thinking."
+  },
+  "semi-square": {
+    "angle": 45,
+    "orb": 2,
+    "nature": "challenging",
+    "type": "minor",
+    "keywords": ["irritation", "internal friction", "adjustment", "minor obstacles", "growth"],
+    "interpretation": "A semi-square represents a subtle tension between planets that creates internal friction and minor but persistent challenges that gradually build toward necessary growth. This aspect relates to the eighth harmonic, associated with processes of transformation and the integration of polarities. Semi-squares often manifest as ongoing irritations or recurring frustrations that eventually demand attention and adjustment. Unlike the more obvious tension of a square, semi-squares typically operate as background stress that accumulates over time rather than presenting immediate obstacles. This aspect frequently corresponds to internal psychological dynamics that create tension until consciously addressed and integrated. When multiple semi-squares combine in a chart pattern, they can indicate areas where persistent effort and adjustments are required before progress becomes possible."
+  },
+  "sesquisquare": {
+    "angle": 135,
+    "orb": 2,
+    "nature": "challenging",
+    "type": "minor",
+    "keywords": ["agitation", "adjustment", "transition", "refinement", "redirected energy"],
+    "interpretation": "A sesquisquare (also called sesquiquadrate) represents a complex tension between planets that creates a sense of agitation and the need for significant adjustment after a period of development. This aspect combines the energies of a square and a semi-square, creating a quality of friction that emerges after initial progress has been made. Sesquisquares often manifest when a situation that seemed to be developing smoothly suddenly requires course correction or refinement. The nature of this aspect typically involves the need to redirect energy or attention once an initial phase has been completed. Psychologically, sesquisquares often correspond to moments of frustration when we realize that what worked initially is no longer sufficient, requiring a more sophisticated approach. This aspect frequently operates as a refining influence that prevents complacency and encourages ongoing development."
   }
 } 

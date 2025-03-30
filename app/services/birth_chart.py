@@ -28,8 +28,9 @@ class BirthChartService:
             self.data_dir = Path(data_dir)
             
         self.planets = [
-            const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS,
-            const.JUPITER, const.SATURN, const.URANUS, const.NEPTUNE, const.PLUTO
+            "Sun", "Moon", "Mercury", "Venus", "Mars", 
+            "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
+            "Chiron" # Add Chiron to the list of planets
         ]
         self._load_structured_data()
 
@@ -96,11 +97,17 @@ class BirthChartService:
         """Get the house number for a given longitude."""
         for i in range(1, 13):
             house = chart.get(f"House{i}")
-            next_house = chart.get(f"House{(i % 12) + 1}")
-            if (house.lon <= longitude < next_house.lon) or \
-               (house.lon > next_house.lon and (longitude >= house.lon or longitude < next_house.lon)):
+            if house and self._is_longitude_in_house(longitude, house.lon, chart.get(f"House{i%12+1}").lon):
                 return i
-        return 1  # Default to first house if not found
+        return None
+
+    def _is_longitude_in_house(self, longitude, house_lon, next_house_lon):
+        """Helper function to determine if a longitude is in a given house."""
+        # Handle the special case where houses cross the 0/360 degree point
+        if house_lon > next_house_lon:
+            return longitude >= house_lon or longitude < next_house_lon
+        # Normal case
+        return house_lon <= longitude < next_house_lon
 
     def _get_planet_data(self, obj: Any, chart: Chart) -> Dict[str, Any]:
         """Extract all available data for a planet."""
@@ -194,40 +201,70 @@ class BirthChartService:
                     obj = chart.get(planet)
                     if obj:
                         house_num = self._get_house_number(chart, obj.lon)
+                        # Get retrograde status
+                        is_retrograde = obj.isRetrograde() if hasattr(obj, 'isRetrograde') else False
+                        # Get movement information
+                        movement = obj.movement() if hasattr(obj, 'movement') else "Direct"
+                        
                         planets[planet] = {
                             "sign": obj.sign,
                             "degree": round(obj.lon, 2),  # Round to 2 decimal places
                             "house": house_num,
-                            "retrograde": obj.isRetrograde() if hasattr(obj, 'isRetrograde') else False
+                            "retrograde": is_retrograde,
+                            "movement": movement
                         }
                 except KeyError:
                     logger.warning(f"Planet {planet} not found in chart")
                     continue
             
-            # Extract angles with validation
-            for angle in ["ASC", "MC"]:
+            # Extract angles and map them correctly
+            angles = {}
+            angle_mappings = {
+                "ASC": "ascendant",
+                "MC": "midheaven",
+                "DESC": "descendant",
+                "IC": "imum_coeli"
+            }
+            
+            for flatlib_name, output_name in angle_mappings.items():
                 try:
-                    obj = chart.get(getattr(const, angle))
+                    angle_const = getattr(const, flatlib_name)
+                    obj = chart.get(angle_const)
                     if obj:
-                        house_num = 1 if angle == "ASC" else 10  # ASC is house 1, MC is house 10
-                        planets[angle] = {
+                        angles[output_name] = {
                             "sign": obj.sign,
-                            "degree": round(obj.lon, 2),  # Round to 2 decimal places
-                            "house": house_num,
-                            "retrograde": False  # Angles don't have retrograde motion
+                            "degrees": round(obj.lon, 2)
                         }
-                except (KeyError, AttributeError):
-                    logger.warning(f"Angle {angle} not found in chart")
+                except (KeyError, AttributeError) as e:
+                    logger.warning(f"Angle {flatlib_name} not found in chart: {str(e)}")
                     continue
             
-            # Map ASC to Ascendant in the output
-            if "ASC" in planets:
-                planets["Ascendant"] = planets.pop("ASC")
-            if "MC" in planets:
-                planets["Midheaven"] = planets.pop("MC")
+            # Try to get north and south nodes
+            special_points = {
+                "NORTH_NODE": "north_node",
+                "SOUTH_NODE": "south_node"
+            }
+            
+            for flatlib_name, output_name in special_points.items():
+                try:
+                    if hasattr(const, flatlib_name):
+                        point_const = getattr(const, flatlib_name)
+                        obj = chart.get(point_const)
+                        if obj:
+                            house_num = self._get_house_number(chart, obj.lon)
+                            planets[output_name] = {
+                                "sign": obj.sign,
+                                "degree": round(obj.lon, 2),
+                                "house": house_num,
+                                "retrograde": False,  # Nodes don't have retrograde motion
+                                "movement": "Direct"
+                            }
+                except (KeyError, AttributeError) as e:
+                    logger.debug(f"Special point {flatlib_name} not found in chart: {str(e)}")
+                    continue
             
             # Validate minimum required planets
-            required_planets = ["Sun", "Moon", "Ascendant"]
+            required_planets = ["Sun", "Moon"]
             missing_planets = [p for p in required_planets if p not in planets]
             if missing_planets:
                 return {
@@ -257,7 +294,8 @@ class BirthChartService:
                                         "planet1": planet1,
                                         "planet2": planet2,
                                         "type": aspect.type,
-                                        "orb": round(aspect.orb, 2)  # Round to 2 decimal places
+                                        "orb": round(aspect.orb, 2),  # Round to 2 decimal places
+                                        "nature": "neutral"  # Default value
                                     })
                         except KeyError:
                             continue
@@ -265,7 +303,7 @@ class BirthChartService:
             chart_data = {
                 "planets": planets,
                 "houses": houses,
-                "angles": {},
+                "angles": angles,
                 "aspects": chart_aspects,
                 "calculation_date": dt.isoformat(),
                 "location": {

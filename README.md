@@ -36,15 +36,36 @@ pip install -r requirements.txt
 
 ### Running the Services
 
-1. Start the Birth Chart Service:
+1. Start the Birth Chart Service (two options available):
+
 ```bash
+# Option 1 - Direct API
 uvicorn app.birth_chart_server:app --host 0.0.0.0 --port 8001
+
+# Option 2 - V1 API with additional endpoints
+uvicorn app.api.v1.api:api_router --host 0.0.0.0 --port 8001
 ```
 
 2. In a separate terminal, start the Interpretation Service:
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8002
 ```
+
+### Important Notes
+
+1. **Birth Chart Service Endpoints**:
+   - Direct API: `POST /birthchart`
+   - V1 API: `POST /v1/birthchart`
+   - The V1 API includes additional endpoints and structured responses
+
+2. **Interpretation Service Endpoints**:
+   - Main endpoint: `POST /api/v1/interpretation`
+   - Requires a valid birth chart in the request body
+   - Structured data files in `data/structured/` must be accessible
+
+3. **Known Issues**:
+   - Some planetary positions (Uranus, Neptune, Pluto, Chiron) may show as "not found" - this is expected
+   - The service must be run from the project root directory to properly load modules
 
 ## API Documentation
 
