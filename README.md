@@ -34,38 +34,48 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Running the Services
+## Environment Setup
 
-1. Start the Birth Chart Service (two options available):
+1. Create a `.env.local` file in the `dailyheavens-frontend` directory with the following content:
 
-```bash
-# Option 1 - Direct API
-uvicorn app.birth_chart_server:app --host 0.0.0.0 --port 8001
-
-# Option 2 - V1 API with additional endpoints
-uvicorn app.api.v1.api:api_router --host 0.0.0.0 --port 8001
+```
+NEXT_PUBLIC_BIRTH_CHART_API_URL=http://localhost:8001/api/v1/birthchart
+NEXT_PUBLIC_INTERPRETATION_API_URL=http://localhost:8002/api/v1/interpretation
 ```
 
-2. In a separate terminal, start the Interpretation Service:
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8002
-```
+## Running the Services
 
-### Important Notes
+1. **Start the Birth Chart Service**:
+   - Ensure you are in the project root directory.
+   - Run the following command:
+     ```bash
+     uvicorn app.birth_chart_server:app --host 0.0.0.0 --port 8001
+     ```
 
-1. **Birth Chart Service Endpoints**:
-   - Direct API: `POST /birthchart`
-   - V1 API: `POST /v1/birthchart`
-   - The V1 API includes additional endpoints and structured responses
+2. **Start the Interpretation Service**:
+   - In a separate terminal, run:
+     ```bash
+     uvicorn app.main:app --host 0.0.0.0 --port 8002
+     ```
 
-2. **Interpretation Service Endpoints**:
-   - Main endpoint: `POST /api/v1/interpretation`
-   - Requires a valid birth chart in the request body
-   - Structured data files in `data/structured/` must be accessible
+3. **Start the Frontend**:
+   - Navigate to the `dailyheavens-frontend` directory.
+   - Run:
+     ```bash
+     pnpm dev
+     ```
 
-3. **Known Issues**:
-   - Some planetary positions (Uranus, Neptune, Pluto, Chiron) may show as "not found" - this is expected
-   - The service must be run from the project root directory to properly load modules
+## Troubleshooting
+
+- **404 Not Found**: Ensure the `.env.local` file is correctly configured and services are running on the specified ports.
+- **Syntax Errors**: Check for syntax errors in the Python files and fix them before starting the services.
+- **Port Already in Use**: Ensure no other processes are using the required ports before starting the services.
+- **ModuleNotFoundError**: Ensure the correct working directory and module paths are used.
+
+## Verifying the Setup
+
+- Access the frontend at `http://localhost:3000` (or the next available port).
+- Test the birth chart functionality to ensure the frontend and backend are communicating correctly.
 
 ## API Documentation
 
