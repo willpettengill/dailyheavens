@@ -126,15 +126,15 @@ export default function Dashboard() {
   }
 
   // Extract data
-  const { user, birth_chart, interpretation } = chartData;
-  const planets = birth_chart.planets;
-  const houses = birth_chart.houses;
-  const angles = birth_chart.angles;
-  const interpretations = interpretation.planets;
-  const aspects = interpretation.aspects || [];
-  const patterns = interpretation.patterns || [];
-  const elementBalance = interpretation.element_balance;
-  const modalityBalance = interpretation.modality_balance;
+  const { user, birth_chart, interpretation } = chartData || {};
+  const planets = birth_chart?.planets || {};
+  const houses = birth_chart?.houses || {};
+  const angles = birth_chart?.angles || {};
+  const interpretations = interpretation?.planets || [];
+  const aspects = interpretation?.aspects || [];
+  const patterns = interpretation?.patterns || [];
+  const elementBalance = interpretation?.element_balance;
+  const modalityBalance = interpretation?.modality_balance;
 
   // Add debugging
   console.log("=== Retrograde Debug ===");
@@ -411,17 +411,29 @@ export default function Dashboard() {
                     <div className="mb-8">
                       <h4 className="text-lg font-semibold mb-2">Aspects</h4>
                       <Accordion type="multiple" className="w-full">
-                        {aspects.filter((aspect: any) => aspect.type !== -1 && aspect.interpretation).map((aspect: any, index: number) => (
-                          <InterpretationItem 
-                            key={index} 
-                            title={`${aspect.planet1} ${aspect.type === 60 ? 'sextile' : 
-                                   aspect.type === 90 ? 'square' : 
-                                   aspect.type === 120 ? 'trine' : 
-                                   aspect.type === 180 ? 'opposition' : 
-                                   aspect.type === 0 ? 'conjunction' : ''} ${aspect.planet2}`}
-                            description={aspect.interpretation}
-                          />
-                        ))}
+                        {aspects
+                          .filter((aspect: any) => 
+                            aspect && 
+                            typeof aspect === 'object' && 
+                            aspect.planet1 && 
+                            aspect.planet2 && 
+                            aspect.type !== -1 && 
+                            aspect.interpretation
+                          )
+                          .map((aspect: any, index: number) => (
+                            <InterpretationItem 
+                              key={index} 
+                              title={`${aspect.planet1 || 'Unknown'} ${
+                                aspect.type === 60 ? 'sextile' : 
+                                aspect.type === 90 ? 'square' : 
+                                aspect.type === 120 ? 'trine' : 
+                                aspect.type === 180 ? 'opposition' : 
+                                aspect.type === 0 ? 'conjunction' : 
+                                'aspects'
+                              } ${aspect.planet2 || 'Unknown'}`}
+                              description={aspect.interpretation || 'No interpretation available'}
+                            />
+                          ))}
                       </Accordion>
                     </div>
                   )}
