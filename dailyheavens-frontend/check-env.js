@@ -1,0 +1,1 @@
+console.log('API URLs:', process.env.NEXT_PUBLIC_BIRTH_CHART_API_URL, process.env.NEXT_PUBLIC_INTERPRETATION_API_URL)
