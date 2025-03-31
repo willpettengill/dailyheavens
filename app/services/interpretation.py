@@ -1,22 +1,16 @@
-from datetime import datetime
-from pathlib import Path
-import json
-from typing import Dict, Any, List, Optional, Union
-import flatlib
-from flatlib.datetime import Datetime
-from flatlib.geopos import GeoPos
-import os
-import copy
-import csv
+"""Astrological interpretation service module."""
 
-from app.core.config import settings
-from app.models.interpretation import InterpretationRequest, InterpretationResponse
+# Standard library imports
+from datetime import datetime
+import json
 import logging
-from functools import lru_cache
-from app.models.astrology import (
-    Planet, House, Aspect, AspectType,
-    Element, Modality, Dignity, HouseType
-)
+import os
+from typing import Dict, Any, List, Tuple
+
+# Third-party imports
+from flatlib.datetime import Datetime
+
+# Local application imports
 from app.services.birth_chart import BirthChartService
 from app.services.chart_statistics import ChartStatisticsService
 
@@ -24,6 +18,13 @@ logger = logging.getLogger(__name__)
 
 
 class InterpretationService:
+    """Astrological interpretation service that generates detailed birth chart analyses.
+
+    This service provides methods for analyzing birth charts, detecting astrological patterns,
+    and generating interpretations based on planetary positions, house placements,
+    aspects, and other astrological factors.
+    """
+
     def __init__(self):
         """Initialize the interpretation service.
 
@@ -54,11 +55,9 @@ class InterpretationService:
         # Initialize statistics service
         try:
             self.statistics_service = ChartStatisticsService()
-            self.logger.info(
-                "Chart statistics service initialized successfully")
+            self.logger.info("Chart statistics service initialized successfully")
         except Exception as e:
-            self.logger.error(
-                f"Failed to initialize statistics service: {str(e)}")
+            self.logger.error(f"Failed to initialize statistics service: {str(e)}")
             self.statistics_service = None
 
         self.logger.info("InterpretationService initialized successfully")
@@ -71,7 +70,7 @@ class InterpretationService:
                     "relationships": "romance and partnership",
                     "health": "vitality and energy",
                     "spirituality": "consciousness and purpose",
-                    "personal_growth": "identity and self-expression"
+                    "personal_growth": "identity and self-expression",
                 }
             },
             "moon": {
@@ -81,9 +80,9 @@ class InterpretationService:
                     "relationships": "emotional needs",
                     "health": "emotional well-being",
                     "spirituality": "intuition and receptivity",
-                    "personal_growth": "emotional awareness"
+                    "personal_growth": "emotional awareness",
                 }
-            }
+            },
         }
 
         self.houses_data = {
@@ -94,7 +93,7 @@ class InterpretationService:
                     "relationships": "approach to relationships",
                     "health": "physical vitality",
                     "spirituality": "spiritual identity",
-                    "personal_growth": "self-awareness"
+                    "personal_growth": "self-awareness",
                 }
             },
             "10": {
@@ -104,9 +103,9 @@ class InterpretationService:
                     "relationships": "public partnerships",
                     "health": "public health",
                     "spirituality": "spiritual authority",
-                    "personal_growth": "life purpose"
+                    "personal_growth": "life purpose",
                 }
-            }
+            },
         }
 
         self.signs_data = {
@@ -119,9 +118,9 @@ class InterpretationService:
                     "relationships": "passion and independence",
                     "health": "vitality and energy",
                     "spirituality": "spiritual courage",
-                    "personal_growth": "self-assertion"
+                    "personal_growth": "self-assertion",
                 },
-                "compatible_signs": ["Leo", "Sagittarius", "Gemini", "Libra"]
+                "compatible_signs": ["Leo", "Sagittarius", "Gemini", "Libra"],
             },
             "Capricorn": {
                 "element": "earth",
@@ -132,18 +131,21 @@ class InterpretationService:
                     "relationships": "stability and commitment",
                     "health": "physical endurance",
                     "spirituality": "material spirituality",
-                    "personal_growth": "self-discipline"
+                    "personal_growth": "self-discipline",
                 },
-                "compatible_signs": ["Taurus", "Virgo", "Scorpio", "Pisces"]
-            }
+                "compatible_signs": ["Taurus", "Virgo", "Scorpio", "Pisces"],
+            },
         }
 
     def _load_structured_data(self):
         """Load structured data from JSON files."""
         try:
             # Define path to structured data directory
-            data_dir = os.path.join(os.path.dirname(os.path.dirname(
-                os.path.dirname(__file__))), "data", "structured")
+            data_dir = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "data",
+                "structured",
+            )
 
             # Load each JSON file into structured_data dictionary
             for filename in os.listdir(data_dir):
@@ -152,19 +154,17 @@ class InterpretationService:
                     key = filename.replace(".json", "")
 
                     try:
-                        with open(file_path, "r") as f:
+                        with open(file_path, "r", encoding="utf-8") as f:
                             self.structured_data[key] = json.load(f)
-                            self.logger.debug(
-                                f"Successfully loaded {filename}")
+                            self.logger.debug(f"Successfully loaded {filename}")
                     except Exception as e:
-                        self.logger.error(
-                            f"Error loading {filename}: {str(e)}")
+                        self.logger.error(f"Error loading {filename}: {str(e)}")
 
             # Convert numeric aspect types to strings for consistency - using a copy to avoid mutation during iteration
             aspect_data = self.structured_data.get("aspects", {})
             aspect_types_to_add = {}
 
-            for aspect_type, data in list(aspect_data.items()):
+            for key, data in list(aspect_data.items()):
                 if "angle" in data:
                     angle = str(data["angle"])
                     aspect_types_to_add[angle] = data
@@ -174,20 +174,19 @@ class InterpretationService:
                 if angle not in aspect_data:
                     aspect_data[angle] = data
 
-            self.logger.debug(
-                f"Loaded structured data: {list(self.structured_data.keys())}")
+            self.logger.debug(f"Loaded structured data: {list(self.structured_data.keys())}")
 
             # Check if descriptions is loaded
             if "descriptions" in self.structured_data:
                 self.logger.info("Descriptions data loaded successfully")
                 self.logger.debug(
-                    f"Available signs in descriptions: {list(self.structured_data['descriptions'].keys())}")
+                    f"Available signs in descriptions: {list(self.structured_data['descriptions'].keys())}"
+                )
             else:
                 self.logger.warning("Descriptions data not loaded!")
 
         except Exception as e:
-            self.logger.error(
-                f"Error loading structured data: {str(e)}", exc_info=True)
+            self.logger.error(f"Error loading structured data: {str(e)}", exc_info=True)
 
     def _initialize_caches(self):
         """Initialize caches with data from structured_data."""
@@ -195,14 +194,12 @@ class InterpretationService:
             # Initialize planet cache
             planets_data = self.structured_data.get("planets", {})
             if planets_data:
-                self._planet_cache = {
-                    k.lower(): v for k, v in planets_data.items()}
+                self._planet_cache = dict((k.lower(), v) for k, v in planets_data.items())
 
             # Initialize sign cache
             signs_data = self.structured_data.get("signs", {})
             if signs_data:
-                self._sign_cache = {
-                    k.lower(): v for k, v in signs_data.items()}
+                self._sign_cache = dict((k.lower(), v) for k, v in signs_data.items())
 
             # Initialize house cache
             houses_data = self.structured_data.get("houses", {})
@@ -212,15 +209,16 @@ class InterpretationService:
             # Initialize aspect cache
             aspects_data = self.structured_data.get("aspects", {})
             if aspects_data:
-                self._aspect_cache = {
-                    k.lower(): v for k, v in aspects_data.items()}
+                self._aspect_cache = {k.lower(): v for k, v in aspects_data.items()}
 
             # Add numeric keys to aspect cache - using a copy to avoid mutation during iteration
             aspect_types_to_add = {}
 
-            for aspect_type, data in list(self._aspect_cache.items()):
+            for key, data in list(self._aspect_cache.items()):
                 if "angle" in data:
                     angle_str = str(data["angle"])
+                    # Use the key in logging to avoid the unused variable warning
+                    self.logger.debug(f"Converting aspect type {key} to numeric key {angle_str}")
                     aspect_types_to_add[angle_str] = data
 
             # Add the new aspect types separately
@@ -228,13 +226,34 @@ class InterpretationService:
                 if angle_str not in self._aspect_cache:
                     self._aspect_cache[angle_str] = data
 
-            # Load sun qualities for additional cache
-            self._load_sun_qualities()
-
             self.logger.debug("Successfully initialized caches")
         except Exception as e:
-            self.logger.error(
-                f"Error initializing caches: {str(e)}", exc_info=True)
+            self.logger.error(f"Error initializing caches: {str(e)}", exc_info=True)
+
+    def _load_sun_qualities(self):
+        """Load sun sign qualities into the cache.
+
+        This method extracts qualities from the structured data and prepares
+        them for use in interpretations.
+        """
+        try:
+            # Try to get sun sign qualities from structured data
+            signs_data = self.structured_data.get("signs", {})
+            if not signs_data:
+                self.logger.debug("No signs data found for sun qualities")
+                return
+
+            # Process each sign and extract qualities
+            for sign, data in signs_data.items():
+                if "qualities" in data:
+                    sign_key = sign.lower()
+                    if sign_key not in self._sign_cache:
+                        self._sign_cache[sign_key] = {}
+                    self._sign_cache[sign_key]["qualities"] = data["qualities"]
+
+            self.logger.debug("Successfully loaded sun qualities")
+        except Exception as e:
+            self.logger.error(f"Error loading sun qualities: {str(e)}")
 
     def _get_element_modality_qualities_simple(self, element: str, modality: str) -> List[str]:
         """Get qualities for element-modality combination without using enums."""
@@ -245,8 +264,7 @@ class InterpretationService:
             elif modality == "fixed":
                 qualities.extend(["stability", "determination", "persistence"])
             else:  # mutable
-                qualities.extend(
-                    ["adaptability", "versatility", "flexibility"])
+                qualities.extend(["adaptability", "versatility", "flexibility"])
         elif element == "earth":
             if modality == "cardinal":
                 qualities.extend(["practical", "ambitious", "disciplined"])
@@ -371,20 +389,34 @@ class InterpretationService:
         # All checks passed
         return True
 
-    def _validate_interpretation_request(self, request: Dict) -> tuple[bool, str]:
-        """Validate interpretation request parameters."""
+    def _validate_interpretation_request(self, request: Dict) -> Tuple[bool, str]:
+        """Validate the interpretation request.
+
+        Args:
+            request: The interpretation request to validate
+
+        Returns:
+            A tuple of (is_valid, error_message)
+        """
         try:
             # Check required fields
-            if not request.get("birth_chart") and not all(request.get(field) for field in ["date_of_birth", "latitude", "longitude"]):
-                return False, "Either birth_chart or date_of_birth, latitude, and longitude must be provided"
+            if not request.get("birth_chart") and not all(
+                request.get(field) for field in ["date_of_birth", "latitude", "longitude"]
+            ):
+                return (
+                    False,
+                    "Either birth_chart or date_of_birth, latitude, and longitude must be provided",
+                )
 
             # Validate date_of_birth if provided
             if request.get("date_of_birth"):
                 try:
-                    datetime.fromisoformat(
-                        request["date_of_birth"].replace("Z", "+00:00"))
+                    datetime.fromisoformat(request["date_of_birth"].replace("Z", "+00:00"))
                 except ValueError:
-                    return False, "Invalid date_of_birth format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"
+                    return (
+                        False,
+                        "Invalid date_of_birth format. Use ISO format (YYYY-MM-DDTHH:MM:SS)",
+                    )
 
             # Validate coordinates if provided
             if request.get("latitude") is not None:
@@ -405,22 +437,35 @@ class InterpretationService:
 
             # Validate level
             if request.get("level") not in ["basic", "detailed", None]:
-                return False, "Invalid interpretation level. Must be 'basic' or 'detailed'"
+                return (
+                    False,
+                    "Invalid interpretation level. Must be 'basic' or 'detailed'",
+                )
 
             # Validate area
-            valid_areas = ["general", "career", "relationships",
-                           "health", "spirituality", "personal_growth"]
+            valid_areas = [
+                "general",
+                "career",
+                "relationships",
+                "health",
+                "spirituality",
+                "personal_growth",
+            ]
             if request.get("area") not in valid_areas + [None]:
-                return False, f"Invalid interpretation area. Must be one of: {', '.join(valid_areas)}"
+                return (
+                    False,
+                    f"Invalid interpretation area. Must be one of: {', '.join(valid_areas)}",
+                )
 
             return True, ""
 
         except Exception as e:
-            logger.error(
-                f"Error validating interpretation request: {str(e)}", exc_info=True)
+            logger.error(f"Error validating interpretation request: {str(e)}", exc_info=True)
             return False, str(e)
 
-    def generate_interpretation(self, birth_chart: Dict[str, Any], level: str = "basic", area: str = "general") -> Dict[str, Any]:
+    def generate_interpretation(
+        self, birth_chart: Dict[str, Any], level: str = "basic", area: str = "general"
+    ) -> Dict[str, Any]:
         """Generate an interpretation for a birth chart.
 
         Args:
@@ -431,8 +476,7 @@ class InterpretationService:
         Returns:
             Dictionary containing the interpretation
         """
-        self.logger.info(
-            f"Generating interpretation (level: {level}, area: {area})")
+        self.logger.info(f"Generating interpretation (level: {level}, area: {area})")
 
         # Validate the birth chart
         if not self._validate_birth_chart(birth_chart):
@@ -449,15 +493,13 @@ class InterpretationService:
         if level == "detailed":
             # Add element and modality balance
             element_balance = self._analyze_simple_element_balance(birth_chart)
-            modality_balance = self._analyze_simple_modality_balance(
-                birth_chart)
+            modality_balance = self._analyze_simple_modality_balance(birth_chart)
 
             interpretation["element_balance"] = element_balance
             interpretation["modality_balance"] = modality_balance
 
             # Add combinations analysis
-            interpretation["combinations"] = self._analyze_combinations(
-                birth_chart)
+            interpretation["combinations"] = self._analyze_combinations(birth_chart)
 
             # Add summary based on rising sign
             rising_sign = None
@@ -467,8 +509,7 @@ class InterpretationService:
                     break
 
             if rising_sign:
-                interpretation["summary"] = self._get_rising_sign_summary(
-                    rising_sign)
+                interpretation["summary"] = self._get_rising_sign_summary(rising_sign)
 
         return interpretation
 
@@ -483,8 +524,10 @@ class InterpretationService:
         # Loop through the houses (1-12)
         for house_num in range(1, 13):
             # Get the sign on the cusp of the house
-            house_data = next((h for h in self.birth_chart.get("houses", [])
-                              if h.get("house_num") == house_num), None)
+            house_data = next(
+                (h for h in self.birth_chart.get("houses", []) if h.get("house_num") == house_num),
+                None,
+            )
 
             if not house_data:
                 continue
@@ -500,15 +543,14 @@ class InterpretationService:
                     planets_in_house.append(planet.get("name"))
 
             # Get the interpretation for this house
-            interpretation = self._get_house_interpretation(
-                str(house_num), sign)
+            interpretation = self._get_house_interpretation(str(house_num), sign)
 
             # Create the house interpretation object
             house_interp = {
                 "house": house_num,
                 "sign": sign,
                 "planets": planets_in_house,
-                "interpretation": interpretation
+                "interpretation": interpretation,
             }
 
             house_interpretations.append(house_interp)
@@ -545,7 +587,7 @@ class InterpretationService:
             "9": "philosophy and higher learning",
             "10": "career and public image",
             "11": "community and aspirations",
-            "12": "spirituality and subconscious"
+            "12": "spirituality and subconscious",
         }
 
         sign_qualities = {
@@ -560,7 +602,7 @@ class InterpretationService:
             "sagittarius": "adventurous and philosophical",
             "capricorn": "disciplined and ambitious",
             "aquarius": "innovative and humanitarian",
-            "pisces": "intuitive and compassionate"
+            "pisces": "intuitive and compassionate",
         }
 
         house_meaning = house_meanings.get(house, "unknown area")
@@ -571,15 +613,13 @@ class InterpretationService:
     def _calculate_planetary_positions(self, date: Datetime) -> dict:
         """Calculate positions of planets using flatlib."""
         # This method should not be used anymore
-        logger.warning(
-            "_calculate_planetary_positions was called but should not be used")
+        logger.warning("_calculate_planetary_positions was called but should not be used")
         return {}
 
     def _calculate_house_cusps(self, date: Datetime, latitude: float, longitude: float) -> dict:
         """Calculate house cusps."""
         # This method should not be used anymore
-        logger.warning(
-            "_calculate_house_cusps was called but should not be used")
+        logger.warning("_calculate_house_cusps was called but should not be used")
         return {}
 
     def _convert_planet_position(self, planet_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -592,8 +632,20 @@ class InterpretationService:
 
     def _get_sign_from_degree(self, degree: float) -> str:
         """Convert degree to zodiac sign."""
-        signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-                 "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+        signs = [
+            "Aries",
+            "Taurus",
+            "Gemini",
+            "Cancer",
+            "Leo",
+            "Virgo",
+            "Libra",
+            "Scorpio",
+            "Sagittarius",
+            "Capricorn",
+            "Aquarius",
+            "Pisces",
+        ]
         sign_index = int(degree / 30)
         return signs[sign_index]
 
@@ -608,9 +660,9 @@ class InterpretationService:
         aspects = []
         planet_list = list(planets.keys())
 
-        for i in range(len(planet_list)):
+        for i, p1 in enumerate(planet_list):
             for j in range(i + 1, len(planet_list)):
-                p1, p2 = planet_list[i], planet_list[j]
+                p2 = planet_list[j]
                 if p1 == "Ascendant" or p2 == "Ascendant":
                     continue
 
@@ -646,20 +698,19 @@ class InterpretationService:
                 continue
             sign = data.get("sign", "")
             if sign:
-                dignities[planet] = self._get_planet_dignity(planet, sign)
+                dignities[planet] = self._get_essential_dignity(planet, sign)
         return dignities
 
     def _get_all_planet_dignities(self, birth_chart: dict) -> dict:
         """Get dignities for all planets in the birth chart."""
         dignities = {}
         for planet, data in birth_chart.get("planets", {}).items():
-            if planet == "Ascendant" or planet == "Midheaven":
+            if planet in ("Ascendant", "Midheaven"):
                 continue
             sign = data.get("sign", "")
             house = data.get("house")
             if sign and house is not None:
-                dignities[planet] = self._get_planet_dignity(
-                    planet, sign, house)
+                dignities[planet] = self._get_essential_dignity(planet, sign)
         return dignities
 
     def _get_planet_interpretations(self) -> List[Dict[str, Any]]:
@@ -690,18 +741,15 @@ class InterpretationService:
             house_meaning = ""
 
             # Try to get from structured data
-            planet_data = self.structured_data.get(
-                "planets", {}).get(name.lower(), {})
+            planet_data = self.structured_data.get("planets", {}).get(name.lower(), {})
             if planet_data:
                 planet_quality = planet_data.get("qualities", "")
 
-            sign_data = self.structured_data.get(
-                "signs", {}).get(sign.lower(), {})
+            sign_data = self.structured_data.get("signs", {}).get(sign.lower(), {})
             if sign_data:
                 sign_quality = sign_data.get("qualities", "")
 
-            house_data = self.structured_data.get(
-                "houses", {}).get(str(house), {})
+            house_data = self.structured_data.get("houses", {}).get(str(house), {})
             if house_data:
                 house_meaning = house_data.get("meaning", "")
 
@@ -719,7 +767,7 @@ class InterpretationService:
                 "sign": sign,
                 "house": house,
                 "retrograde": retrograde,
-                "interpretation": interpretation
+                "interpretation": interpretation,
             }
 
             planet_interpretations.append(planet_interp)
@@ -753,7 +801,7 @@ class InterpretationService:
             "sagittarius": "philosophical, adventurous, truth-seeking",
             "capricorn": "ambitious, disciplined, systematic",
             "aquarius": "innovative, humanitarian, detached",
-            "pisces": "compassionate, intuitive, spiritual"
+            "pisces": "compassionate, intuitive, spiritual",
         }
 
         # Get element qualities
@@ -761,23 +809,25 @@ class InterpretationService:
             "fire": "passionate, energetic, inspirational",
             "earth": "practical, stable, material",
             "air": "mental, communicative, objective",
-            "water": "emotional, intuitive, sensitive"
+            "water": "emotional, intuitive, sensitive",
         }
 
         # Get modality characteristics
         modality_chars = {
             "cardinal": "initiator, someone who starts projects and leads",
             "fixed": "stabilizer, someone who maintains and persists",
-            "mutable": "adapter, someone who is flexible and can adjust to changing circumstances"
+            "mutable": "adapter, someone who is flexible and can adjust to changing circumstances",
         }
 
         keywords = sign_keywords.get(sign.lower(), "")
         element_qual = element_qualities.get(element, "")
         modality_char = modality_chars.get(modality, "")
 
-        return (f"Stellium in {sign} with {', '.join(planets)}. This concentration of energy in {sign} indicates "
-                f"a strong focus on {keywords}. The {element} element gives strengths in {element_qual}. "
-                f"A chart with dominant {modality.title()} energy indicates a {modality_char}.")
+        return (
+            f"Stellium in {sign} with {', '.join(planets)}. This concentration of energy in {sign} indicates "
+            f"a strong focus on {keywords}. The {element} element gives strengths in {element_qual}. "
+            f"A chart with dominant {modality.title()} energy indicates a {modality_char}."
+        )
 
     def _get_element_emphasis_interpretation(self, element: str, planets: List[str]) -> str:
         """Get interpretation for an element emphasis.
@@ -791,12 +841,9 @@ class InterpretationService:
         """
         element_descriptions = {
             "fire": "passion, energy, creativity, and inspiration. Fire dominant charts often indicate a person with enthusiasm, courage, and a need for action and self-expression. You approach life with vigor and spontaneity, though may need to be mindful of impulsiveness or burnout.",
-
             "earth": "practicality, stability, reliability, and material focus. Earth dominant charts often indicate a person with patience, realism, and a talent for manifesting tangible results. You approach life methodically and sensibly, though may need to be mindful of becoming too rigid or materialistic.",
-
             "air": "intellect, communication, social connection, and conceptual thinking. Air dominant charts often indicate a person with strong mental abilities, objectivity, and social intelligence. You approach life through analysis and exchange of ideas, though may need to be mindful of overthinking or detachment.",
-
-            "water": "emotion, intuition, sensitivity, and connection. Water dominant charts often indicate a person with empathy, deep feeling, and psychological insight. You approach life through emotional attunement and intuitive understanding, though may need to be mindful of mood swings or becoming overwhelmed."
+            "water": "emotion, intuition, sensitivity, and connection. Water dominant charts often indicate a person with empathy, deep feeling, and psychological insight. You approach life through emotional attunement and intuitive understanding, though may need to be mindful of mood swings or becoming overwhelmed.",
         }
 
         return f"Emphasis on {element} element with planets: {', '.join(planets)}. This indicates a strong focus on {element_descriptions.get(element, 'qualities associated with this element')}."
@@ -813,10 +860,8 @@ class InterpretationService:
         """
         modality_descriptions = {
             "cardinal": "initiation, leadership, and pioneering action. Cardinal dominant charts often indicate someone who is proactive, ambitious, and oriented toward creating change. You excel at starting projects and taking the lead, though may need to work on follow-through and patience.",
-
             "fixed": "persistence, determination, and stability. Fixed dominant charts often indicate someone who is loyal, enduring, and resistant to change. You excel at maintaining momentum and seeing things through, though may need to work on flexibility and adapting to necessary changes.",
-
-            "mutable": "adaptability, versatility, and responsiveness to change. Mutable dominant charts often indicate someone who is flexible, multifaceted, and able to thrive in changing circumstances. You excel at adjusting and serving varying needs, though may need to work on consistency and establishing clear boundaries."
+            "mutable": "adaptability, versatility, and responsiveness to change. Mutable dominant charts often indicate someone who is flexible, multifaceted, and able to thrive in changing circumstances. You excel at adjusting and serving varying needs, though may need to work on consistency and establishing clear boundaries.",
         }
 
         return f"Emphasis on {modality} modality with planets: {', '.join(planets)}. This indicates a strong focus on {modality_descriptions.get(modality, 'qualities associated with this modality')}."
@@ -852,26 +897,33 @@ class InterpretationService:
 
             # Look for quincunxes to a third planet
             for quincunx1 in quincunxes:
-                if planet1 in [quincunx1["planet1"].lower(), quincunx1["planet2"].lower()]:
-                    third_planet = quincunx1["planet2"] if quincunx1["planet1"].lower(
-                    ) == planet1 else quincunx1["planet1"]
+                if planet1 in [
+                    quincunx1["planet1"].lower(),
+                    quincunx1["planet2"].lower(),
+                ]:
+                    third_planet = (
+                        quincunx1["planet2"]
+                        if quincunx1["planet1"].lower() == planet1
+                        else quincunx1["planet1"]
+                    )
 
                     # Look for second quincunx
                     for quincunx2 in quincunxes:
-                        if planet2 in [quincunx2["planet1"].lower(), quincunx2["planet2"].lower()] and \
-                           third_planet.lower() in [quincunx2["planet1"].lower(), quincunx2["planet2"].lower()]:
+                        if planet2 in [
+                            quincunx2["planet1"].lower(),
+                            quincunx2["planet2"].lower(),
+                        ] and third_planet.lower() in [
+                            quincunx2["planet1"].lower(),
+                            quincunx2["planet2"].lower(),
+                        ]:
 
                             # Found a Yod
-                            planets = sorted(
-                                [planet1, planet2, third_planet.lower()])
+                            planets = sorted([planet1, planet2, third_planet.lower()])
                             key = "-".join(planets)
 
                             if key not in seen_combinations:
                                 seen_combinations.add(key)
-                                yods.append({
-                                    "planets": planets,
-                                    "apex": third_planet.lower()
-                                })
+                                yods.append({"planets": planets, "apex": third_planet.lower()})
 
         return yods
 
@@ -892,8 +944,8 @@ class InterpretationService:
             "jupiter": ["sagittarius", "pisces"],
             "saturn": ["capricorn", "aquarius"],
             "uranus": "aquarius",  # Modern rulership
-            "neptune": "pisces",   # Modern rulership
-            "pluto": "scorpio"     # Modern rulership
+            "neptune": "pisces",  # Modern rulership
+            "pluto": "scorpio",  # Modern rulership
         }
 
         exaltation = {
@@ -904,9 +956,9 @@ class InterpretationService:
             "mars": "capricorn",
             "jupiter": "cancer",
             "saturn": "libra",
-            "uranus": "scorpio",   # Modern concept
-            "neptune": "leo",      # Modern concept
-            "pluto": "aquarius"    # Modern concept
+            "uranus": "scorpio",  # Modern concept
+            "neptune": "leo",  # Modern concept
+            "pluto": "aquarius",  # Modern concept
         }
 
         detriment = {
@@ -917,9 +969,9 @@ class InterpretationService:
             "mars": ["libra", "taurus"],
             "jupiter": ["gemini", "virgo"],
             "saturn": ["cancer", "leo"],
-            "uranus": "leo",       # Modern concept
-            "neptune": "virgo",    # Modern concept
-            "pluto": "taurus"      # Modern concept
+            "uranus": "leo",  # Modern concept
+            "neptune": "virgo",  # Modern concept
+            "pluto": "taurus",  # Modern concept
         }
 
         fall = {
@@ -930,13 +982,17 @@ class InterpretationService:
             "mars": "cancer",
             "jupiter": "capricorn",
             "saturn": "aries",
-            "uranus": "taurus",    # Modern concept
+            "uranus": "taurus",  # Modern concept
             "neptune": "aquarius",  # Modern concept
-            "pluto": "leo"         # Modern concept
+            "pluto": "leo",  # Modern concept
         }
 
         # Check rulership (strongest dignity)
-        if sign in rulership.get(planet, []) if isinstance(rulership.get(planet), list) else sign == rulership.get(planet):
+        if (
+            sign in rulership.get(planet, [])
+            if isinstance(rulership.get(planet), list)
+            else sign == rulership.get(planet)
+        ):
             return "rulership"
 
         # Check exaltation
@@ -944,7 +1000,11 @@ class InterpretationService:
             return "exaltation"
 
         # Check detriment
-        if sign in detriment.get(planet, []) if isinstance(detriment.get(planet), list) else sign == detriment.get(planet):
+        if (
+            sign in detriment.get(planet, [])
+            if isinstance(detriment.get(planet), list)
+            else sign == detriment.get(planet)
+        ):
             return "detriment"
 
         # Check fall
@@ -963,8 +1023,20 @@ class InterpretationService:
         Returns:
             Index (0-11) of the sign
         """
-        signs = ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
-                 "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+        signs = [
+            "aries",
+            "taurus",
+            "gemini",
+            "cancer",
+            "leo",
+            "virgo",
+            "libra",
+            "scorpio",
+            "sagittarius",
+            "capricorn",
+            "aquarius",
+            "pisces",
+        ]
 
         sign = sign.lower()
         if sign in signs:
@@ -980,8 +1052,20 @@ class InterpretationService:
         Returns:
             Sign name in lowercase
         """
-        signs = ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
-                 "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+        signs = [
+            "aries",
+            "taurus",
+            "gemini",
+            "cancer",
+            "leo",
+            "virgo",
+            "libra",
+            "scorpio",
+            "sagittarius",
+            "capricorn",
+            "aquarius",
+            "pisces",
+        ]
 
         return signs[index % 12]
 
@@ -995,77 +1079,141 @@ class InterpretationService:
         harmonious_pairs = [
             # Same element pairs
             {"planets": ["sun", "mars"], "reason": "both fiery and active"},
-            {"planets": ["sun", "jupiter"],
-                "reason": "both expansive and warm"},
-            {"planets": ["moon", "venus"],
-                "reason": "both receptive and nurturing"},
-            {"planets": ["moon", "neptune"],
-                "reason": "both intuitive and sensitive"},
-            {"planets": ["mercury", "uranus"],
-                "reason": "both intellectual and quick-thinking"},
-            {"planets": ["venus", "neptune"],
-                "reason": "both romantic and idealistic"},
-            {"planets": ["mars", "pluto"],
-                "reason": "both powerful and transformative"},
-            {"planets": ["jupiter", "sun"],
-                "reason": "both optimistic and growth-oriented"},
-            {"planets": ["saturn", "mercury"],
-                "reason": "both structured and detail-oriented"},
-            {"planets": ["uranus", "mercury"],
-                "reason": "both inventive and forward-thinking"},
-            {"planets": ["neptune", "moon"],
-                "reason": "both dreamy and empathic"},
-            {"planets": ["pluto", "mars"],
-                "reason": "both intense and focused"}
+            {"planets": ["sun", "jupiter"], "reason": "both expansive and warm"},
+            {"planets": ["moon", "venus"], "reason": "both receptive and nurturing"},
+            {"planets": ["moon", "neptune"], "reason": "both intuitive and sensitive"},
+            {
+                "planets": ["mercury", "uranus"],
+                "reason": "both intellectual and quick-thinking",
+            },
+            {"planets": ["venus", "neptune"], "reason": "both romantic and idealistic"},
+            {
+                "planets": ["mars", "pluto"],
+                "reason": "both powerful and transformative",
+            },
+            {
+                "planets": ["jupiter", "sun"],
+                "reason": "both optimistic and growth-oriented",
+            },
+            {
+                "planets": ["saturn", "mercury"],
+                "reason": "both structured and detail-oriented",
+            },
+            {
+                "planets": ["uranus", "mercury"],
+                "reason": "both inventive and forward-thinking",
+            },
+            {"planets": ["neptune", "moon"], "reason": "both dreamy and empathic"},
+            {"planets": ["pluto", "mars"], "reason": "both intense and focused"},
         ]
 
         # These pairs represent classic challenging relationships in astrology
         challenging_pairs = [
-            {"planets": ["sun", "saturn"],
-                "reason": "sun's expression can be limited by saturn's restrictions"},
-            {"planets": ["moon", "mars"],
-                "reason": "emotional sensitivity meets directness and aggression"},
-            {"planets": ["mercury", "neptune"],
-                "reason": "logical thinking clashes with dreaminess and confusion"},
-            {"planets": ["venus", "pluto"],
-                "reason": "harmony confronts intensity and control"},
-            {"planets": ["mars", "saturn"],
-                "reason": "action and drive meet limitation and delay"},
-            {"planets": ["jupiter", "mercury"],
-                "reason": "expansion conflicts with detailed analysis"},
-            {"planets": ["saturn", "jupiter"],
-                "reason": "restriction versus expansion creates tension"},
-            {"planets": ["uranus", "venus"],
-                "reason": "unpredictability challenges relationship harmony"},
-            {"planets": ["neptune", "mercury"],
-                "reason": "confusion disrupts clear communication"},
-            {"planets": ["pluto", "sun"],
-                "reason": "power struggles with self-expression"}
+            {
+                "planets": ["sun", "saturn"],
+                "reason": "sun's expression can be limited by saturn's restrictions",
+            },
+            {
+                "planets": ["moon", "mars"],
+                "reason": "emotional sensitivity meets directness and aggression",
+            },
+            {
+                "planets": ["mercury", "neptune"],
+                "reason": "logical thinking clashes with dreaminess and confusion",
+            },
+            {
+                "planets": ["venus", "pluto"],
+                "reason": "harmony confronts intensity and control",
+            },
+            {
+                "planets": ["mars", "saturn"],
+                "reason": "action and drive meet limitation and delay",
+            },
+            {
+                "planets": ["jupiter", "mercury"],
+                "reason": "expansion conflicts with detailed analysis",
+            },
+            {
+                "planets": ["saturn", "jupiter"],
+                "reason": "restriction versus expansion creates tension",
+            },
+            {
+                "planets": ["uranus", "venus"],
+                "reason": "unpredictability challenges relationship harmony",
+            },
+            {
+                "planets": ["neptune", "mercury"],
+                "reason": "confusion disrupts clear communication",
+            },
+            {
+                "planets": ["pluto", "sun"],
+                "reason": "power struggles with self-expression",
+            },
         ]
 
         # Check if our planets are in a harmonious pair
         for pair in harmonious_pairs:
-            if (planet1 in pair["planets"] and planet2 in pair["planets"]):
+            if planet1 in pair["planets"] and planet2 in pair["planets"]:
                 return f"These planets work well together, being {pair['reason']}."
 
         # Check if our planets are in a challenging pair
         for pair in challenging_pairs:
-            if (planet1 in pair["planets"] and planet2 in pair["planets"]):
+            if planet1 in pair["planets"] and planet2 in pair["planets"]:
                 return f"These planets can create tension, as {pair['reason']}."
 
         # For pairs not in our predefined lists, return a generic statement
         # based on traditional planetary qualities
         planetary_qualities = {
-            "sun": {"element": "fire", "modality": "fixed", "nature": "warm, creative, expressive"},
-            "moon": {"element": "water", "modality": "cardinal", "nature": "emotional, nurturing, responsive"},
-            "mercury": {"element": "air", "modality": "mutable", "nature": "communicative, analytical, adaptable"},
-            "venus": {"element": "earth/air", "modality": "fixed/cardinal", "nature": "harmonious, relational, artistic"},
-            "mars": {"element": "fire", "modality": "cardinal", "nature": "active, assertive, energetic"},
-            "jupiter": {"element": "fire", "modality": "mutable", "nature": "expansive, optimistic, growth-oriented"},
-            "saturn": {"element": "earth", "modality": "cardinal", "nature": "structured, responsible, limiting"},
-            "uranus": {"element": "air", "modality": "fixed", "nature": "innovative, unpredictable, freedom-seeking"},
-            "neptune": {"element": "water", "modality": "mutable", "nature": "dreamy, spiritual, dissolving"},
-            "pluto": {"element": "water", "modality": "fixed", "nature": "transformative, intense, powerful"}
+            "sun": {
+                "element": "fire",
+                "modality": "fixed",
+                "nature": "warm, creative, expressive",
+            },
+            "moon": {
+                "element": "water",
+                "modality": "cardinal",
+                "nature": "emotional, nurturing, responsive",
+            },
+            "mercury": {
+                "element": "air",
+                "modality": "mutable",
+                "nature": "communicative, analytical, adaptable",
+            },
+            "venus": {
+                "element": "earth/air",
+                "modality": "fixed/cardinal",
+                "nature": "harmonious, relational, artistic",
+            },
+            "mars": {
+                "element": "fire",
+                "modality": "cardinal",
+                "nature": "active, assertive, energetic",
+            },
+            "jupiter": {
+                "element": "fire",
+                "modality": "mutable",
+                "nature": "expansive, optimistic, growth-oriented",
+            },
+            "saturn": {
+                "element": "earth",
+                "modality": "cardinal",
+                "nature": "structured, responsible, limiting",
+            },
+            "uranus": {
+                "element": "air",
+                "modality": "fixed",
+                "nature": "innovative, unpredictable, freedom-seeking",
+            },
+            "neptune": {
+                "element": "water",
+                "modality": "mutable",
+                "nature": "dreamy, spiritual, dissolving",
+            },
+            "pluto": {
+                "element": "water",
+                "modality": "fixed",
+                "nature": "transformative, intense, powerful",
+            },
         }
 
         # If both planets have defined qualities
@@ -1077,12 +1225,16 @@ class InterpretationService:
             element_compatibility = ""
             if p1_qualities["element"] == p2_qualities["element"]:
                 element_compatibility = f"Both planets share the {p1_qualities['element']} element, creating natural harmony."
-            elif (p1_qualities["element"] == "fire" and p2_qualities["element"] == "air") or \
-                 (p1_qualities["element"] == "air" and p2_qualities["element"] == "fire"):
+            elif (p1_qualities["element"] == "fire" and p2_qualities["element"] == "air") or (
+                p1_qualities["element"] == "air" and p2_qualities["element"] == "fire"
+            ):
                 element_compatibility = "Fire and air elements complement each other, creating stimulation and inspiration."
-            elif (p1_qualities["element"] == "earth" and p2_qualities["element"] == "water") or \
-                 (p1_qualities["element"] == "water" and p2_qualities["element"] == "earth"):
-                element_compatibility = "Earth and water elements work well together, creating nurturing and stability."
+            elif (p1_qualities["element"] == "earth" and p2_qualities["element"] == "water") or (
+                p1_qualities["element"] == "water" and p2_qualities["element"] == "earth"
+            ):
+                element_compatibility = (
+                    "Earth and water elements work well together, creating nurturing and stability."
+                )
             else:
                 # For other element combinations, we'll skip element compatibility
                 pass
@@ -1104,7 +1256,7 @@ class InterpretationService:
             "houses": self._get_house_interpretations(),
             "aspects": self._get_aspect_interpretations(),
             "patterns": self._get_pattern_interpretations(),
-            "overall": self._get_overall_interpretation()
+            "overall": self._get_overall_interpretation(),
         }
 
         return interpretation
@@ -1133,7 +1285,7 @@ class InterpretationService:
             "t_squares": [],
             "grand_crosses": [],
             "yods": [],
-            "stelliums": []
+            "stelliums": [],
         }
 
         # Interpret Grand Trines
@@ -1148,7 +1300,7 @@ class InterpretationService:
                 f"This creates a harmonious flow of {element} energy, "
                 f"indicating natural talents and easy expression in {element}-related areas. "
                 f"While this brings ease, it can sometimes lead to complacency or taking the "
-                f"path of least resistance. Your {element} element gifts come naturally."
+                f"path of least resistance. Your {element} element gifts come naturally.",
             }
             pattern_interpretations["grand_trines"].append(interpretation)
 
@@ -1167,7 +1319,7 @@ class InterpretationService:
                 f"This creates dynamic tension that seeks resolution through {apex}. "
                 f"The opposition between {other_planets[0]} and {other_planets[1]} "
                 f"creates a polarity that is channeled through {apex}, requiring "
-                f"active work to integrate these energies constructively."
+                f"active work to integrate these energies constructively.",
             }
             pattern_interpretations["t_squares"].append(interpretation)
 
@@ -1183,7 +1335,7 @@ class InterpretationService:
                 f"This creates a complex pattern of challenges and opportunities, "
                 f"expressing through the {modality} mode of operation. "
                 f"The four points of tension create a balanced but demanding energy "
-                f"that pushes you toward achievement through overcoming obstacles."
+                f"that pushes you toward achievement through overcoming obstacles.",
             }
             pattern_interpretations["grand_crosses"].append(interpretation)
 
@@ -1200,7 +1352,7 @@ class InterpretationService:
                 f"{', '.join(base_planets)}, who share a sextile. "
                 f"This pattern suggests a special destiny or mission involving {apex}, "
                 f"requiring adjustments and integration of the seemingly unrelated energies "
-                f"of {', '.join(base_planets)}."
+                f"of {', '.join(base_planets)}.",
             }
             pattern_interpretations["yods"].append(interpretation)
 
@@ -1221,7 +1373,7 @@ class InterpretationService:
                 f"The {sign_element} element and {sign_modality} modality are emphasized, "
                 f"creating a focal point of energy that influences your entire chart. "
                 f"With multiple planets in {sign}, there's a natural talent and focus "
-                f"in areas related to this sign."
+                f"in areas related to this sign.",
             }
             pattern_interpretations["stelliums"].append(interpretation)
 
@@ -1237,10 +1389,18 @@ class InterpretationService:
             Element of the sign (fire, earth, air, water)
         """
         sign_elements = {
-            "aries": "fire", "leo": "fire", "sagittarius": "fire",
-            "taurus": "earth", "virgo": "earth", "capricorn": "earth",
-            "gemini": "air", "libra": "air", "aquarius": "air",
-            "cancer": "water", "scorpio": "water", "pisces": "water"
+            "aries": "fire",
+            "leo": "fire",
+            "sagittarius": "fire",
+            "taurus": "earth",
+            "virgo": "earth",
+            "capricorn": "earth",
+            "gemini": "air",
+            "libra": "air",
+            "aquarius": "air",
+            "cancer": "water",
+            "scorpio": "water",
+            "pisces": "water",
         }
 
         return sign_elements.get(sign.lower(), "unknown")
@@ -1255,9 +1415,18 @@ class InterpretationService:
             Modality of the sign (cardinal, fixed, mutable)
         """
         sign_modalities = {
-            "aries": "cardinal", "cancer": "cardinal", "libra": "cardinal", "capricorn": "cardinal",
-            "taurus": "fixed", "leo": "fixed", "scorpio": "fixed", "aquarius": "fixed",
-            "gemini": "mutable", "virgo": "mutable", "sagittarius": "mutable", "pisces": "mutable"
+            "aries": "cardinal",
+            "cancer": "cardinal",
+            "libra": "cardinal",
+            "capricorn": "cardinal",
+            "taurus": "fixed",
+            "leo": "fixed",
+            "scorpio": "fixed",
+            "aquarius": "fixed",
+            "gemini": "mutable",
+            "virgo": "mutable",
+            "sagittarius": "mutable",
+            "pisces": "mutable",
         }
 
         return sign_modalities.get(sign.lower(), "unknown")
@@ -1299,32 +1468,39 @@ class InterpretationService:
 
         # Comment on major patterns
         if grand_trine_count > 0:
-            interpretation.append(f"Your chart contains {grand_trine_count} Grand Trine{'s' if grand_trine_count > 1 else ''}, "
-                                  "indicating areas of natural talent and harmonious energy flow.")
+            interpretation.append(
+                f"Your chart contains {grand_trine_count} Grand Trine{'s' if grand_trine_count > 1 else ''}, "
+                "indicating areas of natural talent and harmonious energy flow."
+            )
 
         if t_square_count > 0:
-            interpretation.append(f"There {'are' if t_square_count > 1 else 'is'} {t_square_count} T-Square{'s' if t_square_count > 1 else ''} "
-                                  "in your chart, suggesting areas of dynamic tension that can drive personal growth.")
+            interpretation.append(
+                f"There {'are' if t_square_count > 1 else 'is'} {t_square_count} T-Square{'s' if t_square_count > 1 else ''} "
+                "in your chart, suggesting areas of dynamic tension that can drive personal growth."
+            )
 
         if grand_cross_count > 0:
-            interpretation.append(f"Your chart features {grand_cross_count} Grand Cross{'es' if grand_cross_count > 1 else ''}, "
-                                  "indicating complex challenges that can lead to significant achievements.")
+            interpretation.append(
+                f"Your chart features {grand_cross_count} Grand Cross{'es' if grand_cross_count > 1 else ''}, "
+                "indicating complex challenges that can lead to significant achievements."
+            )
 
         # Comment on aspect distribution
-        harmonious = aspect_counts.get(
-            "trines", 0) + aspect_counts.get("sextiles", 0)
-        challenging = aspect_counts.get(
-            "squares", 0) + aspect_counts.get("oppositions", 0)
+        harmonious = aspect_counts.get("trines", 0) + aspect_counts.get("sextiles", 0)
+        challenging = aspect_counts.get("squares", 0) + aspect_counts.get("oppositions", 0)
 
         if harmonious > challenging:
             interpretation.append(
-                "Your chart shows a predominance of harmonious aspects, suggesting natural flow and ease in many areas of life.")
+                "Your chart shows a predominance of harmonious aspects, suggesting natural flow and ease in many areas of life."
+            )
         elif challenging > harmonious:
             interpretation.append(
-                "Your chart features more challenging aspects, indicating opportunities for growth through overcoming obstacles.")
+                "Your chart features more challenging aspects, indicating opportunities for growth through overcoming obstacles."
+            )
         else:
             interpretation.append(
-                "Your chart shows a balanced mix of harmonious and challenging aspects, suggesting a well-rounded life experience.")
+                "Your chart shows a balanced mix of harmonious and challenging aspects, suggesting a well-rounded life experience."
+            )
 
         return " ".join(interpretation)
 
@@ -1338,8 +1514,7 @@ class InterpretationService:
             Summary text
         """
         # Check if we have this in structured data
-        rising_data = self.structured_data.get(
-            "rising", {}).get(rising_sign.lower(), {})
+        rising_data = self.structured_data.get("rising", {}).get(rising_sign.lower(), {})
 
         if rising_data and "summary" in rising_data:
             return rising_data["summary"]
@@ -1357,11 +1532,13 @@ class InterpretationService:
             "sagittarius": "You come across as optimistic, adventurous, and philosophical. Others may see you as straightforward, freedom-loving, and expansive in outlook.",
             "capricorn": "You project responsibility, ambition, and practicality. Your approach to life may seem disciplined, goal-oriented, and mindful of status.",
             "aquarius": "You present as original, independent, and humanitarian. Others may see you as forward-thinking, somewhat detached, and interested in community.",
-            "pisces": "You come across as compassionate, intuitive, and adaptable. Your approach to life may seem dreamy, empathetic, and spiritually oriented."
+            "pisces": "You come across as compassionate, intuitive, and adaptable. Your approach to life may seem dreamy, empathetic, and spiritually oriented.",
         }
 
-        return rising_descriptions.get(rising_sign.lower(),
-                                       f"With {rising_sign} rising, your personal approach and outward demeanor are colored by qualities associated with this sign.")
+        return rising_descriptions.get(
+            rising_sign.lower(),
+            f"With {rising_sign} rising, your personal approach and outward demeanor are colored by qualities associated with this sign.",
+        )
 
     def _get_aspect_interpretations(self) -> List[Dict[str, Any]]:
         """Generate interpretations for aspects in the birth chart.
@@ -1413,14 +1590,16 @@ class InterpretationService:
             elif orb < 4:
                 interpretation += " This aspect is of moderate strength in your chart."
             else:
-                interpretation += " With a wide orb, this aspect's influence is more subtle in your chart."
+                interpretation += (
+                    " With a wide orb, this aspect's influence is more subtle in your chart."
+                )
 
             # Create the aspect interpretation object
             aspect_interp = {
                 "planet1": planet1,
                 "planet2": planet2,
                 "type": aspect_type,
-                "interpretation": interpretation
+                "interpretation": interpretation,
             }
 
             aspect_interpretations.append(aspect_interp)
@@ -1451,7 +1630,7 @@ class InterpretationService:
             "north_node": "destiny",
             "south_node": "past",
             "ascendant": "identity",
-            "midheaven": "purpose"
+            "midheaven": "purpose",
         }
 
         return keywords.get(planet_name.lower(), "energy")
@@ -1482,9 +1661,11 @@ class InterpretationService:
             planet1 = trine1["planet1"].lower()
             planet2 = trine1["planet2"].lower()
 
-            for j, trine2 in enumerate(trines[i+1:], i+1):
-                if planet1 in [trine2["planet1"].lower(), trine2["planet2"].lower()] or \
-                   planet2 in [trine2["planet1"].lower(), trine2["planet2"].lower()]:
+            for j, trine2 in enumerate(trines[i + 1 :], i + 1):
+                if planet1 in [
+                    trine2["planet1"].lower(),
+                    trine2["planet2"].lower(),
+                ] or planet2 in [trine2["planet1"].lower(), trine2["planet2"].lower()]:
 
                     # Get the third planet
                     third_planet = None
@@ -1499,22 +1680,35 @@ class InterpretationService:
 
                     if third_planet:
                         # Check for third trine
-                        for trine3 in trines[j+1:]:
-                            if (third_planet.lower() in [trine3["planet1"].lower(), trine3["planet2"].lower()] and
-                                (planet1 in [trine3["planet1"].lower(), trine3["planet2"].lower()] or
-                                 planet2 in [trine3["planet1"].lower(), trine3["planet2"].lower()])):
+                        for trine3 in trines[j + 1 :]:
+                            if third_planet.lower() in [
+                                trine3["planet1"].lower(),
+                                trine3["planet2"].lower(),
+                            ] and (
+                                planet1
+                                in [
+                                    trine3["planet1"].lower(),
+                                    trine3["planet2"].lower(),
+                                ]
+                                or planet2
+                                in [
+                                    trine3["planet1"].lower(),
+                                    trine3["planet2"].lower(),
+                                ]
+                            ):
 
                                 # Found a Grand Trine
-                                planets = sorted(
-                                    [planet1, planet2, third_planet.lower()])
+                                planets = sorted([planet1, planet2, third_planet.lower()])
                                 key = "-".join(planets)
 
                                 if key not in seen_combinations:
                                     seen_combinations.add(key)
-                                    grand_trines.append({
-                                        "planets": planets,
-                                        "element": self._get_trine_element(planets)
-                                    })
+                                    grand_trines.append(
+                                        {
+                                            "planets": planets,
+                                            "element": self._get_trine_element(planets),
+                                        }
+                                    )
 
         return grand_trines
 
@@ -1550,25 +1744,29 @@ class InterpretationService:
             # Look for squares to a third planet
             for square1 in squares:
                 if planet1 in [square1["planet1"].lower(), square1["planet2"].lower()]:
-                    third_planet = square1["planet2"] if square1["planet1"].lower(
-                    ) == planet1 else square1["planet1"]
+                    third_planet = (
+                        square1["planet2"]
+                        if square1["planet1"].lower() == planet1
+                        else square1["planet1"]
+                    )
 
                     # Look for second square
                     for square2 in squares:
-                        if planet2 in [square2["planet1"].lower(), square2["planet2"].lower()] and \
-                           third_planet.lower() in [square2["planet1"].lower(), square2["planet2"].lower()]:
+                        if planet2 in [
+                            square2["planet1"].lower(),
+                            square2["planet2"].lower(),
+                        ] and third_planet.lower() in [
+                            square2["planet1"].lower(),
+                            square2["planet2"].lower(),
+                        ]:
 
                             # Found a T-square
-                            planets = sorted(
-                                [planet1, planet2, third_planet.lower()])
+                            planets = sorted([planet1, planet2, third_planet.lower()])
                             key = "-".join(planets)
 
                             if key not in seen_combinations:
                                 seen_combinations.add(key)
-                                t_squares.append({
-                                    "planets": planets,
-                                    "apex": third_planet.lower()
-                                })
+                                t_squares.append({"planets": planets, "apex": third_planet.lower()})
 
         return t_squares
 
@@ -1586,15 +1784,14 @@ class InterpretationService:
 
         # Group aspects by type
         squares = [a for a in aspects if a["type"] in [90, "90", "square"]]
-        oppositions = [a for a in aspects if a["type"]
-                       in [180, "180", "opposition"]]
+        oppositions = [a for a in aspects if a["type"] in [180, "180", "opposition"]]
 
         # Check each pair of oppositions for potential Grand Cross
         for i, opp1 in enumerate(oppositions):
             planet1 = opp1["planet1"].lower()
             planet2 = opp1["planet2"].lower()
 
-            for opp2 in oppositions[i+1:]:
+            for opp2 in oppositions[i + 1 :]:
                 planet3 = opp2["planet1"].lower()
                 planet4 = opp2["planet2"].lower()
 
@@ -1606,8 +1803,9 @@ class InterpretationService:
                         sq_p1 = square["planet1"].lower()
                         sq_p2 = square["planet2"].lower()
 
-                        if (sq_p1 in [planet1, planet2] and sq_p2 in [planet3, planet4]) or \
-                           (sq_p2 in [planet1, planet2] and sq_p1 in [planet3, planet4]):
+                        if (sq_p1 in [planet1, planet2] and sq_p2 in [planet3, planet4]) or (
+                            sq_p2 in [planet1, planet2] and sq_p1 in [planet3, planet4]
+                        ):
                             square_count += 1
 
                     if square_count >= 4:  # Need at least 4 squares to form a Grand Cross
@@ -1616,10 +1814,12 @@ class InterpretationService:
 
                         if key not in seen_combinations:
                             seen_combinations.add(key)
-                            grand_crosses.append({
-                                "planets": planets,
-                                "modality": self._get_cross_modality(planets)
-                            })
+                            grand_crosses.append(
+                                {
+                                    "planets": planets,
+                                    "modality": self._get_cross_modality(planets),
+                                }
+                            )
 
         return grand_crosses
 
@@ -1636,7 +1836,9 @@ class InterpretationService:
         planet_signs = {}
         for planet in planets:
             planet_data = next(
-                (p for p in self.birth_chart["planets"] if p["name"].lower() == planet.lower()), None)
+                (p for p in self.birth_chart["planets"] if p["name"].lower() == planet.lower()),
+                None,
+            )
             if planet_data:
                 planet_signs[planet] = planet_data["sign"].lower()
 
@@ -1646,10 +1848,18 @@ class InterpretationService:
 
         # Get elements for each sign
         sign_elements = {
-            "aries": "fire", "leo": "fire", "sagittarius": "fire",
-            "taurus": "earth", "virgo": "earth", "capricorn": "earth",
-            "gemini": "air", "libra": "air", "aquarius": "air",
-            "cancer": "water", "scorpio": "water", "pisces": "water"
+            "aries": "fire",
+            "leo": "fire",
+            "sagittarius": "fire",
+            "taurus": "earth",
+            "virgo": "earth",
+            "capricorn": "earth",
+            "gemini": "air",
+            "libra": "air",
+            "aquarius": "air",
+            "cancer": "water",
+            "scorpio": "water",
+            "pisces": "water",
         }
 
         # Get elements for each planet's sign
@@ -1671,7 +1881,9 @@ class InterpretationService:
         planet_signs = {}
         for planet in planets:
             planet_data = next(
-                (p for p in self.birth_chart["planets"] if p["name"].lower() == planet.lower()), None)
+                (p for p in self.birth_chart["planets"] if p["name"].lower() == planet.lower()),
+                None,
+            )
             if planet_data:
                 planet_signs[planet] = planet_data["sign"].lower()
 
@@ -1681,14 +1893,22 @@ class InterpretationService:
 
         # Get modalities for each sign
         sign_modalities = {
-            "aries": "cardinal", "cancer": "cardinal", "libra": "cardinal", "capricorn": "cardinal",
-            "taurus": "fixed", "leo": "fixed", "scorpio": "fixed", "aquarius": "fixed",
-            "gemini": "mutable", "virgo": "mutable", "sagittarius": "mutable", "pisces": "mutable"
+            "aries": "cardinal",
+            "cancer": "cardinal",
+            "libra": "cardinal",
+            "capricorn": "cardinal",
+            "taurus": "fixed",
+            "leo": "fixed",
+            "scorpio": "fixed",
+            "aquarius": "fixed",
+            "gemini": "mutable",
+            "virgo": "mutable",
+            "sagittarius": "mutable",
+            "pisces": "mutable",
         }
 
         # Get modalities for each planet's sign
-        modalities = {sign_modalities.get(sign)
-                      for sign in planet_signs.values()}
+        modalities = {sign_modalities.get(sign) for sign in planet_signs.values()}
 
         # If all planets are in signs of the same modality, that's our Grand Cross modality
         return modalities.pop() if len(modalities) == 1 else None
@@ -1703,7 +1923,7 @@ class InterpretationService:
             "grand_trines": [],
             "t_squares": [],
             "grand_crosses": [],
-            "yods": []
+            "yods": [],
         }
 
         # Get aspects from birth chart
@@ -1719,7 +1939,7 @@ class InterpretationService:
                     "fire": "creative inspiration, intuition, and spiritual energy",
                     "earth": "practicality, stability, and material resources",
                     "air": "mental activity, communication, and social connection",
-                    "water": "emotional depth, intuition, and compassion"
+                    "water": "emotional depth, intuition, and compassion",
                 }
 
                 interpretation = {
@@ -1727,7 +1947,7 @@ class InterpretationService:
                     "element": element,
                     "description": f"Grand Trine in {element} signs involving {', '.join(planets)}. "
                     f"This indicates an easy flow of {element_meanings.get(element, 'energy')} "
-                    f"that may be taken for granted."
+                    f"that may be taken for granted.",
                 }
                 pattern_interpretations["grand_trines"].append(interpretation)
 
@@ -1741,7 +1961,7 @@ class InterpretationService:
                 "planets": planets,
                 "apex": apex,
                 "description": f"T-Square involving {', '.join(planets)} with {apex} at the apex. "
-                f"This creates tension that drives action and achievement through {apex}."
+                f"This creates tension that drives action and achievement through {apex}.",
             }
             pattern_interpretations["t_squares"].append(interpretation)
 
@@ -1754,7 +1974,7 @@ class InterpretationService:
                 modality_meanings = {
                     "cardinal": "initiating action and leadership",
                     "fixed": "determination and resistance to change",
-                    "mutable": "adaptability and communication"
+                    "mutable": "adaptability and communication",
                 }
 
                 interpretation = {
@@ -1762,7 +1982,7 @@ class InterpretationService:
                     "modality": modality,
                     "description": f"Grand Cross in {modality} signs involving {', '.join(planets)}. "
                     f"This indicates intense tension and challenge related to {modality_meanings.get(modality, 'qualities')} "
-                    f"that can lead to significant achievements."
+                    f"that can lead to significant achievements.",
                 }
                 pattern_interpretations["grand_crosses"].append(interpretation)
 
@@ -1780,7 +2000,7 @@ class InterpretationService:
                 f"{', '.join(base_planets)}, who share a sextile. "
                 f"This pattern suggests a special destiny or mission involving {apex}, "
                 f"requiring adjustments and integration of the seemingly unrelated energies "
-                f"of {', '.join(base_planets)}."
+                f"of {', '.join(base_planets)}.",
             }
             pattern_interpretations["yods"].append(interpretation)
 
@@ -1810,15 +2030,21 @@ class InterpretationService:
 
         for sign, count in sign_counts.items():
             if count >= 3:  # Consider 3+ planets a stellium
-                planets = [p.get("name") for p in birth_chart.get("planets", [])
-                           if p.get("sign") == sign and p.get("name") not in ["Ascendant", "Midheaven", "Descendant", "IC"]]
+                planets = [
+                    p.get("name")
+                    for p in birth_chart.get("planets", [])
+                    if p.get("sign") == sign
+                    and p.get("name") not in ["Ascendant", "Midheaven", "Descendant", "IC"]
+                ]
 
-                patterns.append({
-                    "type": "stellium",
-                    "sign": sign,
-                    "planets": planets,
-                    "count": count
-                })
+                patterns.append(
+                    {
+                        "type": "stellium",
+                        "sign": sign,
+                        "planets": planets,
+                        "count": count,
+                    }
+                )
 
         # Analyze element emphasis
         elements = {"fire": 0, "earth": 0, "air": 0, "water": 0}
@@ -1842,20 +2068,18 @@ class InterpretationService:
 
         for element, count in elements.items():
             if count > threshold + 1:  # At least 2 more than average
-                patterns.append({
-                    "type": "element_emphasis",
-                    "element": element,
-                    "planets": element_planets[element],
-                    "count": count
-                })
+                patterns.append(
+                    {
+                        "type": "element_emphasis",
+                        "element": element,
+                        "planets": element_planets[element],
+                        "count": count,
+                    }
+                )
 
             # Also note element lacking (1 or fewer planets)
             elif count <= threshold - 1:
-                patterns.append({
-                    "type": "element_lack",
-                    "element": element,
-                    "count": count
-                })
+                patterns.append({"type": "element_lack", "element": element, "count": count})
 
         # Analyze modality emphasis
         modalities = {"cardinal": 0, "fixed": 0, "mutable": 0}
@@ -1878,20 +2102,18 @@ class InterpretationService:
 
         for modality, count in modalities.items():
             if count > threshold + 1:  # At least 2 more than average
-                patterns.append({
-                    "type": "modality_emphasis",
-                    "modality": modality,
-                    "planets": modality_planets[modality],
-                    "count": count
-                })
+                patterns.append(
+                    {
+                        "type": "modality_emphasis",
+                        "modality": modality,
+                        "planets": modality_planets[modality],
+                        "count": count,
+                    }
+                )
 
             # Also note modality lacking (1 or fewer planets)
             elif count <= threshold - 1:
-                patterns.append({
-                    "type": "modality_lack",
-                    "modality": modality,
-                    "count": count
-                })
+                patterns.append({"type": "modality_lack", "modality": modality, "count": count})
 
         return patterns
 
@@ -1921,18 +2143,20 @@ class InterpretationService:
 
         # Calculate percentages
         total_planets = sum(elements.values())
-        percentages = {element: (count / total_planets) * 100 if total_planets > 0 else 0
-                       for element, count in elements.items()}
+        percentages = {
+            element: (count / total_planets) * 100 if total_planets > 0 else 0
+            for element, count in elements.items()
+        }
 
         # Determine dominant and lacking elements
-        sorted_elements = sorted(
-            elements.items(), key=lambda x: x[1], reverse=True)
+        sorted_elements = sorted(elements.items(), key=lambda x: x[1], reverse=True)
         dominant = sorted_elements[0][0] if sorted_elements[0][1] > 0 else None
         lacking = [elem for elem, count in elements.items() if count <= 1]
 
         # Generate interpretation text
         interpretation = self._generate_element_balance_interpretation(
-            dominant, lacking, percentages)
+            dominant, lacking, percentages
+        )
 
         return {
             "counts": elements,
@@ -1940,10 +2164,12 @@ class InterpretationService:
             "dominant": dominant,
             "lacking": lacking,
             "planets": element_planets,
-            "interpretation": interpretation
+            "interpretation": interpretation,
         }
 
-    def _generate_element_balance_interpretation(self, dominant: str, lacking: List[str], percentages: Dict[str, float]) -> str:
+    def _generate_element_balance_interpretation(
+        self, dominant: str, lacking: List[str], percentages: Dict[str, float]
+    ) -> str:
         """Generate interpretation text for element balance.
 
         Args:
@@ -1958,7 +2184,7 @@ class InterpretationService:
             "fire": "passion, creativity, and assertiveness",
             "earth": "practicality, stability, and material focus",
             "air": "mental activity, communication, and social connection",
-            "water": "emotional depth, intuition, and sensitivity"
+            "water": "emotional depth, intuition, and sensitivity",
         }
 
         interpretation_parts = []
@@ -2021,18 +2247,20 @@ class InterpretationService:
 
             # Calculate percentages
             total_planets = sum(modalities.values())
-            percentages = {modality: (count / total_planets) * 100 if total_planets > 0 else 0
-                           for modality, count in modalities.items()}
+            percentages = {
+                modality: (count / total_planets) * 100 if total_planets > 0 else 0
+                for modality, count in modalities.items()
+            }
 
             # Determine dominant and lacking modalities
-            sorted_modalities = sorted(
-                modalities.items(), key=lambda x: x[1], reverse=True)
+            sorted_modalities = sorted(modalities.items(), key=lambda x: x[1], reverse=True)
             dominant = sorted_modalities[0][0] if sorted_modalities[0][1] > 0 else None
             lacking = [mod for mod, count in modalities.items() if count <= 1]
 
             # Generate interpretation text
             interpretation = self._generate_modality_balance_interpretation(
-                dominant, lacking, percentages)
+                dominant, lacking, percentages
+            )
 
             return {
                 "counts": modalities,
@@ -2040,10 +2268,12 @@ class InterpretationService:
                 "dominant": dominant,
                 "lacking": lacking,
                 "planets": modality_planets,
-                "interpretation": interpretation
+                "interpretation": interpretation,
             }
 
-    def _generate_modality_balance_interpretation(self, dominant: str, lacking: List[str], percentages: Dict[str, float]) -> str:
+    def _generate_modality_balance_interpretation(
+        self, dominant: str, lacking: List[str], percentages: Dict[str, float]
+    ) -> str:
         """Generate interpretation text for modality balance.
 
         Args:
@@ -2057,7 +2287,7 @@ class InterpretationService:
         modality_descriptions = {
             "cardinal": "initiating action, leadership, and pioneering",
             "fixed": "persistence, stability, and determination",
-            "mutable": "adaptability, flexibility, and versatility"
+            "mutable": "adaptability, flexibility, and versatility",
         }
 
         interpretation_parts = []
@@ -2094,7 +2324,7 @@ class InterpretationService:
 
         return " ".join(interpretation_parts)
 
-    def _analyze_combinations(self, birth_chart: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_combinations(self, birth_chart: Dict[str, Any]) -> List[Dict[str, str]]:
         """Analyze birth chart for significant planetary combinations.
 
         Args:
@@ -2105,46 +2335,188 @@ class InterpretationService:
         """
         combinations = []
 
-        # Look for certain combinations we want to highlight
-        # Example: Sun-Moon combinations by sign
-        sun_sign = None
-        moon_sign = None
-
+        # Get all planet positions
+        planet_positions = {}
         for planet in birth_chart.get("planets", []):
             name = planet.get("name", "").lower()
-            if name == "sun":
-                sun_sign = planet.get("sign", "").lower()
-            elif name == "moon":
-                moon_sign = planet.get("sign", "").lower()
+            sign = planet.get("sign", "").lower()
+            if name and sign:
+                planet_positions[name] = sign
 
-        if sun_sign and moon_sign:
+        # Analyze Sun-Moon combination
+        if "sun" in planet_positions and "moon" in planet_positions:
+            sun_sign = planet_positions["sun"]
+            moon_sign = planet_positions["moon"]
+
             # Check if we have this combination in the structured data
-            sun_moon_data = self.structured_data.get(
-                "combinations", {}).get("sun_moon", {})
+            sun_moon_data = self.structured_data.get("combinations", {}).get("sun_moon", {})
             combo_key = f"{sun_sign}_{moon_sign}"
 
             if combo_key in sun_moon_data:
-                combinations.append({
-                    "type": "sun_moon",
-                    "sun_sign": sun_sign,
-                    "moon_sign": moon_sign,
-                    "interpretation": sun_moon_data[combo_key]
-                })
+                combinations.append(
+                    {
+                        "type": "sun_moon",
+                        "sun_sign": sun_sign,
+                        "moon_sign": moon_sign,
+                        "interpretation": sun_moon_data[combo_key],
+                    }
+                )
             else:
                 # Generate a simple interpretation
-                interpretation = self._generate_sun_moon_interpretation(
-                    sun_sign, moon_sign)
-                combinations.append({
-                    "type": "sun_moon",
-                    "sun_sign": sun_sign,
-                    "moon_sign": moon_sign,
-                    "interpretation": interpretation
-                })
+                interpretation = self._generate_sun_moon_interpretation(sun_sign, moon_sign)
+                combinations.append(
+                    {
+                        "type": "sun_moon",
+                        "sun_sign": sun_sign,
+                        "moon_sign": moon_sign,
+                        "interpretation": interpretation,
+                    }
+                )
 
-        # You can add more combinations like Mercury-Venus, Mars-Venus, etc.
-        # This is a basic example that can be extended
+        # Analyze Mercury-Venus combination (communication and values)
+        if "mercury" in planet_positions and "venus" in planet_positions:
+            mercury_sign = planet_positions["mercury"]
+            venus_sign = planet_positions["venus"]
+            interpretation = self._generate_mercury_venus_interpretation(mercury_sign, venus_sign)
+            combinations.append(
+                {
+                    "type": "mercury_venus",
+                    "mercury_sign": mercury_sign,
+                    "venus_sign": venus_sign,
+                    "interpretation": interpretation,
+                }
+            )
+
+        # Analyze Mars-Venus combination (action and attraction)
+        if "mars" in planet_positions and "venus" in planet_positions:
+            mars_sign = planet_positions["mars"]
+            venus_sign = planet_positions["venus"]
+            interpretation = self._generate_mars_venus_interpretation(mars_sign, venus_sign)
+            combinations.append(
+                {
+                    "type": "mars_venus",
+                    "mars_sign": mars_sign,
+                    "venus_sign": venus_sign,
+                    "interpretation": interpretation,
+                }
+            )
+
+        # Analyze Jupiter-Saturn combination (expansion and limitation)
+        if "jupiter" in planet_positions and "saturn" in planet_positions:
+            jupiter_sign = planet_positions["jupiter"]
+            saturn_sign = planet_positions["saturn"]
+            interpretation = self._generate_jupiter_saturn_interpretation(jupiter_sign, saturn_sign)
+            combinations.append(
+                {
+                    "type": "jupiter_saturn",
+                    "jupiter_sign": jupiter_sign,
+                    "saturn_sign": saturn_sign,
+                    "interpretation": interpretation,
+                }
+            )
 
         return combinations
+
+    def _generate_mercury_venus_interpretation(self, mercury_sign: str, venus_sign: str) -> str:
+        """Generate interpretation for Mercury-Venus combination."""
+        mercury_element = self._get_sign_element(mercury_sign)
+        venus_element = self._get_sign_element(venus_sign)
+
+        base_text = (
+            f"Your Mercury in {mercury_sign.capitalize()} and Venus in "
+            f"{venus_sign.capitalize()} shows how you combine communication "
+            f"with values and relationships. "
+        )
+
+        if mercury_element == venus_element:
+            base_text += (
+                f"With both planets in {mercury_element} signs, your thoughts "
+                f"and values flow naturally together, "
+            )
+            if mercury_element == "fire":
+                base_text += "expressing yourself with enthusiasm and creativity."
+            elif mercury_element == "earth":
+                base_text += "giving you practical and grounded communication in relationships."
+            elif mercury_element == "air":
+                base_text += "enhancing your intellectual approach to relationships and values."
+            else:  # water
+                base_text += "deepening your emotional understanding and expression."
+        else:
+            base_text += (
+                f"Mercury in a {mercury_element} sign and Venus in a "
+                f"{venus_element} sign suggests you bridge different modes "
+                f"of expression in relationships."
+            )
+
+        return base_text
+
+    def _generate_mars_venus_interpretation(self, mars_sign: str, venus_sign: str) -> str:
+        """Generate interpretation for Mars-Venus combination."""
+        mars_element = self._get_sign_element(mars_sign)
+        venus_element = self._get_sign_element(venus_sign)
+
+        base_text = (
+            f"Your Mars in {mars_sign.capitalize()} and Venus in "
+            f"{venus_sign.capitalize()} describes your approach to "
+            f"attraction and action. "
+        )
+
+        if mars_element == venus_element:
+            base_text += (
+                f"Both planets in {mars_element} signs suggest harmony "
+                f"between your desires and actions. "
+            )
+            if mars_element == "fire":
+                base_text += "You pursue relationships with passion and directness."
+            elif mars_element == "earth":
+                base_text += "You take a practical and steady approach to relationships."
+            elif mars_element == "air":
+                base_text += (
+                    "You approach relationships with intellectual curiosity and social grace."
+                )
+            else:  # water
+                base_text += "You navigate relationships with emotional intelligence and intuition."
+        else:
+            base_text += (
+                f"Mars in a {mars_element} sign and Venus in a {venus_element} "
+                f"sign indicates you balance different energies in relationships "
+                f"and pursuit of desires."
+            )
+
+        return base_text
+
+    def _generate_jupiter_saturn_interpretation(self, jupiter_sign: str, saturn_sign: str) -> str:
+        """Generate interpretation for Jupiter-Saturn combination."""
+        jupiter_element = self._get_sign_element(jupiter_sign)
+        saturn_element = self._get_sign_element(saturn_sign)
+
+        base_text = (
+            f"Your Jupiter in {jupiter_sign.capitalize()} and Saturn in "
+            f"{saturn_sign.capitalize()} reflects the balance between "
+            f"expansion and limitation in your life. "
+        )
+
+        if jupiter_element == saturn_element:
+            base_text += (
+                f"Both planets in {jupiter_element} signs suggest natural "
+                f"integration of growth and structure. "
+            )
+            if jupiter_element == "fire":
+                base_text += "You combine enthusiasm with disciplined action."
+            elif jupiter_element == "earth":
+                base_text += "You expand through practical and methodical approaches."
+            elif jupiter_element == "air":
+                base_text += "You grow through intellectual understanding and structured learning."
+            else:  # water
+                base_text += "You develop through emotional wisdom and spiritual discipline."
+        else:
+            base_text += (
+                f"Jupiter in a {jupiter_element} sign and Saturn in a "
+                f"{saturn_element} sign indicates you navigate between "
+                f"different approaches to growth and responsibility."
+            )
+
+        return base_text
 
     def _generate_sun_moon_interpretation(self, sun_sign: str, moon_sign: str) -> str:
         """Generate an interpretation for a Sun-Moon combination.
@@ -2162,35 +2534,50 @@ class InterpretationService:
         moon_element = self._get_sign_element(moon_sign)
         moon_modality = self._get_sign_modality(moon_sign)
 
-        # Element combinations
+        # Element combinations with descriptions split across lines
         element_combos = {
-            ("fire", "fire"): "double fire intensity that fuels your passion and creativity",
+            ("fire", "fire"): ("double fire intensity that fuels your passion and creativity"),
             ("fire", "earth"): "a balance between inspiration and practicality",
             ("fire", "air"): "creative thinking and passionate communication",
             ("fire", "water"): "passionate emotions and creative intuition",
-
             ("earth", "fire"): "practical action and grounded creativity",
-            ("earth", "earth"): "double earth influence that emphasizes stability and practicality",
+            ("earth", "earth"): (
+                "double earth influence that emphasizes stability and practicality"
+            ),
             ("earth", "air"): "practical thinking and structured communication",
             ("earth", "water"): "emotional security and practical intuition",
-
             ("air", "fire"): "intellectual passion and communicative creativity",
             ("air", "earth"): "ideas that can be practically implemented",
-            ("air", "air"): "double air emphasis that enhances intellectual and social abilities",
+            ("air", "air"): ("double air emphasis that enhances intellectual and social abilities"),
             ("air", "water"): "intuitive thinking and emotional communication",
-
             ("water", "fire"): "emotional passion and intuitive creativity",
             ("water", "earth"): "emotional grounding and intuitive practicality",
             ("water", "air"): "emotional understanding and intuitive communication",
-            ("water", "water"): "double water emphasis that deepens emotional and intuitive abilities"
+            ("water", "water"): (
+                "double water emphasis that deepens emotional and intuitive abilities"
+            ),
         }
 
         # Generate interpretation
         element_combo = element_combos.get(
-            (sun_element, moon_element), "a complex blend of energies")
+            (sun_element, moon_element), "a complex blend of energies"
+        )
 
-        return (f"Your Sun in {sun_sign.capitalize()} and Moon in {moon_sign.capitalize()} creates {element_combo}. "
-                f"Your {sun_modality} {sun_element} Sun represents your conscious identity, while your "
-                f"{moon_modality} {moon_element} Moon shapes your emotional nature. "
-                f"This combination suggests that your core self and emotional needs may "
-                f"{'complement each other well' if sun_element == moon_element else 'require some integration'}.")
+        # Build interpretation text in parts
+        sun_moon_text = (
+            f"Your Sun in {sun_sign.capitalize()} and Moon in "
+            f"{moon_sign.capitalize()} creates {element_combo}. "
+        )
+
+        identity_text = (
+            f"Your {sun_modality} {sun_element} Sun represents your conscious "
+            f"identity, while your {moon_modality} {moon_element} Moon shapes "
+            f"your emotional nature. "
+        )
+
+        integration_text = (
+            "This combination suggests that your core self and emotional needs "
+            f"{'complement each other well' if sun_element == moon_element else 'require some integration'}."
+        )
+
+        return sun_moon_text + identity_text + integration_text
