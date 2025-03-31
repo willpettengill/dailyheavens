@@ -24,8 +24,7 @@ async def generate_interpretation(request: InterpretationRequest) -> Interpretat
         # Generate interpretation
         interpretation = interpretation_service.generate_interpretation(
             birth_chart=request.birth_chart,
-            level=request.level.value,
-            area=request.area.value
+            level=request.level.value
         )
         
         # Check for error response
