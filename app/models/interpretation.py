@@ -27,7 +27,7 @@ class BirthData(BaseModel):
 
 class InterpretationRequest(BaseModel):
     birth_chart: Dict[str, Any]
-    area: InterpretationArea
+    area: InterpretationArea = InterpretationArea.GENERAL
     level: InterpretationLevel = InterpretationLevel.BASIC
 
 

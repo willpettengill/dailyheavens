@@ -290,10 +290,20 @@ class BirthChartService:
                             if obj1 and obj2:
                                 aspect = flatlib_aspects.getAspect(obj1, obj2, const.MAJOR_ASPECTS)
                                 if aspect:
+                                    # Map aspect types to string values
+                                    aspect_type_map = {
+                                        0: "conjunction",
+                                        60: "sextile",
+                                        90: "square",
+                                        120: "trine",
+                                        180: "opposition"
+                                    }
+                                    aspect_type = aspect_type_map.get(aspect.type, str(aspect.type))
+                                    
                                     chart_aspects.append({
                                         "planet1": planet1,
                                         "planet2": planet2,
-                                        "type": aspect.type,
+                                        "type": aspect_type,
                                         "orb": round(aspect.orb, 2),  # Round to 2 decimal places
                                         "nature": "neutral"  # Default value
                                     })

@@ -28,16 +28,18 @@ async def generate_interpretation(request: InterpretationRequest) -> Interpretat
             area=request.area.value
         )
         
-        if interpretation["status"] == "error":
+        # Check for error response
+        if isinstance(interpretation, dict) and interpretation.get("error"):
             return InterpretationResponse(
                 status="error",
                 data={},
-                error=interpretation["message"]
+                error=interpretation["error"]
             )
             
+        # Return successful response with interpretation
         return InterpretationResponse(
             status="success",
-            data=interpretation["data"]
+            data={"birth_chart": request.birth_chart, "interpretations": interpretation}
         )
     except ValueError as e:
         raise HTTPException(
