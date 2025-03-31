@@ -20,6 +20,37 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Project Notes & Learnings
+
+### API Interaction
+- The frontend communicates with backend services (Birth Chart on port 8001, Interpretation on port 8002) via a Next.js API route (`/api/birth-chart`).
+- This route acts as a proxy, fetching data from both backend services and combining them into a single response for the frontend.
+- User birth data submitted on the home page (`app/page.tsx`) is sent to this API route.
+- Successful responses are stored in `localStorage` (`birthChartData`, `userEmail`) to persist the data.
+- The Dashboard page (`app/dashboard/page.tsx`) first checks `localStorage` for data. If none is found, it fetches default user data (currently hardcoded for `wwpettengill@gmail.com`).
+
+### Frontend Errors & Fixes
+- A `TypeError: Cannot read properties of undefined (reading 'map')` occurred specifically when switching to the "Interpretation" tab on the dashboard.
+- **Cause:** Although the `interpretation.aspects` data was present in the initial API response, accessing it during the re-render triggered by the tab switch failed. This was likely due to temporary undefined states during rendering or potentially malformed aspect objects within the array.
+- **Fix:** Implemented defensive programming in `app/dashboard/page.tsx`:
+    - Added optional chaining (`?.`) and default values (`|| {}`, `|| []`) when destructuring data from the API response.
+    - Added stricter checks within the `.filter()` method for the `aspects` array to ensure each aspect object is valid and has the required properties (`planet1`, `planet2`, `type`, `interpretation`) before mapping.
+    - Added optional chaining and fallback values (`?? 'N/A'`, `?? 'No interpretation available'`) within the `.map()` method when accessing aspect properties for display.
+- **Note:** While the frontend error is resolved, the underlying `interpretation` data structure from the backend API could be improved for consistency (e.g., ensuring all aspects always have a valid `type` and `interpretation`).
+
+### Tailwind CSS v4 Configuration (Summary)
+- **Correct Setup:**
+    - Uses `@tailwindcss/postcss` plugin in `postcss.config.mjs`.
+    - Uses `@import "tailwindcss";` in `app/globals.css`.
+    - Requires a `tailwind.config.js` (or `.ts`, `.cjs`) file at the project root for basic configuration (content paths, theme extensions, plugins). Even a minimal config is needed for v4 compatibility.
+    - Follows ShadCN UI guidelines for CSS variables (`hsl()` format) and theme structure (`@theme inline`) in `globals.css`.
+    - `components.json` should reference the CSS file and base color.
+- **Incorrect Setup / Common Issues:**
+    - Missing `tailwind.config.js` file caused build errors.
+    - Using old `@tailwind` directives instead of `@import "tailwindcss"`.
+    - Incorrect CSS variable formats (e.g., using `oklch()` without proper setup) or misplaced `:root` / `.dark` selectors in `globals.css`.
+    - Incompatible Tailwind version (v4) with configurations expecting v3 features (like specific package exports) led to errors like `Package path ./components is not exported`.
+
 ## Tailwind CSS v4 Configuration
 
 This project uses Tailwind CSS v4 with the following setup:
