@@ -1292,7 +1292,7 @@ class InterpretationService:
             if isinstance(rulership.get(planet), list)
             else sign == rulership.get(planet)
         ):
-            return "rulership"
+            return "domicile" # Changed from "rulership" to match dignities.json
 
         # Check exaltation
         if sign == exaltation.get(planet):
