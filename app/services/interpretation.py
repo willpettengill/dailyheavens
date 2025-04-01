@@ -91,10 +91,10 @@ class InterpretationService:
             # Convert numeric aspect types to strings for consistency
             if "aspects" in self.structured_data:
                 aspect_data = self.structured_data["aspects"]
-            aspect_types_to_add = {}
-            
+                aspect_types_to_add = {}
+                
                 for key, data in list(aspect_data.items()):
-                if "angle" in data:
+                    if "angle" in data:
                         angle_str = str(data["angle"])
                         self.logger.debug(f"Converting aspect type {key} to numeric key {angle_str}")
                         aspect_types_to_add[angle_str] = data
@@ -316,11 +316,11 @@ class InterpretationService:
             for planet_name, planet_data in planets.items():
                 if not isinstance(planet_data, dict):
                     self.logger.error(f"Planet {planet_name} data must be a dictionary")
-            return False
-        
+                    return False
+            
                 if "sign" not in planet_data:
                     self.logger.error(f"Planet {planet_name} must have a sign")
-                return False
+                    return False
                     
         # Handle list format (old format)
         elif isinstance(planets, list):
@@ -330,18 +330,18 @@ class InterpretationService:
             for planet in planets:
                 if not isinstance(planet, dict):
                     self.logger.error("Each planet must be a dictionary")
-                return False
+                    return False
 
                 if "name" not in planet:
                     self.logger.error("Each planet must have a name")
-                return False
+                    return False
 
                 if "sign" not in planet:
                     self.logger.error("Each planet must have a sign")
-                return False
+                    return False
         else:
             self.logger.error("Planets must be either a dictionary or a list")
-                return False
+            return False
         
         # Check for houses (optional but recommended)
         houses = birth_chart.get("houses", {})
@@ -358,24 +358,24 @@ class InterpretationService:
             for house in houses:
                 if not isinstance(house, dict):
                     self.logger.error("Each house must be a dictionary")
-                return False
+                    return False
         
                 if "house_num" not in house:
                     self.logger.error("Each house must have a house_num")
-            return False
+                    return False
         
                 if "sign" not in house:
                     self.logger.error("Each house must have a sign")
-                return False
+                    return False
         elif houses and not isinstance(houses, (dict, list)):
             self.logger.error("Houses must be either a dictionary or a list")
-                return False
+            return False
             
         # Check for aspects (optional but recommended)
         aspects = birth_chart.get("aspects", [])
         if aspects and not isinstance(aspects, list):
             self.logger.error("Aspects must be a list")
-                return False
+            return False
         
         # All checks passed
         self.logger.debug("Birth chart validation passed")
@@ -470,7 +470,7 @@ class InterpretationService:
         # Validate birth chart
         if not self._validate_birth_chart(birth_chart):
             self.logger.error("Invalid birth chart provided")
-                return {"status": "error", "message": "Invalid birth chart data"}
+            return {"status": "error", "message": "Invalid birth chart data"}
                 
         # Store birth chart for use in methods
         self.birth_chart = birth_chart
@@ -1127,7 +1127,7 @@ class InterpretationService:
                 interpretation += f" - {planet_quality}"
             if sign_quality:
                 interpretation += f" - {sign_quality}"
-                        if house_meaning:
+            if house_meaning:
                 interpretation += f" - {house_meaning}"
 
             # Create the planet interpretation object
@@ -1282,8 +1282,8 @@ class InterpretationService:
                             planets = sorted([planet1, planet2, third_planet.lower()])
                             key = "-".join(planets)
                             
-                        if key not in seen_combinations:
-                            seen_combinations.add(key)
+                            if key not in seen_combinations:
+                                seen_combinations.add(key)
                                 yods.append({"planets": planets, "apex": third_planet.lower()})
                             
         return yods
@@ -1630,7 +1630,7 @@ class InterpretationService:
             return "air"
         elif sign in water_signs:
             return "water"
-                    else:
+        else:
             self.logger.warning(f"Unknown sign for element determination: {sign}")
             return "unknown"
             
@@ -1655,7 +1655,7 @@ class InterpretationService:
             return "fixed"
         elif sign in mutable_signs:
             return "mutable"
-            else:
+        else:
             self.logger.warning(f"Unknown sign for modality determination: {sign}")
             return "unknown"
 
@@ -1884,7 +1884,7 @@ class InterpretationService:
                     f"Your chart shows limited {lacking_element} element energy, which may mean "
                     f"{element_descriptions.get(lacking_element)} could be areas for conscious development."
                 )
-                else:
+            else:
                 lacking_elements = ", ".join(lacking)
                 interpretation_parts.append(
                     f"Your chart shows limited {lacking_elements} elements, suggesting areas "
@@ -1910,7 +1910,6 @@ class InterpretationService:
             Dictionary containing modality balance information
         """
         self.logger.debug("Analyzing modality balance")
-        
         # Initialize modality counts and planet groupings
         modalities = {"cardinal": 0, "fixed": 0, "mutable": 0}
         modality_planets = {"cardinal": [], "fixed": [], "mutable": []}
@@ -1944,33 +1943,36 @@ class InterpretationService:
                 if modality in modalities:
                     modalities[modality] += 1
                     modality_planets[modality].append(planet.get("name"))
-            
-            # Calculate percentages
-            total_planets = sum(modalities.values())
-            percentages = {}
-    
-            if total_planets > 0:
+
+        # Calculate percentages
+        total_planets = sum(modalities.values())
+        percentages = {}
+
+        if total_planets > 0:
             for modality, count in modalities.items():
                 percentages[modality] = round((count / total_planets) * 100, 2)
-            
-            # Determine dominant and lacking modalities
-            sorted_modalities = sorted(modalities.items(), key=lambda x: x[1], reverse=True)
-            dominant = sorted_modalities[0][0] if sorted_modalities[0][1] > 0 else None
-            lacking = [modality for modality, count in modalities.items() if count <= 1]
-            
-            # Generate interpretation
-            interpretation = self._generate_modality_balance_interpretation(dominant, lacking, percentages)
-            
-            # Prepare result
-            result = {
-                "counts": modalities,
-                "percentages": percentages,
-                "dominant": dominant,
-                "lacking": lacking,
-                "planets": modality_planets,
-                "interpretation": interpretation
-            }
         
+        # Determine dominant and lacking modalities
+        dominant = None
+        if total_planets > 0:
+             sorted_modalities = sorted(modalities.items(), key=lambda x: x[1], reverse=True)
+             if sorted_modalities and sorted_modalities[0][1] > 0: # Added check if sorted_modalities is not empty
+                 dominant = sorted_modalities[0][0]
+        lacking = [modality for modality, count in modalities.items() if count <= 1]
+        
+        # Generate interpretation
+        interpretation = self._generate_modality_balance_interpretation(dominant, lacking, percentages)
+        
+        # Prepare result
+        result = {
+            "counts": modalities,
+            "percentages": percentages,
+            "dominant": dominant,
+            "lacking": lacking,
+            "planets": modality_planets,
+            "interpretation": interpretation
+        }
+
         self.logger.debug(f"Modality balance analysis: {result['counts']}")
         return result
         
