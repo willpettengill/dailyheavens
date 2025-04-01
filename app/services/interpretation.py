@@ -92,7 +92,7 @@ class InterpretationService:
             if "aspects" in self.structured_data:
                 aspect_data = self.structured_data["aspects"]
                 aspect_types_to_add = {}
-                
+            
                 for key, data in list(aspect_data.items()):
                     if "angle" in data:
                         angle_str = str(data["angle"])
@@ -100,9 +100,12 @@ class InterpretationService:
                         aspect_types_to_add[angle_str] = data
             
             # Add the new aspect types separately
-            for angle, data in aspect_types_to_add.items():
-                if angle not in aspect_data:
-                    aspect_data[angle] = data
+            # Ensure this block is correctly indented if it belongs to the 'if "aspects" in ...' block
+            # Assuming it belongs, based on context:
+            if "aspects" in self.structured_data: # Re-check needed if logic differs
+                for angle, data in aspect_types_to_add.items():
+                    if angle not in aspect_data:
+                        aspect_data[angle] = data
             
             # Check if descriptions is loaded
             if "descriptions" in self.structured_data:
@@ -317,7 +320,7 @@ class InterpretationService:
                 if not isinstance(planet_data, dict):
                     self.logger.error(f"Planet {planet_name} data must be a dictionary")
                     return False
-            
+        
                 if "sign" not in planet_data:
                     self.logger.error(f"Planet {planet_name} must have a sign")
                     return False
@@ -798,7 +801,7 @@ class InterpretationService:
             # Build interpretation using data from JSON
             interpretation = f"House {house_num} with {sign.capitalize()} on the cusp influences {house_focus}. "
             interpretation += f"This brings {sign_quality} qualities to this area of life."
-            return interpretation
+        return interpretation
         
     def _generate_aspect_interpretations(self, birth_chart: Dict, level: str = "basic") -> List[Dict]:
         """Generate interpretations for aspects in the birth chart.
@@ -870,7 +873,7 @@ class InterpretationService:
         if not aspect_data:
             self.logger.warning(f"Unknown aspect type: {aspect_type}. Skipping interpretation.")
             return None
-        
+            
         # --- Try Specific Pair Interpretation First ---
         specific_interp = aspect_data.get("specific_pairs", {}).get(pair_key)
         if specific_interp:
@@ -943,9 +946,9 @@ class InterpretationService:
             nature = aspect_data.get("nature")
 
             if nature == "harmonious":
-                 harmonious_count += 1
+                harmonious_count += 1
             elif nature == "challenging":
-                 challenging_count += 1
+                challenging_count += 1
             # Variable nature aspects like conjunctions are not counted here for balance
 
         aspect_balance_texts = self.structured_data.get("interpretation_patterns", {}).get("aspect_balance", {})
@@ -1237,13 +1240,22 @@ class InterpretationService:
                             quincunx2["planet1"].lower(),
                             quincunx2["planet2"].lower(),
                         ]:
-                            # Found a Yod
-                            planets = sorted([planet1, planet2, third_planet.lower()])
-                            key = "-".join(planets)
+                            match = False
+                            if quincunx2["planet1"].lower() == third_planet.lower():
+                                if quincunx2["planet2"].lower() == planet2:
+                                    match = True
+                            elif quincunx2["planet2"].lower() == third_planet.lower():
+                                if quincunx2["planet1"].lower() == planet2:
+                                    match = True
                             
-                            if key not in seen_combinations:
-                                seen_combinations.add(key)
-                                yods.append({"planets": planets, "apex": third_planet.lower()})
+                            if match:
+                                # Found a Yod
+                                planets = sorted([planet1, planet2, third_planet.lower()])
+                                key = "-".join(planets)
+                                
+                                if key not in seen_combinations:
+                                    seen_combinations.add(key)
+                                    yods.append({"planets": planets, "apex": third_planet.lower()})
                             
         return yods
 
@@ -1752,7 +1764,7 @@ class InterpretationService:
             else:
                 interpretation_parts.append(f"Your chart emphasizes the {dominant} element ({percentage}% of planets).") # Fallback
                 self.logger.warning(f"No description found for dominant element {dominant} in interpretation_patterns.json")
-
+            
         # Describe lacking elements
         if lacking:
              # Use detailed description if element is very lacking (e.g., 0 planets)
@@ -1823,23 +1835,26 @@ class InterpretationService:
                 if modality in modalities:
                     modalities[modality] += 1
                     modality_planets[modality].append(planet.get("name"))
-
-        # Calculate percentages
+            
+        # Calculate percentages (Moved outside elif)
         total_planets = sum(modalities.values())
         percentages = {}
 
         if total_planets > 0:
             for modality, count in modalities.items():
                 percentages[modality] = round((count / total_planets) * 100, 2)
-        
+        else: # Handle case where no planets were counted
+             percentages = {m: 0.0 for m in modalities}
+            
         # Determine dominant and lacking modalities
         dominant = None
+        lacking = [] # Initialize lacking
         if total_planets > 0:
-             sorted_modalities = sorted(modalities.items(), key=lambda x: x[1], reverse=True)
-             if sorted_modalities and sorted_modalities[0][1] > 0: # Added check if sorted_modalities is not empty
+            sorted_modalities = sorted(modalities.items(), key=lambda x: x[1], reverse=True)
+            if sorted_modalities and sorted_modalities[0][1] > 0: # Added check if sorted_modalities is not empty
                  dominant = sorted_modalities[0][0]
-        lacking = [modality for modality, count in modalities.items() if count <= 1]
-        
+            lacking = [modality for modality, count in modalities.items() if count <= 1]
+            
         # Generate interpretation
         interpretation = self._generate_modality_balance_interpretation(dominant, lacking, percentages)
         
@@ -1852,7 +1867,7 @@ class InterpretationService:
             "planets": modality_planets,
             "interpretation": interpretation
         }
-
+        
         self.logger.debug(f"Modality balance analysis: {result['counts']}")
         return result
         
@@ -1871,7 +1886,7 @@ class InterpretationService:
         patterns_data = self.structured_data.get("interpretation_patterns", {})
         modality_patterns = patterns_data.get("modality_patterns", {})
         modality_emphasis_patterns = patterns_data.get("modality_emphasis", {})
-
+        
         # Describe dominant modality
         if dominant:
             percentage = round(percentages[dominant])
@@ -1897,7 +1912,7 @@ class InterpretationService:
                 elif f"{modality}_lacking" in modality_patterns:
                     desc = modality_patterns[f"{modality}_lacking"].get("description", f"potential challenges related to {modality} qualities.")
                     lacking_modalities_str.append(f"limited {modality} modality energy. {desc}")
-                else:
+            else:
                     lacking_modalities_str.append(f"limited {modality} modality energy")
                     self.logger.warning(f"No description found for lacking modality {modality} in interpretation_patterns.json")
             if lacking_modalities_str:
@@ -1927,6 +1942,9 @@ class InterpretationService:
         # Analyze stelliums (3 or more planets in the same sign)
         sign_counts = {}
         sign_planets = {}
+        # Also count planets per house for emphasis analysis
+        house_counts = {str(i): 0 for i in range(1, 13)}
+        house_planets = {str(i): [] for i in range(1, 13)}
         
         # Process planets (handling both dictionary and list formats)
         planets_data = birth_chart.get("planets", {})
@@ -1946,6 +1964,15 @@ class InterpretationService:
                     if sign_lower not in sign_planets:
                         sign_planets[sign_lower] = []
                     sign_planets[sign_lower].append(planet_name)
+                    
+                # Count house placements
+                house = planet_data.get("house")
+                if house is not None:
+                    house_str = str(house)
+                    if house_str in house_counts:
+                        house_counts[house_str] += 1
+                        house_planets[house_str].append(planet_name)
+                        
         elif isinstance(planets_data, list):
             # List format (old)
             for planet in planets_data:
@@ -1961,6 +1988,14 @@ class InterpretationService:
                     if sign_lower not in sign_planets:
                         sign_planets[sign_lower] = []
                     sign_planets[sign_lower].append(planet.get("name"))
+
+                # Count house placements
+                house = planet.get("house")
+                if house is not None:
+                    house_str = str(house)
+                    if house_str in house_counts:
+                        house_counts[house_str] += 1
+                        house_planets[house_str].append(planet.get("name"))
                     
         # Find stelliums
         for sign, count in sign_counts.items():
@@ -1993,7 +2028,36 @@ class InterpretationService:
                     "interpretation": interpretation_text
                 })
                 
-        self.logger.debug(f"Found {len(patterns)} simple patterns")
+        # --- Analyze House Emphasis (3 or more planets in the same house) ---
+        house_emphasis_data = self.structured_data.get("house_emphasis", {})
+        house_num_map = {
+            "1": "first_house", "2": "second_house", "3": "third_house",
+            "4": "fourth_house", "5": "fifth_house", "6": "sixth_house",
+            "7": "seventh_house", "8": "eighth_house", "9": "ninth_house",
+            "10": "tenth_house", "11": "eleventh_house", "12": "twelfth_house"
+        }
+
+        for house_str, count in house_counts.items():
+            if count >= 3:
+                emphasis_key = house_num_map.get(house_str)
+                if emphasis_key and emphasis_key in house_emphasis_data:
+                    emphasis_info = house_emphasis_data[emphasis_key]
+                    interpretation_text = emphasis_info.get("interpretation", "")
+                    if interpretation_text:
+                        patterns.append({
+                            "type": "house_emphasis",
+                            "house": int(house_str),
+                            "planets": house_planets[house_str],
+                            "count": count,
+                            "interpretation": interpretation_text
+                        })
+                        self.logger.debug(f"Found House {house_str} emphasis ({count} planets)")
+                    else:
+                        self.logger.warning(f"No interpretation text found for {emphasis_key} in house_emphasis.json")
+                else:
+                    self.logger.warning(f"No data found for {emphasis_key} (House {house_str}) in house_emphasis.json")
+
+        self.logger.debug(f"Found {len(patterns)} simple patterns (stelliums and house emphasis)")
         return patterns
 
     def _analyze_complex_patterns(self, birth_chart: Dict) -> List[Dict]:
