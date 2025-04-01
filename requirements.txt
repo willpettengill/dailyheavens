@@ -5,3 +5,4 @@ python-dateutil==2.9.0.post0
 flatlib==0.2.3
 pyswisseph==2.08.00-1
 starlette==0.35.1
+Jinja2>=3.0,<4.0

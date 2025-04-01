@@ -5,10 +5,11 @@ from datetime import datetime
 import json
 import logging
 import os
-from typing import Dict, Any, List, Tuple, Union
+from typing import Dict, Any, List, Tuple, Union, Optional
 
 # Third-party imports
 from flatlib.datetime import Datetime
+from jinja2 import Environment, FileSystemLoader, select_autoescape # Added Jinja2 imports
 
 # Local application imports
 from app.services.birth_chart import BirthChartService
@@ -64,6 +65,24 @@ class InterpretationService:
         # Initialize caches after loading data
         self._initialize_caches()
         
+        # Initialize Jinja2 environment
+        try:
+            # Correct path: Go up one level from 'services' to 'app', then into 'templates'
+            service_dir = os.path.dirname(__file__)
+            app_dir = os.path.dirname(service_dir)
+            template_dir = os.path.join(app_dir, 'templates') 
+            self.jinja_env = Environment(
+                loader=FileSystemLoader(template_dir),
+                autoescape=select_autoescape(['html', 'xml', 'txt']) # Autoescape for safety, though using .txt
+            )
+            self.logger.info(f"Jinja2 environment initialized. Loading templates from: {template_dir}")
+            # Optionally, list loaded templates
+            template_names = self.jinja_env.list_templates()
+            self.logger.debug(f"Found templates: {template_names}")
+        except Exception as e:
+            self.logger.error(f"Error initializing Jinja2 environment: {str(e)}", exc_info=True)
+            self.jinja_env = None # Ensure env is None if init fails
+        
         self.logger.info("InterpretationService initialized successfully")
         
     def _load_all_structured_data(self):
@@ -92,17 +111,15 @@ class InterpretationService:
             if "aspects" in self.structured_data:
                 aspect_data = self.structured_data["aspects"]
                 aspect_types_to_add = {}
-            
+                
+                # Iterate through aspect data (corrected indentation)
                 for key, data in list(aspect_data.items()):
                     if "angle" in data:
                         angle_str = str(data["angle"])
                         self.logger.debug(f"Converting aspect type {key} to numeric key {angle_str}")
                         aspect_types_to_add[angle_str] = data
             
-            # Add the new aspect types separately
-            # Ensure this block is correctly indented if it belongs to the 'if "aspects" in ...' block
-            # Assuming it belongs, based on context:
-            if "aspects" in self.structured_data: # Re-check needed if logic differs
+                # Add the new aspect types separately (corrected indentation)
                 for angle, data in aspect_types_to_add.items():
                     if angle not in aspect_data:
                         aspect_data[angle] = data
@@ -319,11 +336,11 @@ class InterpretationService:
             for planet_name, planet_data in planets.items():
                 if not isinstance(planet_data, dict):
                     self.logger.error(f"Planet {planet_name} data must be a dictionary")
-                    return False
+                    return False # Corrected Indentation
         
                 if "sign" not in planet_data:
                     self.logger.error(f"Planet {planet_name} must have a sign")
-                    return False
+                    return False # Corrected Indentation
                     
         # Handle list format (old format)
         elif isinstance(planets, list):
@@ -333,18 +350,18 @@ class InterpretationService:
             for planet in planets:
                 if not isinstance(planet, dict):
                     self.logger.error("Each planet must be a dictionary")
-                    return False
+                    return False # Corrected Indentation
 
                 if "name" not in planet:
                     self.logger.error("Each planet must have a name")
-                    return False
+                    return False # Corrected Indentation
 
                 if "sign" not in planet:
                     self.logger.error("Each planet must have a sign")
-                    return False
+                    return False # Corrected Indentation
         else:
             self.logger.error("Planets must be either a dictionary or a list")
-            return False
+            return False # Corrected Indentation
         
         # Check for houses (optional but recommended)
         houses = birth_chart.get("houses", {})
@@ -361,24 +378,24 @@ class InterpretationService:
             for house in houses:
                 if not isinstance(house, dict):
                     self.logger.error("Each house must be a dictionary")
-                    return False
+                    return False # Corrected Indentation
         
                 if "house_num" not in house:
                     self.logger.error("Each house must have a house_num")
-                    return False
+                    return False # Corrected Indentation
         
                 if "sign" not in house:
                     self.logger.error("Each house must have a sign")
-                    return False
+                    return False # Corrected Indentation
         elif houses and not isinstance(houses, (dict, list)):
             self.logger.error("Houses must be either a dictionary or a list")
-            return False
+            return False # Corrected Indentation
             
         # Check for aspects (optional but recommended)
         aspects = birth_chart.get("aspects", [])
         if aspects and not isinstance(aspects, list):
             self.logger.error("Aspects must be a list")
-            return False
+            return False # Corrected Indentation
         
         # All checks passed
         self.logger.debug("Birth chart validation passed")
@@ -473,7 +490,7 @@ class InterpretationService:
         # Validate birth chart
         if not self._validate_birth_chart(birth_chart):
             self.logger.error("Invalid birth chart provided")
-            return {"status": "error", "message": "Invalid birth chart data"}
+            return {"status": "error", "message": "Invalid birth chart data"} # Corrected Indentation
                 
         # Store birth chart for use in methods
         self.birth_chart = birth_chart
@@ -496,25 +513,46 @@ class InterpretationService:
             "overall": "",
         }
         
-        # Add planet interpretations
-        self.logger.debug("Generating planet interpretations")
-        planet_interpretations = self._generate_planet_interpretations(birth_chart, level)
-        interpretation["planets"] = planet_interpretations
-        self.logger.debug(f"Generated interpretations for {len(planet_interpretations)} planets")
+        # Check if Jinja env initialized
+        if not self.jinja_env:
+            self.logger.error("Jinja environment not initialized. Cannot render templates.")
+            return {"status": "error", "message": "Interpretation engine failed to initialize templates."}
+
+        # Get structured data (Phase 2 output)
+        planet_structured_data = self._generate_planet_interpretations(birth_chart, level)
+        house_structured_data = self._generate_house_interpretations(birth_chart, level)
+        aspect_structured_data = self._generate_aspect_interpretations(birth_chart, level)
+
+        # --- Render Templates --- 
+        try:
+            # Render planet interpretations
+            planet_template = self.jinja_env.get_template('planet_interpretation.txt.j2')
+            for p_data in planet_structured_data:
+                p_data['interpretation_text'] = planet_template.render(planet=p_data).strip()
+            interpretation["planets"] = planet_structured_data # Assign list with rendered text
+            self.logger.debug(f"Rendered interpretations for {len(interpretation['planets'])} planets")
+
+            # Render house interpretations
+            house_template = self.jinja_env.get_template('house_interpretation.txt.j2')
+            for h_data in house_structured_data:
+                h_data['interpretation_text'] = house_template.render(house=h_data).strip()
+            interpretation["houses"] = house_structured_data # Assign list with rendered text
+            self.logger.debug(f"Rendered interpretations for {len(interpretation['houses'])} houses")
+
+            # Render aspect interpretations
+            aspect_template = self.jinja_env.get_template('aspect_interpretation.txt.j2')
+            for a_data in aspect_structured_data:
+                a_data['interpretation_text'] = aspect_template.render(aspect=a_data).strip()
+            interpretation["aspects"] = aspect_structured_data # Assign list with rendered text
+            self.logger.debug(f"Rendered interpretations for {len(interpretation['aspects'])} aspects")
+
+        except Exception as e:
+            self.logger.error(f"Error rendering Jinja templates: {str(e)}", exc_info=True)
+            return {"status": "error", "message": f"Failed to render interpretation template: {e}"}
+
+        # --- Add other analyses (balances, patterns, overall - potentially templated later) --- 
         
-        # Add house interpretations
-        self.logger.debug("Generating house interpretations")
-        house_interpretations = self._generate_house_interpretations(birth_chart, level)
-        interpretation["houses"] = house_interpretations
-        self.logger.debug(f"Generated interpretations for {len(house_interpretations)} houses")
-        
-        # Add aspect interpretations
-        self.logger.debug("Generating aspect interpretations")
-        aspect_interpretations = self._generate_aspect_interpretations(birth_chart, level)
-        interpretation["aspects"] = aspect_interpretations
-        self.logger.debug(f"Generated interpretations for {len(aspect_interpretations)} aspects")
-        
-        # Add element and modality balance
+        # Add element and modality balance (Still using previous method for now)
         self.logger.debug("Analyzing element balance")
         element_balance = self._analyze_simple_element_balance(birth_chart)
         interpretation["element_balance"] = element_balance
@@ -586,16 +624,11 @@ class InterpretationService:
                 if not sign or house is None:
                     continue
                     
-                # Generate interpretation
-                interpretation = self._get_planet_interpretation(planet_name, sign, house, retrograde)
+                # Generate structured interpretation data
+                planet_interp_data = self._get_planet_interpretation(planet_name, sign, house, retrograde)
                 
-                planet_interpretations.append({
-                            "planet": planet_name,
-                            "sign": sign,
-                            "house": house,
-                            "retrograde": retrograde,
-                    "interpretation": interpretation
-                })
+                # Append the entire structured dictionary
+                planet_interpretations.append(planet_interp_data)
         elif isinstance(planets_data, list):
             # List format (old)
             for planet in planets_data:
@@ -607,22 +640,17 @@ class InterpretationService:
                 if not name or not sign or house is None:
                     continue
             
-                # Generate interpretation
-                interpretation = self._get_planet_interpretation(name, sign, house, retrograde)
+                # Generate structured interpretation data
+                planet_interp_data = self._get_planet_interpretation(name, sign, house, retrograde)
                 
-                planet_interpretations.append({
-                    "planet": name,
-                    "sign": sign,
-                    "house": house,
-                    "retrograde": retrograde,
-                    "interpretation": interpretation
-                })
+                # Append the entire structured dictionary
+                planet_interpretations.append(planet_interp_data)
                 
         self.logger.debug(f"Generated {len(planet_interpretations)} planet interpretations")
         return planet_interpretations
         
-    def _get_planet_interpretation(self, planet: str, sign: str, house: int, retrograde: bool = False) -> str:
-        """Generate interpretation for a planet in a sign and house using structured data.
+    def _get_planet_interpretation(self, planet: str, sign: str, house: int, retrograde: bool = False) -> Dict: # Changed return type
+        """Generate structured interpretation data for a planet in a sign and house.
         
         Args:
             planet: Planet name
@@ -631,9 +659,9 @@ class InterpretationService:
             retrograde: Whether the planet is retrograde
             
         Returns:
-            Interpretation text
+            Dictionary containing structured interpretation components.
         """
-        self.logger.debug(f"Generating interpretation for {planet} in {sign} (House {house}) using structured data")
+        self.logger.debug(f"Generating structured interpretation for {planet} in {sign} (House {house})")
         
         # Normalize inputs
         planet_lower = planet.lower()
@@ -646,60 +674,57 @@ class InterpretationService:
         house_data = self._house_cache.get(house_str, {})
         dignities_data = self.structured_data.get("dignities", {})
 
-        # --- Planet in Sign Interpretation (using migrated data) ---
-        level = "basic" # Assuming basic for now, can be passed as arg later
+        interpretation_components = {}
+
+        # --- Planet in Sign Interpretation ---
+        level = "basic" # Assuming basic for now
         sign_interpretations = planet_data.get("sign_interpretations", {})
         specific_sign_interp = sign_interpretations.get(level, {}).get(sign_lower)
 
-        # Use specific interpretation if found, otherwise build a generic one
         if specific_sign_interp:
-            planet_sign_interp = specific_sign_interp
+            interpretation_components['planet_sign'] = specific_sign_interp
             self.logger.debug(f"Using specific {level} interpretation for {planet} in {sign}")
         else:
             self.logger.warning(f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic.")
-            # Fallback: Use core energy + sign keywords (existing logic below is generic enough)
             planet_core = planet_data.get("description", f"The core energy of {planet.capitalize()}")
             sign_keywords = sign_data.get("keywords", [sign_lower])
             sign_keyword1 = sign_keywords[0]
             sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
-            planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
+            # Simpler generic structure for templating
+            interpretation_components['planet_sign'] = f"{planet_core} In {sign.capitalize()}, expressed as {sign_keyword1}/{sign_keyword2}."
 
-        # --- House area of life ---
-        house_focus = house_data.get("focus", f"the area of life associated with House {house}")
-        if not house_data:
+        # --- House Placement Interpretation ---
+        house_focus = house_data.get("focus", f"House {house} matters")
+        interpretation_components['house_placement'] = f"Influence felt in House {house}, related to {house_focus}."
+        if not self.structured_data.get("houses", {}).get(house_str):
              self.logger.warning(f"No data found for house {house} in houses.json")
 
-        # Retrograde interpretation text (Consider moving to JSON later)
-        retrograde_text = f" With {planet.capitalize()} retrograde, these energies are often internalized, prompting deeper reflection or unconventional expression." if retrograde else ""
+        # --- Retrograde Component ---
+        # Store text only if retrograde, otherwise None
+        interpretation_components['retrograde'] = f"Energies internalized due to retrograde motion." if retrograde else None
 
-        # --- Dignity Interpretation --- 
+        # --- Dignity Component ---
         dignity_type = self._get_essential_dignity(planet_lower, sign_lower)
-        dignity_interp = ""
-        if dignity_type != "peregrine": # Only add text if not peregrine
+        dignity_component = None # Default to None
+        if dignity_type != "peregrine":
             dignity_desc_template = dignities_data.get(dignity_type, {}).get("description", "")
             if dignity_desc_template:
-                # Basic formatting - replace generic terms
-                dignity_interp = dignity_desc_template.split('.')[0] # Get first sentence for brevity
-                dignity_interp = dignity_interp.replace("a planet's", f"{planet.capitalize()}'s")
-                dignity_interp = dignity_interp.replace("a planet", f"{planet.capitalize()}")
-                dignity_interp = dignity_interp.replace("its home sign", f"its home sign {sign.capitalize()}") 
-                dignity_interp = dignity_interp.replace("the planet's", f"{planet.capitalize()}'s")
-                dignity_interp = dignity_interp.replace("the planet", f"{planet.capitalize()}")
-                dignity_interp = f" ({dignity_type.capitalize()}: {dignity_interp})." # Wrap in context
+                # Get first sentence, keep it simple for structure
+                dignity_text = dignity_desc_template.split('.')[0]
+                dignity_component = { 'type': dignity_type.capitalize(), 'text': dignity_text }
             else:
                 self.logger.warning(f"No description found for dignity '{dignity_type}' in dignities.json")
+        interpretation_components['dignity'] = dignity_component # Assign the dict or None
 
-        # --- Build Final Interpretation (Revised) --- 
-        # Combine the specific/generic Planet-in-Sign interp with house placement, retrograde, and dignity
-        interpretation = (
-            f"{planet.capitalize()} in {sign.capitalize()} (House {house}): "
-            f"{planet_sign_interp} " # Use the specific or generated interp
-            f"Placed in House {house}, this influence manifests particularly in relation to {house_focus}."
-            f"{retrograde_text}"
-            f"{dignity_interp}"
-        )
-        
-        return interpretation.strip() # Remove potential trailing space
+        # --- Return structured data ---
+        return {
+            'planet': planet,
+            'sign': sign,
+            'house': house,
+            'retrograde': retrograde,
+            'interpretation_components': interpretation_components # Nested dict with text pieces
+        }
+
         
     def _generate_house_interpretations(self, birth_chart: Dict, level: str = "basic") -> List[Dict]:
         """Generate interpretations for houses in the birth chart.
@@ -727,14 +752,11 @@ class InterpretationService:
                     if not sign:
                         continue
                         
-                    # Generate interpretation
-                    interpretation = self._get_house_interpretation(house_num, sign)
+                    # Generate structured interpretation data
+                    house_interp_data = self._get_house_interpretation(house_num, sign)
                     
-                    house_interpretations.append({
-                        "house": house_num,
-                        "sign": sign,
-                        "interpretation": interpretation
-                    })
+                    # Append the entire structured dictionary
+                    house_interpretations.append(house_interp_data)
                 except (ValueError, TypeError):
                     self.logger.warning(f"Invalid house number: {house_num_str}")
                     continue
@@ -747,29 +769,26 @@ class InterpretationService:
                 if house_num is None or not sign:
                     continue
                     
-                # Generate interpretation
-                interpretation = self._get_house_interpretation(house_num, sign)
+                # Generate structured interpretation data
+                house_interp_data = self._get_house_interpretation(house_num, sign)
                 
-                house_interpretations.append({
-                    "house": house_num,
-                    "sign": sign,
-                    "interpretation": interpretation
-                })
+                # Append the entire structured dictionary
+                house_interpretations.append(house_interp_data)
                 
         self.logger.debug(f"Generated {len(house_interpretations)} house interpretations")
         return house_interpretations
         
-    def _get_house_interpretation(self, house_num: int, sign: str) -> str:
-        """Generate interpretation for a house with a specific sign on its cusp.
+    def _get_house_interpretation(self, house_num: int, sign: str) -> Dict: # Changed return type
+        """Generate structured interpretation data for a house with a specific sign on its cusp.
         
         Args:
             house_num: House number
             sign: Zodiac sign on the house cusp
             
         Returns:
-            Interpretation text
+            Dictionary containing structured interpretation components.
         """
-        self.logger.debug(f"Generating interpretation for House {house_num} with {sign} on cusp")
+        self.logger.debug(f"Generating structured interpretation for House {house_num} with {sign} on cusp")
         
         # Normalize inputs
         sign_lower = sign.lower()
@@ -779,12 +798,15 @@ class InterpretationService:
         house_data = self.structured_data.get("houses", {}).get(house_str, {})
         sign_data = self.structured_data.get("signs", {}).get(sign_lower, {})
 
+        interpretation_components = {}
+        interpretation_text = ""
+
         # --- Get Specific Cusp Interpretation ---
         specific_interp = house_data.get("cusp_sign_interpretations", {}).get("basic", {}).get(sign_lower)
         
         if specific_interp:
             self.logger.debug(f"Using specific interpretation for House {house_num} cusp in {sign}")
-            return f"House {house_num} ({sign.capitalize()} cusp): {specific_interp}"
+            interpretation_text = specific_interp
         else:
             self.logger.warning(f"No specific cusp interpretation found for House {house_num} in {sign}. Building generic.")
             # --- Fallback to Generic Description ---
@@ -798,10 +820,20 @@ class InterpretationService:
                 sign_quality = sign_lower # Use sign name as fallback
                 self.logger.warning(f"No general quality found for sign {sign} in signs.json")
 
-            # Build interpretation using data from JSON
-            interpretation = f"House {house_num} with {sign.capitalize()} on the cusp influences {house_focus}. "
-            interpretation += f"This brings {sign_quality} qualities to this area of life."
-        return interpretation
+            # Build generic interpretation text
+            interpretation_text = (
+                f"With {sign.capitalize()} on the cusp, this influences {house_focus}. "
+                f"This brings {sign_quality} qualities to this area of life."
+            )
+        
+        interpretation_components['cusp_interpretation'] = interpretation_text
+
+        # --- Return structured data --- 
+        return {
+            'house': house_num,
+            'sign': sign,
+            'interpretation_components': interpretation_components
+        }
         
     def _generate_aspect_interpretations(self, birth_chart: Dict, level: str = "basic") -> List[Dict]:
         """Generate interpretations for aspects in the birth chart.
@@ -828,42 +860,37 @@ class InterpretationService:
             if not planet1 or not planet2 or aspect_type is None:
                 continue
                 
-            # Generate interpretation
-            interpretation = self._get_aspect_interpretation(planet1, planet2, aspect_type, orb)
+            # Generate structured interpretation data
+            aspect_interp_data = self._get_aspect_interpretation(planet1, planet2, aspect_type, orb)
             
-            if interpretation:
-                aspect_interpretations.append({
-                            "planet1": planet1,
-                            "planet2": planet2,
-                            "type": aspect_type,
-                    "orb": orb,
-                    "interpretation": interpretation
-                })
+            # Append the entire structured dictionary if not None
+            if aspect_interp_data:
+                aspect_interpretations.append(aspect_interp_data)
                 
         self.logger.debug(f"Generated {len(aspect_interpretations)} aspect interpretations")
         return aspect_interpretations
         
-    def _get_aspect_interpretation(self, planet1: str, planet2: str, aspect_type: Union[int, str], orb: float = 0) -> str:
-        """Generate interpretation for an aspect between two planets.
+    def _get_aspect_interpretation(self, planet1: str, planet2: str, aspect_type: Union[int, str], orb: float = 0) -> Optional[Dict]: # Changed return type
+        """Generate structured interpretation data for an aspect between two planets.
         
         Args:
             planet1: First planet
             planet2: Second planet
-            aspect_type: Type of aspect (0/conjunction, 60/sextile, 90/square, 120/trine, 180/opposition)
+            aspect_type: Type of aspect (e.g., 0, 'conjunction', 'Trine')
             orb: Orb of the aspect
             
         Returns:
-            Interpretation text or None if aspect type is unknown.
+            Dictionary containing structured interpretation components, or None if aspect type is unknown.
         """
-        self.logger.debug(f"Generating interpretation for {planet1}-{planet2} {aspect_type} aspect")
+        self.logger.debug(f"Generating structured interpretation for {planet1}-{planet2} {aspect_type} aspect")
         
         # Normalize inputs
         planet1_lower = planet1.lower()
         planet2_lower = planet2.lower()
-        # Ensure consistent ordering for lookup (e.g., sun_moon not moon_sun)
         sorted_planets = sorted([planet1_lower, planet2_lower])
         pair_key = f"{sorted_planets[0]}_{sorted_planets[1]}"
-        aspect_key = str(aspect_type).lower() # Use lowercase string key for cache lookup
+        aspect_key = str(aspect_type).lower() # Cache key
+        aspect_type_display = str(aspect_type).capitalize() # For display
 
         # Get data from structured_data cache
         aspect_data = self._aspect_cache.get(aspect_key)
@@ -873,7 +900,12 @@ class InterpretationService:
         if not aspect_data:
             self.logger.warning(f"Unknown aspect type: {aspect_type}. Skipping interpretation.")
             return None
-            
+        
+        interpretation_components = {}
+        interpretation_core = ""
+        aspect_name = aspect_data.get("name", aspect_type_display)
+        nature = aspect_data.get("nature", "neutral")
+
         # --- Try Specific Pair Interpretation First ---
         specific_interp = aspect_data.get("specific_pairs", {}).get(pair_key)
         if specific_interp:
@@ -882,30 +914,37 @@ class InterpretationService:
         else:
             # --- Fallback to Generic Interpretation ---
             self.logger.debug(f"No specific interpretation found for {pair_key} {aspect_key}. Building generic.")
-            aspect_name = aspect_data.get("name", aspect_key.capitalize()) 
             aspect_keywords = aspect_data.get("keywords", [])
-            aspect_action = aspect_keywords[0] if aspect_keywords else aspect_data.get("nature", "influences")
+            aspect_action = aspect_keywords[0] if aspect_keywords else nature # Use nature if no keyword
             planet1_keyword = planet1_data.get("keywords", [planet1_lower])[0]
             planet2_keyword = planet2_data.get("keywords", [planet2_lower])[0]
 
             interpretation_core = (
-                f"{planet1.capitalize()} {aspect_name} {planet2.capitalize()}: "
                 f"This aspect {aspect_action} the themes of {planet1_keyword} ({planet1.capitalize()}) "
                 f"and {planet2_keyword} ({planet2.capitalize()})."
             )
+        
+        interpretation_components['core'] = interpretation_core
 
-        # --- Add Orb Significance --- 
-        orb_text = ""
+        # --- Orb Significance --- 
+        orb_significance_text = None # Default to None
         defined_orb = aspect_data.get("orb", 8) # Default to 8 if not defined
         if orb < (defined_orb / 4.0):
-            orb_text = f" With a tight orb of {orb:.1f}°, its influence is particularly direct and significant."
+            orb_significance_text = f"Tight orb ({orb:.1f}°): Influence is particularly direct and significant."
         elif orb > (defined_orb * 0.85): # If close to max orb
-             orb_text = f" With a wider orb of {orb:.1f}°, its influence may be less immediate but still relevant."
+             orb_significance_text = f"Wider orb ({orb:.1f}°): Influence may be less immediate but still relevant."
+        interpretation_components['orb_significance'] = orb_significance_text
             
-        # Combine core interpretation with orb text
-        interpretation = f"{interpretation_core}{orb_text}"
-        
-        return interpretation.strip()
+        # --- Return structured data --- 
+        return {
+            'planet1': planet1,
+            'planet2': planet2,
+            'type': aspect_type_display, # Use display name
+            'orb': orb,
+            'name': aspect_name,
+            'nature': nature,
+            'interpretation_components': interpretation_components
+        }
         
     def _generate_overall_interpretation(self, birth_chart: Dict, level: str = "basic") -> str:
         """Generate an overall interpretation of the birth chart.
@@ -1126,8 +1165,8 @@ class InterpretationService:
                 interpretation += f" - {planet_quality}"
             if sign_quality:
                 interpretation += f" - {sign_quality}"
-            if house_meaning:
-                interpretation += f" - {house_meaning}"
+            if house_meaning: # Corrected Indentation
+                interpretation += f" - {house_meaning}" # Corrected Indentation
 
             # Create the planet interpretation object
             planet_interp = {
@@ -1249,7 +1288,7 @@ class InterpretationService:
                                     match = True
                             
                             if match:
-                                # Found a Yod
+                                # Found a Yod (Corrected Indentation)
                                 planets = sorted([planet1, planet2, third_planet.lower()])
                                 key = "-".join(planets)
                                 
@@ -1601,6 +1640,7 @@ class InterpretationService:
             return "air"
         elif sign in water_signs:
             return "water"
+        # Corrected indentation for the else block
         else:
             self.logger.warning(f"Unknown sign for element determination: {sign}")
             return "unknown"
@@ -1626,6 +1666,7 @@ class InterpretationService:
             return "fixed"
         elif sign in mutable_signs:
             return "mutable"
+        # Corrected indentation for the else block
         else:
             self.logger.warning(f"Unknown sign for modality determination: {sign}")
             return "unknown"
@@ -1648,8 +1689,10 @@ class InterpretationService:
         try:
             description = self.structured_data.get("descriptions", {}).get(rising_sign_lower, {}).get("rising_sign", "")
             if description:
+                # Corrected indentation for the logger call
                 self.logger.debug(f"Found rising sign summary in structured data for {rising_sign}")
             else:
+                # Corrected indentation for the logger call
                  self.logger.warning(f"No rising_sign description found for {rising_sign} in descriptions.json")
         except AttributeError:
              self.logger.error(f"Error accessing rising sign description for {rising_sign} in structured data.")
@@ -1713,11 +1756,17 @@ class InterpretationService:
         if total_planets > 0:
             for element, count in elements.items():
                 percentages[element] = round((count / total_planets) * 100, 2)
+        else: # Handle case where no planets were counted
+            percentages = {e: 0.0 for e in elements} # Corrected
                 
         # Determine dominant and lacking elements
-        sorted_elements = sorted(elements.items(), key=lambda x: x[1], reverse=True)
-        dominant = sorted_elements[0][0] if sorted_elements[0][1] > 0 else None
-        lacking = [element for element, count in elements.items() if count <= 1]
+        dominant = None # Corrected default
+        lacking = [] # Corrected default
+        if total_planets > 0: # Corrected
+            sorted_elements = sorted(elements.items(), key=lambda x: x[1], reverse=True)
+            if sorted_elements and sorted_elements[0][1] > 0: # Ensure list is not empty
+                dominant = sorted_elements[0][0]
+            lacking = [element for element, count in elements.items() if count <= 1]
         
         # Generate interpretation
         interpretation = self._generate_element_balance_interpretation(dominant, lacking, percentages)
@@ -1735,11 +1784,11 @@ class InterpretationService:
         self.logger.debug(f"Element balance analysis: {result['counts']}")
         return result
         
-    def _generate_element_balance_interpretation(self, dominant: str, lacking: List[str], percentages: Dict[str, float]) -> str:
+    def _generate_element_balance_interpretation(self, dominant: Optional[str], lacking: List[str], percentages: Dict[str, float]) -> str: # Type hints updated
         """Generate an interpretation of the element balance using structured data.
         
         Args:
-            dominant: Dominant element
+            dominant: Dominant element (or None)
             lacking: List of lacking elements
             percentages: Element percentages
             
@@ -1753,7 +1802,7 @@ class InterpretationService:
         
         # Describe dominant element
         if dominant:
-            percentage = round(percentages[dominant])
+            percentage = round(percentages.get(dominant, 0)) # Use .get() for safety
             # Use detailed description if emphasis is strong (e.g., > 40%), otherwise concise
             if percentage > 40 and f"{dominant}_dominant" in element_emphasis_patterns:
                  desc = element_emphasis_patterns[f"{dominant}_dominant"].get("description", "")
@@ -1770,11 +1819,14 @@ class InterpretationService:
              # Use detailed description if element is very lacking (e.g., 0 planets)
             lacking_elements_str = []
             for element in lacking:
-                count = percentages.get(element, 0) # Get count via percentage (approximate)
-                if count == 0 and f"{element}_lacking" in element_emphasis_patterns:
+                # Ensure percentage is calculated correctly even for 0 count
+                percent_val = percentages.get(element, 0) 
+                is_zero = percent_val == 0.0
+
+                if is_zero and f"{element}_lacking" in element_emphasis_patterns:
                     desc = element_emphasis_patterns[f"{element}_lacking"].get("description", "")
                     lacking_elements_str.append(f"a notable lack of the {element} element. {desc}")
-                elif f"{element}_lacking" in elemental_patterns:
+                elif f"{element}_lacking" in elemental_patterns: # Handle non-zero lacking
                     desc = elemental_patterns[f"{element}_lacking"].get("description", f"potential challenges related to {element} qualities.")
                     lacking_elements_str.append(f"limited {element} element energy. {desc}")
                 else:
@@ -1784,7 +1836,7 @@ class InterpretationService:
                  interpretation_parts.append("Your chart indicates " + "; ".join(lacking_elements_str) + ".")
                 
         # Note balance if neither dominant nor lacking elements
-        if not dominant and not lacking:
+        if not dominant and not lacking: # Check if ONLY balanced
             interpretation_parts.append(
                 "Your chart shows a relatively balanced distribution of elements, "
                 "suggesting versatility in approaching life through different modes of expression."
@@ -1805,55 +1857,59 @@ class InterpretationService:
         # Initialize modality counts and planet groupings
         modalities = {"cardinal": 0, "fixed": 0, "mutable": 0}
         modality_planets = {"cardinal": [], "fixed": [], "mutable": []}
+        total_planets = 0 # Initialize total_planets
         
         # Process planets (handling both dictionary and list formats)
         planets_data = birth_chart.get("planets", {})
         
+        # Consolidate planet processing logic
+        planet_iterator = []
         if isinstance(planets_data, dict):
-            # Dictionary format (new)
-            for planet_name, planet_data in planets_data.items():
-                # Skip points like Ascendant, MC
-                if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
-                    continue
-                    
-                sign = planet_data.get("sign", "").lower()
-                modality = self._get_sign_modality(sign)
-                
-                if modality in modalities:
-                    modalities[modality] += 1
-                    modality_planets[modality].append(planet_name)
+            planet_iterator = planets_data.items()
+            is_dict_format = True
         elif isinstance(planets_data, list):
-            # List format (old)
-            for planet in planets_data:
-                # Skip points like Ascendant, MC
-                if planet.get("name", "").lower() in ["ascendant", "midheaven", "descendant", "ic"]:
-                    continue
-                    
-                sign = planet.get("sign", "").lower()
-                modality = self._get_sign_modality(sign)
-                
-                if modality in modalities:
-                    modalities[modality] += 1
-                    modality_planets[modality].append(planet.get("name"))
+            planet_iterator = enumerate(planets_data) # Use enumerate if needed later, otherwise just iterate
+            is_dict_format = False
+        
+        for item in planet_iterator:
+            planet_name = ""
+            planet_info = None
             
-        # Calculate percentages (Moved outside elif)
-        total_planets = sum(modalities.values())
-        percentages = {}
+            if is_dict_format:
+                planet_name, planet_info = item
+            else:
+                 _, planet_info = item # Assuming list items are dicts
+                 planet_name = planet_info.get("name", "")
 
+            # Skip points like Ascendant, MC
+            if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
+                continue
+                
+            sign = planet_info.get("sign", "").lower()
+            modality = self._get_sign_modality(sign)
+            
+            if modality in modalities:
+                modalities[modality] += 1
+                modality_planets[modality].append(planet_name)
+                total_planets += 1 # Increment total_planets here
+        
+        # Calculate percentages
+        percentages = {}
         if total_planets > 0:
             for modality, count in modalities.items():
                 percentages[modality] = round((count / total_planets) * 100, 2)
         else: # Handle case where no planets were counted
-             percentages = {m: 0.0 for m in modalities}
+            percentages = {m: 0.0 for m in modalities}
             
         # Determine dominant and lacking modalities
         dominant = None
         lacking = [] # Initialize lacking
         if total_planets > 0:
             sorted_modalities = sorted(modalities.items(), key=lambda x: x[1], reverse=True)
-            if sorted_modalities and sorted_modalities[0][1] > 0: # Added check if sorted_modalities is not empty
-                 dominant = sorted_modalities[0][0]
-            lacking = [modality for modality, count in modalities.items() if count <= 1]
+            if sorted_modalities and sorted_modalities[0][1] > 0: 
+                dominant = sorted_modalities[0][0]
+            # Define lacking as 1 or 0 planets
+            lacking = [modality for modality, count in modalities.items() if count <= 1] 
             
         # Generate interpretation
         interpretation = self._generate_modality_balance_interpretation(dominant, lacking, percentages)
@@ -1871,11 +1927,11 @@ class InterpretationService:
         self.logger.debug(f"Modality balance analysis: {result['counts']}")
         return result
         
-    def _generate_modality_balance_interpretation(self, dominant: str, lacking: List[str], percentages: Dict[str, float]) -> str:
+    def _generate_modality_balance_interpretation(self, dominant: Optional[str], lacking: List[str], percentages: Dict[str, float]) -> str: # Type hints updated
         """Generate an interpretation of the modality balance using structured data.
         
         Args:
-            dominant: Dominant modality
+            dominant: Dominant modality (or None)
             lacking: List of lacking modalities
             percentages: Modality percentages
             
@@ -1889,7 +1945,7 @@ class InterpretationService:
         
         # Describe dominant modality
         if dominant:
-            percentage = round(percentages[dominant])
+            percentage = round(percentages.get(dominant, 0)) # Use .get()
             # Use detailed description if emphasis is strong (e.g., > 40%), otherwise concise
             if percentage > 40 and f"{dominant}_dominant" in modality_emphasis_patterns:
                 desc = modality_emphasis_patterns[f"{dominant}_dominant"].get("description", "")
@@ -1905,21 +1961,23 @@ class InterpretationService:
         if lacking:
             lacking_modalities_str = []
             for modality in lacking:
-                count = percentages.get(modality, 0) # Get count via percentage (approximate)
-                if count == 0 and f"{modality}_lacking" in modality_emphasis_patterns:
+                percent_val = percentages.get(modality, 0)
+                is_zero = percent_val == 0.0
+
+                if is_zero and f"{modality}_lacking" in modality_emphasis_patterns:
                     desc = modality_emphasis_patterns[f"{modality}_lacking"].get("description", "")
                     lacking_modalities_str.append(f"a notable lack of the {modality} modality. {desc}")
-                elif f"{modality}_lacking" in modality_patterns:
+                elif f"{modality}_lacking" in modality_patterns: # Handle non-zero lacking
                     desc = modality_patterns[f"{modality}_lacking"].get("description", f"potential challenges related to {modality} qualities.")
                     lacking_modalities_str.append(f"limited {modality} modality energy. {desc}")
-            else:
+                else:
                     lacking_modalities_str.append(f"limited {modality} modality energy")
                     self.logger.warning(f"No description found for lacking modality {modality} in interpretation_patterns.json")
             if lacking_modalities_str:
                  interpretation_parts.append("Your chart indicates " + "; ".join(lacking_modalities_str) + ".")
                 
         # Note balance if neither dominant nor lacking modalities
-        if not dominant and not lacking:
+        if not dominant and not lacking: # Check if ONLY balanced
             interpretation_parts.append(
                 "Your chart shows a relatively balanced distribution of modalities, "
                 "suggesting versatility in how you approach initiation, stabilization, and adaptation."
@@ -1949,53 +2007,45 @@ class InterpretationService:
         # Process planets (handling both dictionary and list formats)
         planets_data = birth_chart.get("planets", {})
         
+        # Consolidate planet processing logic
+        planet_iterator = []
         if isinstance(planets_data, dict):
-            # Dictionary format (new)
-            for planet_name, planet_data in planets_data.items():
-                # Skip points like Ascendant, MC
-                if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
-                    continue
-                
-                sign = planet_data.get("sign")
-                if sign:
-                    sign_lower = sign.lower()
-                    sign_counts[sign_lower] = sign_counts.get(sign_lower, 0) + 1
-                    
-                    if sign_lower not in sign_planets:
-                        sign_planets[sign_lower] = []
-                    sign_planets[sign_lower].append(planet_name)
-                    
-                # Count house placements
-                house = planet_data.get("house")
-                if house is not None:
-                    house_str = str(house)
-                    if house_str in house_counts:
-                        house_counts[house_str] += 1
-                        house_planets[house_str].append(planet_name)
-                        
+            planet_iterator = planets_data.items()
+            is_dict_format = True
         elif isinstance(planets_data, list):
-            # List format (old)
-            for planet in planets_data:
-                # Skip points like Ascendant, MC
-                if planet.get("name", "").lower() in ["ascendant", "midheaven", "descendant", "ic"]:
-                    continue
-                    
-                sign = planet.get("sign")
-                if sign:
-                    sign_lower = sign.lower()
-                    sign_counts[sign_lower] = sign_counts.get(sign_lower, 0) + 1
-                    
-                    if sign_lower not in sign_planets:
-                        sign_planets[sign_lower] = []
-                    sign_planets[sign_lower].append(planet.get("name"))
-
-                # Count house placements
-                house = planet.get("house")
-                if house is not None:
-                    house_str = str(house)
-                    if house_str in house_counts:
-                        house_counts[house_str] += 1
-                        house_planets[house_str].append(planet.get("name"))
+            planet_iterator = enumerate(planets_data) 
+            is_dict_format = False
+            
+        for item in planet_iterator:
+            planet_name = ""
+            planet_info = None
+            
+            if is_dict_format:
+                planet_name, planet_info = item
+            else:
+                 _, planet_info = item # Assuming list items are dicts
+                 planet_name = planet_info.get("name", "")
+                 
+            # Skip points like Ascendant, MC
+            if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
+                continue
+            
+            sign = planet_info.get("sign")
+            if sign:
+                sign_lower = sign.lower()
+                sign_counts[sign_lower] = sign_counts.get(sign_lower, 0) + 1
+                
+                if sign_lower not in sign_planets:
+                    sign_planets[sign_lower] = []
+                sign_planets[sign_lower].append(planet_name)
+                
+            # Count house placements
+            house = planet_info.get("house")
+            if house is not None:
+                house_str = str(house)
+                if house_str in house_counts:
+                    house_counts[house_str] += 1
+                    house_planets[house_str].append(planet_name)
                     
         # Find stelliums
         for sign, count in sign_counts.items():
@@ -2020,7 +2070,8 @@ class InterpretationService:
                     description=description # Consider adding only a snippet for brevity if needed
                 )
 
-                patterns.append({
+                # Corrected Indentation for patterns.append
+                patterns.append({ 
                     "type": "stellium",
                     "sign": sign,
                     "planets": sign_planets[sign],
@@ -2173,11 +2224,86 @@ class InterpretationService:
         self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Yod'])} Yods (after overlap check)." )
         # --- End Yod Detection ---
         
-        # Analyze Grand Trine (TODO: Implement Grand Trine detection)
-        # Requires finding three planets trining each other, often in the same element.
+        # --- Grand Trine Detection ---
+        self.logger.debug("Checking for Grand Trines...")
+        trines = [a for a in aspects if str(a.get("type")) in ["120", "trine"]]
+        found_grand_trines = []
+        planets_in_chart = list(birth_chart.get("planets", {}).keys())
         
-        # Analyze Grand Cross (TODO: Implement Grand Cross detection)
-        # Requires finding four planets in a cross configuration (two oppositions, four squares).
+        # Iterate through all combinations of 3 planets
+        from itertools import combinations as iter_combinations
+        for p1, p2, p3 in iter_combinations(planets_in_chart, 3):
+            # Check for trines between all pairs
+            has_trine_12 = any((a["planet1"] == p1 and a["planet2"] == p2) or (a["planet1"] == p2 and a["planet2"] == p1) for a in trines)
+            has_trine_13 = any((a["planet1"] == p1 and a["planet2"] == p3) or (a["planet1"] == p3 and a["planet2"] == p1) for a in trines)
+            has_trine_23 = any((a["planet1"] == p2 and a["planet2"] == p3) or (a["planet1"] == p3 and a["planet2"] == p2) for a in trines)
+            
+            if has_trine_12 and has_trine_13 and has_trine_23:
+                gt_planets = sorted([p1, p2, p3])
+                gt_key = "-".join(gt_planets)
+                
+                # Avoid duplicates and patterns using already-involved planets
+                if gt_key not in found_grand_trines and not any(p in planets_involved for p in gt_planets):
+                    found_grand_trines.append(gt_key)
+                    
+                    pattern_info = self.structured_data.get("interpretation_patterns", {}).get("grand_trine", {})
+                    description = pattern_info.get("description", "")
+                    # Add a simple template here, can be refined later
+                    interpretation_text = f"Grand Trine involving {p1}, {p2}, and {p3}. {description}"
+
+                    patterns.append({
+                        "type": "Grand Trine",
+                        "planets": gt_planets,
+                        "interpretation": interpretation_text
+                    })
+                    planets_involved.update(gt_planets)
+        self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Grand Trine'])} Grand Trines (after overlap check).")
+        # --- End Grand Trine Detection ---
+
+        # --- Grand Cross Detection ---
+        # Simplistic approach: Find two oppositions whose planets form squares
+        self.logger.debug("Checking for Grand Crosses...")
+        found_grand_crosses = []
+        # Iterate through pairs of oppositions
+        for i, opp1 in enumerate(oppositions):
+            for j, opp2 in enumerate(oppositions):
+                if i >= j: continue # Avoid duplicates and self-comparison
+                
+                p1 = opp1["planet1"]
+                p2 = opp1["planet2"]
+                p3 = opp2["planet1"]
+                p4 = opp2["planet2"]
+                
+                # Check if the planets are distinct
+                gc_planets_set = {p1, p2, p3, p4}
+                if len(gc_planets_set) != 4: continue
+                    
+                # Check required squares (p1-p3, p1-p4, p2-p3, p2-p4)
+                has_square_13 = any((s["planet1"] == p1 and s["planet2"] == p3) or (s["planet1"] == p3 and s["planet2"] == p1) for s in squares)
+                has_square_14 = any((s["planet1"] == p1 and s["planet2"] == p4) or (s["planet1"] == p4 and s["planet2"] == p1) for s in squares)
+                has_square_23 = any((s["planet1"] == p2 and s["planet2"] == p3) or (s["planet1"] == p3 and s["planet2"] == p2) for s in squares)
+                has_square_24 = any((s["planet1"] == p2 and s["planet2"] == p4) or (s["planet1"] == p4 and s["planet2"] == p2) for s in squares)
+                
+                if has_square_13 and has_square_14 and has_square_23 and has_square_24:
+                    gc_planets = sorted(list(gc_planets_set))
+                    gc_key = "-".join(gc_planets)
+                    
+                    # Avoid duplicates and overlaps
+                    if gc_key not in found_grand_crosses and not any(p in planets_involved for p in gc_planets):
+                        found_grand_crosses.append(gc_key)
+                        
+                        pattern_info = self.structured_data.get("interpretation_patterns", {}).get("grand_cross", {})
+                        description = pattern_info.get("description", "")
+                        interpretation_text = f"Grand Cross involving {', '.join(gc_planets)}. {description}"
+                        
+                        patterns.append({
+                            "type": "Grand Cross",
+                            "planets": gc_planets,
+                            "interpretation": interpretation_text
+                        })
+                        planets_involved.update(gc_planets)
+        self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Grand Cross'])} Grand Crosses (after overlap check).")
+        # --- End Grand Cross Detection ---
         
         # Add other pattern analyses here (e.g., Mystic Rectangle, Kite)
         
@@ -2194,7 +2320,7 @@ class InterpretationService:
            (element1 in ["earth", "water"] and element2 in ["earth", "water"]):
             return "complementary_elements"
         return "incompatible_elements"
-
+        
     def _analyze_combinations(self, birth_chart: Dict) -> List[Dict]:
         """Analyze significant planetary combinations (e.g., Sun-Moon blends).
         

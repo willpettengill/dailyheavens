@@ -1,0 +1,22 @@
+{% set interp = planet.interpretation_components %}
+{{ planet.planet }} in {{ planet.sign }} (House {{ planet.house }}):
+
+{# Planet in Sign Interpretation #}
+{% if interp.planet_sign %}
+- {{ interp.planet_sign }}
+{% endif %}
+
+{# House Placement #}
+{% if interp.house_placement %}
+- {{ interp.house_placement }}
+{% endif %}
+
+{# Dignity #}
+{% if interp.dignity %}
+- Dignity: {{ interp.dignity.type }} ({{ interp.dignity.text }}.)
+{% endif %}
+
+{# Retrograde #}
+{% if interp.retrograde %}
+- Retrograde: {{ interp.retrograde }}
+{% endif %} 
