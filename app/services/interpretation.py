@@ -2184,6 +2184,17 @@ class InterpretationService:
         self.logger.debug(f"Found {len(patterns)} complex patterns in total.")
         return patterns
         
+    def _get_element_compatibility(self, element1: str, element2: str) -> str:
+        """Determine compatibility category between two elements."""
+        if not element1 or not element2 or element1 == "unknown" or element2 == "unknown":
+            return "unknown"
+        if element1 == element2:
+            return "same_element"
+        if (element1 in ["fire", "air"] and element2 in ["fire", "air"]) or \
+           (element1 in ["earth", "water"] and element2 in ["earth", "water"]):
+            return "complementary_elements"
+        return "incompatible_elements"
+
     def _analyze_combinations(self, birth_chart: Dict) -> List[Dict]:
         """Analyze significant planetary combinations (e.g., Sun-Moon blends).
         
@@ -2195,18 +2206,26 @@ class InterpretationService:
         """
         self.logger.debug("Analyzing planetary combinations")
         combinations = []
-        combinations_data = self.structured_data.get("combinations", {})
-        sun_moon_combinations = combinations_data.get("sun_moon_combinations", {})
+        # Load data for both simple sign pairings and detailed elemental combos
+        simple_combinations_data = self.structured_data.get("combinations", {})
+        detailed_combinations_data = self.structured_data.get("interpretation_combinations", {})
+        
+        sun_moon_sign_combinations = simple_combinations_data.get("sun_moon_combinations", {})
+        sun_moon_element_combinations = detailed_combinations_data.get("sun_moon_combinations", {})
+        sun_rising_element_combinations = detailed_combinations_data.get("sun_rising_combinations", {})
+        moon_rising_element_combinations = detailed_combinations_data.get("moon_rising_combinations", {})
         
         planets = birth_chart.get("planets", {})
+        angles = birth_chart.get("angles", {})
+        
         sun_sign = None
         moon_sign = None
+        rising_sign = angles.get("Ascendant", {}).get("sign")
         
-        # Handle dictionary format
+        # Get Sun/Moon signs
         if isinstance(planets, dict):
             sun_sign = planets.get("Sun", {}).get("sign")
             moon_sign = planets.get("Moon", {}).get("sign")
-        # Handle list format (backward compatibility)
         elif isinstance(planets, list):
             for planet in planets:
                 if planet.get("name") == "Sun":
@@ -2214,25 +2233,85 @@ class InterpretationService:
                 elif planet.get("name") == "Moon":
                     moon_sign = planet.get("sign")
                     
+        # --- Sun-Moon Combination (Simple Sign Pairing) ---
         if sun_sign and moon_sign:
             sun_sign_lower = sun_sign.lower()
             moon_sign_lower = moon_sign.lower()
             
-            if sun_sign_lower in sun_moon_combinations and moon_sign_lower in sun_moon_combinations[sun_sign_lower]:
-                interpretation = sun_moon_combinations[sun_sign_lower][moon_sign_lower]
+            if sun_sign_lower in sun_moon_sign_combinations and moon_sign_lower in sun_moon_sign_combinations[sun_sign_lower]:
+                interpretation = sun_moon_sign_combinations[sun_sign_lower][moon_sign_lower]
                 combinations.append({
-                    "type": "Sun-Moon Combination",
+                    "type": "Sun-Moon Sign Pairing",
                     "planets": ["Sun", "Moon"],
                     "signs": [sun_sign, moon_sign],
                     "interpretation": interpretation
                 })
-                self.logger.debug(f"Found Sun ({sun_sign})-Moon ({moon_sign}) combination interpretation.")
+                self.logger.debug(f"Found Sun ({sun_sign})-Moon ({moon_sign}) sign pairing interpretation.")
             else:
-                self.logger.warning(f"No interpretation found for Sun ({sun_sign})-Moon ({moon_sign}) combination.")
+                self.logger.warning(f"No interpretation found for Sun ({sun_sign})-Moon ({moon_sign}) sign pairing in combinations.json.")
         else:
-            self.logger.warning("Sun or Moon sign missing, cannot analyze Sun-Moon combination.")
+            self.logger.warning("Sun or Moon sign missing, cannot analyze Sun-Moon sign pairing.")
             
-        # TODO: Add analysis for other combinations (Sun-Rising, Moon-Rising)
-        
-        self.logger.debug(f"Found {len(combinations)} planetary combinations")
+        # --- Sun-Moon Combination (Elemental Theme) ---
+        if sun_sign and moon_sign:
+            sun_element = self._get_sign_element(sun_sign)
+            moon_element = self._get_sign_element(moon_sign)
+            compatibility = self._get_element_compatibility(sun_element, moon_element)
+            
+            if compatibility != "unknown" and compatibility in sun_moon_element_combinations:
+                interpretation = sun_moon_element_combinations[compatibility].get("description", "")
+                combinations.append({
+                    "type": "Sun-Moon Elemental Theme",
+                    "planets": ["Sun", "Moon"],
+                    "elements": [sun_element, moon_element],
+                    "compatibility": compatibility,
+                    "interpretation": interpretation
+                })
+                self.logger.debug(f"Found Sun ({sun_element})-Moon ({moon_element}) elemental theme ({compatibility}).")
+            else:
+                self.logger.warning(f"Could not determine Sun-Moon elemental theme for {sun_element}-{moon_element}.")
+                
+        # --- Sun-Rising Combination (Elemental Theme) ---
+        if sun_sign and rising_sign:
+            sun_element = self._get_sign_element(sun_sign)
+            rising_element = self._get_sign_element(rising_sign)
+            compatibility = self._get_element_compatibility(sun_element, rising_element)
+            
+            if compatibility != "unknown" and compatibility in sun_rising_element_combinations:
+                interpretation = sun_rising_element_combinations[compatibility].get("description", "")
+                combinations.append({
+                    "type": "Sun-Rising Elemental Theme",
+                    "points": ["Sun", "Ascendant"],
+                    "elements": [sun_element, rising_element],
+                    "compatibility": compatibility,
+                    "interpretation": interpretation
+                })
+                self.logger.debug(f"Found Sun ({sun_element})-Rising ({rising_element}) elemental theme ({compatibility}).")
+            else:
+                 self.logger.warning(f"Could not determine Sun-Rising elemental theme for {sun_element}-{rising_element}.")
+        else:
+             self.logger.warning("Sun or Rising sign missing, cannot analyze Sun-Rising elemental theme.")
+
+        # --- Moon-Rising Combination (Elemental Theme) ---
+        if moon_sign and rising_sign:
+            moon_element = self._get_sign_element(moon_sign)
+            rising_element = self._get_sign_element(rising_sign)
+            compatibility = self._get_element_compatibility(moon_element, rising_element)
+            
+            if compatibility != "unknown" and compatibility in moon_rising_element_combinations:
+                interpretation = moon_rising_element_combinations[compatibility].get("description", "")
+                combinations.append({
+                    "type": "Moon-Rising Elemental Theme",
+                    "points": ["Moon", "Ascendant"],
+                    "elements": [moon_element, rising_element],
+                    "compatibility": compatibility,
+                    "interpretation": interpretation
+                })
+                self.logger.debug(f"Found Moon ({moon_element})-Rising ({rising_element}) elemental theme ({compatibility}).")
+            else:
+                 self.logger.warning(f"Could not determine Moon-Rising elemental theme for {moon_element}-{rising_element}.")
+        else:
+            self.logger.warning("Moon or Rising sign missing, cannot analyze Moon-Rising elemental theme.")
+
+        self.logger.debug(f"Found {len(combinations)} planetary combinations in total")
         return combinations
