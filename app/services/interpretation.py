@@ -2511,13 +2511,95 @@ class InterpretationService:
             f"Found {len([p for p in patterns if p['type'] == 'Yod'])} Yods (after overlap check).")
         # --- End Yod Detection ---
 
-        # Analyze Grand Trine (TODO: Implement Grand Trine detection)
-        # Requires finding three planets trining each other, often in the same
-        # element.
+        # --- Grand Trine Detection ---
+        self.logger.debug("Checking for Grand Trines...")
+        trines = [a for a in aspects if str(a.get("type")) in ["120", "trine"]]
+        found_grand_trines = []
+        planets_in_chart = list(birth_chart.get("planets", {}).keys())
 
-        # Analyze Grand Cross (TODO: Implement Grand Cross detection)
-        # Requires finding four planets in a cross configuration (two
-        # oppositions, four squares).
+        from itertools import combinations as iter_combinations
+        for p1, p2, p3 in iter_combinations(planets_in_chart, 3):
+            # Skip if any planet is already part of a detected pattern
+            if p1 in planets_involved or p2 in planets_involved or p3 in planets_involved:
+                continue
+
+            # Check for trines between all pairs
+            has_trine_12 = any((a["planet1"] == p1 and a["planet2"] == p2) or (a["planet1"] == p2 and a["planet2"] == p1) for a in trines)
+            has_trine_13 = any((a["planet1"] == p1 and a["planet2"] == p3) or (a["planet1"] == p3 and a["planet2"] == p1) for a in trines)
+            has_trine_23 = any((a["planet1"] == p2 and a["planet2"] == p3) or (a["planet1"] == p3 and a["planet2"] == p2) for a in trines)
+
+            if has_trine_12 and has_trine_13 and has_trine_23:
+                gt_planets = sorted([p1, p2, p3])
+                gt_key = "-".join(gt_planets)
+
+                if gt_key not in found_grand_trines:
+                    found_grand_trines.append(gt_key)
+
+                    pattern_info = self.structured_data.get("interpretation_patterns", {}).get("grand_trine", {})
+                    description = pattern_info.get("description", "")
+                    # Add a simple template here, can be refined later
+                    interpretation_text = f"Grand Trine involving {p1}, {p2}, and {p3}. {description}"
+
+                    patterns.append({
+                        "type": "Grand Trine",
+                        "planets": gt_planets,
+                        "interpretation": interpretation_text
+                    })
+                    planets_involved.update(gt_planets)
+                    self.logger.debug(f"Found Grand Trine: {gt_planets}")
+
+        self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Grand Trine'])} Grand Trines (after overlap check).")
+        # --- End Grand Trine Detection ---
+
+        # --- Grand Cross Detection ---
+        self.logger.debug("Checking for Grand Crosses...")
+        found_grand_crosses = []
+        # Iterate through pairs of oppositions
+        for i, opp1 in enumerate(oppositions):
+            for j, opp2 in enumerate(oppositions):
+                if i >= j: continue # Avoid duplicates and self-comparison
+
+                p1 = opp1["planet1"]
+                p2 = opp1["planet2"]
+                p3 = opp2["planet1"]
+                p4 = opp2["planet2"]
+
+                # Check if the planets are distinct
+                gc_planets_set = {p1, p2, p3, p4}
+                if len(gc_planets_set) != 4:
+                    continue
+
+                # Skip if any planet is already part of a detected pattern
+                if any(p in planets_involved for p in gc_planets_set):
+                    continue
+
+                # Check required squares (p1-p3, p1-p4, p2-p3, p2-p4)
+                has_square_13 = any((s["planet1"] == p1 and s["planet2"] == p3) or (s["planet1"] == p3 and s["planet2"] == p1) for s in squares)
+                has_square_14 = any((s["planet1"] == p1 and s["planet2"] == p4) or (s["planet1"] == p4 and s["planet2"] == p1) for s in squares)
+                has_square_23 = any((s["planet1"] == p2 and s["planet2"] == p3) or (s["planet1"] == p3 and s["planet2"] == p2) for s in squares)
+                has_square_24 = any((s["planet1"] == p2 and s["planet2"] == p4) or (s["planet1"] == p4 and s["planet2"] == p2) for s in squares)
+
+                if has_square_13 and has_square_14 and has_square_23 and has_square_24:
+                    gc_planets = sorted(list(gc_planets_set))
+                    gc_key = "-".join(gc_planets)
+
+                    if gc_key not in found_grand_crosses:
+                        found_grand_crosses.append(gc_key)
+
+                        pattern_info = self.structured_data.get("interpretation_patterns", {}).get("grand_cross", {})
+                        description = pattern_info.get("description", "")
+                        interpretation_text = f"Grand Cross involving {', '.join(gc_planets)}. {description}"
+
+                        patterns.append({
+                            "type": "Grand Cross",
+                            "planets": gc_planets,
+                            "interpretation": interpretation_text
+                        })
+                        planets_involved.update(gc_planets)
+                        self.logger.debug(f"Found Grand Cross: {gc_planets}")
+
+        self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Grand Cross'])} Grand Crosses (after overlap check).")
+        # --- End Grand Cross Detection ---
 
         # Add other pattern analyses here (e.g., Mystic Rectangle, Kite)
 
