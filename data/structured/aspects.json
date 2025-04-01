@@ -7,8 +7,8 @@
     "keywords": ["unity", "fusion", "intensity", "beginnings", "concentration", "blending"],
     "interpretation": "A conjunction represents a fusion of planetary energies, creating a powerful blend that intensifies and concentrates the qualities of both planets involved. This aspect marks points of new beginnings and focused energy in the chart. The nature of a conjunction—whether harmonious or challenging—depends entirely on the planets involved and their inherent compatibility. When benefic planets conjoin, they enhance each other's positive qualities; when malefics meet, they may intensify difficulties; when mixed, the more dominant planet often colors the expression of the other. The house placement of a conjunction becomes a significant focal point in the life, demanding attention and conscious integration of the planetary forces.",
     "specific_pairs": {
-        "sun_moon": "Your emotional nature and basic personality are unified, creating a strong sense of self.",
-        "sun_ascendant": "You project yourself naturally and confidently."
+        "moon_sun": "Your emotional nature and basic personality are unified, creating a strong sense of self.",
+        "ascendant_sun": "You project yourself naturally and confidently."
     }
   },
   "sextile": {
@@ -27,8 +27,8 @@
     "keywords": ["tension", "growth", "action", "challenge", "development", "friction"],
     "interpretation": "A square represents a dynamic tension between planets that creates internal friction and external challenges, ultimately driving growth through necessary action. This aspect generates the motivating pressure needed for personal development and achievement. Squares often manifest as conflicts between different needs or areas of life that require resolution through conscious integration and balanced expression. While initially experienced as obstacles or frustrations, squares ultimately serve as catalysts for strength-building and mastery. The tension of a square is most productive when both planetary energies are acknowledged and given appropriate expression, rather than allowing one to dominate or repress the other. Many significant accomplishments in life emerge directly from working constructively with square aspects.",
     "specific_pairs": {
-        "sun_moon": "You may experience internal tension between your will and your emotions.",
-        "sun_ascendant": "You may struggle between being yourself and meeting others' expectations."
+        "moon_sun": "You may experience internal tension between your will and your emotions.",
+        "ascendant_sun": "You may struggle between being yourself and meeting others' expectations."
     }
   },
   "trine": {
@@ -39,8 +39,8 @@
     "keywords": ["harmony", "flow", "talent", "ease", "innate gifts", "integration"],
     "interpretation": "A trine represents a harmonious, flowing connection between planets of the same element, creating natural talents, innate abilities, and points of ease in the chart. This aspect provides a balanced, integrated expression of the planetary energies involved, allowing them to support and enhance each other effortlessly. Trines often manifest as gifts that come so naturally they may be taken for granted, operating as unconscious strengths or paths of least resistance. While trines bring blessings, their frictionless nature can sometimes lead to complacency without the motivating tension that drives conscious development. The element of the trine (fire, earth, air, or water) colors how this harmony expresses, whether through inspired action, practical stability, mental clarity, or emotional connection.",
     "specific_pairs": {
-        "sun_moon": "There is natural harmony between your conscious self and emotional needs.",
-        "sun_ascendant": "Your personality flows easily into your outer expression."
+        "moon_sun": "There is natural harmony between your conscious self and emotional needs.",
+        "ascendant_sun": "Your personality flows easily into your outer expression."
     }
   },
   "opposition": {
@@ -51,8 +51,8 @@
     "keywords": ["polarity", "awareness", "balance", "tension", "relationship", "integration"],
     "interpretation": "An opposition represents a polarity between planets that creates dynamic tension and awareness through the experience of seemingly opposing forces. This aspect illuminates the balance point between complementary energies that appear to pull in different directions but actually complete each other. Oppositions often manifest through relationships and encounters with others who embody qualities we must integrate within ourselves. The tension of an opposition is most constructive when viewed as a spectrum to be bridged rather than a conflict to be resolved. Unlike the internal friction of a square, oppositions typically externalize tension through encounters with others or between different areas of life. The axis of houses involved in an opposition indicates the life domains where this balancing act will be most prominently experienced.",
     "specific_pairs": {
-        "sun_moon": "You must work to balance your conscious needs with your emotional ones.",
-        "sun_ascendant": "You might present yourself differently from your true nature."
+        "moon_sun": "You must work to balance your conscious needs with your emotional ones.",
+        "ascendant_sun": "You might present yourself differently from your true nature."
     }
   },
   "quincunx": {
