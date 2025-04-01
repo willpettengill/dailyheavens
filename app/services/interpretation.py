@@ -655,7 +655,8 @@ class InterpretationService:
         self.logger.debug("Analyzing chart shape")
         chart_shape_analysis = self._analyze_chart_shape(birth_chart)
         interpretation["chart_shape"] = chart_shape_analysis
-        self.logger.debug(f"Chart shape analysis complete: {chart_shape_analysis.get('shape_name', 'N/A')}")
+        # Fixed this line to avoid calling .get() when shape_name might not be accessible
+        self.logger.debug(f"Chart shape analysis complete: {chart_shape_analysis['shape_name'] if isinstance(chart_shape_analysis, dict) and 'shape_name' in chart_shape_analysis else 'N/A'}")
 
         self.logger.info("Interpretation generation completed successfully")
         return interpretation
@@ -2952,6 +2953,7 @@ class InterpretationService:
         interpretation = interpretations.get(shape_name, interpretations.get("undetermined", "")) # Use determined shape_name
 
         self.logger.debug(f"Determined chart shape: {shape_name} (Span: {occupied_span:.1f}, Gap: {largest_gap:.1f})")
+        self.logger.debug(f"Shape interpretation type: {type(interpretation).__name__}, value: {interpretation}")
 
         return {
             "shape_name": shape_name.capitalize(),
