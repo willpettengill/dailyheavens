@@ -619,7 +619,8 @@ class InterpretationService:
             interpretation["mc_summary"] = mc_interp
             self.logger.debug("MC interpretation generated")
         else:
-            self.logger.warning("Midheaven sign not found in birth chart angles.")
+            self.logger.warning(
+                "Midheaven sign not found in birth chart angles.")
 
         # IC (Imum Coeli) - Corresponds to 4th House Cusp
         ic_sign = birth_chart.get(
@@ -632,7 +633,8 @@ class InterpretationService:
             interpretation["ic_summary"] = ic_interp
             self.logger.debug("IC interpretation generated")
         else:
-            self.logger.warning("Imum Coeli sign not found in birth chart angles.")
+            self.logger.warning(
+                "Imum Coeli sign not found in birth chart angles.")
 
         # DSC (Descendant) - Corresponds to 7th House Cusp
         dsc_sign = birth_chart.get(
@@ -645,7 +647,8 @@ class InterpretationService:
             interpretation["dsc_summary"] = dsc_interp
             self.logger.debug("DSC interpretation generated")
         else:
-            self.logger.warning("Descendant sign not found in birth chart angles.")
+            self.logger.warning(
+                "Descendant sign not found in birth chart angles.")
         # --- End Angle Interpretation ---
 
         self.logger.info("Interpretation generation completed successfully")
@@ -758,28 +761,37 @@ class InterpretationService:
             sun_desc = descriptions_data.get(sign_lower, {}).get('sun_sign')
             if sun_desc:
                 planet_sign_interp = sun_desc
-                self.logger.debug(f"Using dedicated sun_sign description for Sun in {sign}")
+                self.logger.debug(
+                    f"Using dedicated sun_sign description for Sun in {sign}")
             else:
                 # Fallback if specific sun description is missing
-                self.logger.warning(f"No dedicated sun_sign description found for {sign} in descriptions.json. Building generic.")
-                planet_core = planet_data.get("description", f"The core energy of {planet.capitalize()}")
+                self.logger.warning(
+                    f"No dedicated sun_sign description found for {sign} in descriptions.json. Building generic.")
+                planet_core = planet_data.get(
+                    "description", f"The core energy of {planet.capitalize()}")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
                 sign_keyword1 = sign_keywords[0]
-                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                sign_keyword2 = sign_keywords[1] if len(
+                    sign_keywords) > 1 else sign_keyword1
                 planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
 
         elif planet_lower == 'moon':
             moon_desc = descriptions_data.get(sign_lower, {}).get('moon_sign')
             if moon_desc:
                 planet_sign_interp = moon_desc
-                self.logger.debug(f"Using dedicated moon_sign description for Moon in {sign}")
+                self.logger.debug(
+                    f"Using dedicated moon_sign description for Moon in {sign}")
             else:
                 # Fallback if specific moon description is missing
-                self.logger.warning(f"No dedicated moon_sign description found for {sign} in descriptions.json. Building generic.")
-                planet_core = planet_data.get("description", f"Your emotional nature") # Specific fallback for Moon
+                self.logger.warning(
+                    f"No dedicated moon_sign description found for {sign} in descriptions.json. Building generic.")
+                # Specific fallback for Moon
+                planet_core = planet_data.get(
+                    "description", f"Your emotional nature")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
                 sign_keyword1 = sign_keywords[0]
-                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                sign_keyword2 = sign_keywords[1] if len(
+                    sign_keywords) > 1 else sign_keyword1
                 planet_sign_interp = f"{planet_core}, influenced by {sign.capitalize()}, shows qualities like {sign_keyword1} and {sign_keyword2}."
 
         else:
@@ -788,7 +800,8 @@ class InterpretationService:
             specific_sign_interp = sign_interpretations.get(
                 level, {}).get(sign_lower)
 
-            # Use specific interpretation if found, otherwise build a generic one
+            # Use specific interpretation if found, otherwise build a generic
+            # one
             if specific_sign_interp:
                 planet_sign_interp = specific_sign_interp
                 self.logger.debug(
@@ -816,42 +829,50 @@ class InterpretationService:
 
         # --- Dignity Interpretation ---
         dignity_type = self._get_essential_dignity(planet_lower, sign_lower)
-        dignity_interp = ""
-        if dignity_type != "peregrine":  # Only add text if not peregrine
-            dignity_desc_template = dignities_data.get(
-                dignity_type, {}).get("description", "")
-            if dignity_desc_template:
-                # Basic formatting - replace generic terms
-                dignity_interp = dignity_desc_template.split(
-                    '.')[0]  # Get first sentence for brevity
-                dignity_interp = dignity_interp.replace(
-                    "a planet's", f"{planet.capitalize()}'s")
-                dignity_interp = dignity_interp.replace(
-                    "a planet", f"{planet.capitalize()}")
-                dignity_interp = dignity_interp.replace(
-                    "its home sign", f"its home sign {sign.capitalize()}")
-                dignity_interp = dignity_interp.replace(
-                    "the planet's", f"{planet.capitalize()}'s")
-                dignity_interp = dignity_interp.replace(
-                    "the planet", f"{planet.capitalize()}")
-                # Wrap in context
-                dignity_interp = f" ({dignity_type.capitalize()}: {dignity_interp})."
+        dignity_interp_sentence = "" # Initialize dignity sentence
+        if dignity_type != "peregrine":
+            dignity_desc_full = dignities_data.get(
+                dignity_type, {}).get("description", "") # Get full description
+            if dignity_desc_full:
+                # Format the full description
+                formatted_desc = dignity_desc_full
+                # Replace generic terms (case-insensitive for start of sentence)
+                replacements = {
+                    "a planet's": f"{planet.capitalize()}'s",
+                    "a planet": f"{planet.capitalize()}",
+                    "its home sign": f"its home sign {sign.capitalize()}", # Specific for domicile
+                    "the planet's": f"{planet.capitalize()}'s",
+                    "the planet": f"{planet.capitalize()}",
+                }
+                for generic, specific in replacements.items():
+                    formatted_desc = formatted_desc.replace(generic, specific)
+                    formatted_desc = formatted_desc.replace(generic.capitalize(), specific) # Handle start of sentence
+
+                # Construct the interpretation sentence
+                dignity_interp_sentence = f"In terms of essential dignity, {planet.capitalize()} is in {dignity_type.capitalize()} here. {formatted_desc}"
             else:
                 self.logger.warning(
                     f"No description found for dignity '{dignity_type}' in dignities.json")
+                # Fallback if description missing but dignity known
+                dignity_interp_sentence = f"In terms of essential dignity, {planet.capitalize()} is in {dignity_type.capitalize()} here, which influences its expression."
 
         # --- Build Final Interpretation (Revised) ---
         # Combine the specific/generic Planet-in-Sign interp with house
-        # placement, retrograde, and dignity
-        interpretation = (
-            f"{planet.capitalize()} in {sign.capitalize()} (House {house}): "
-            f"{planet_sign_interp} "  # Use the specific or generated interp
-            f"Placed in House {house}, this influence manifests particularly in relation to {house_focus}."
-            f"{retrograde_text}"
-            f"{dignity_interp}"
-        )
+        # placement, dignity, and retrograde status
 
-        return interpretation.strip()  # Remove potential trailing space
+        interpretation_parts = [
+            f"{planet.capitalize()} in {sign.capitalize()} (House {house}):",
+            planet_sign_interp # Planet-in-Sign interpretation
+        ]
+        if dignity_interp_sentence: # Add dignity interpretation if available
+            interpretation_parts.append(dignity_interp_sentence)
+        interpretation_parts.append(f"Placed in House {house}, this influence manifests particularly in relation to {house_focus}.") # House placement
+        if retrograde_text:
+            interpretation_parts.append(retrograde_text.strip()) # Add retrograde text if applicable
+
+        interpretation = " ".join(interpretation_parts) # Join all parts with spaces
+
+        return interpretation # Return the combined string
 
     def _generate_house_interpretations(
             self,
@@ -2390,14 +2411,10 @@ class InterpretationService:
             a for a in aspects if str(
                 a.get("type")) in [
                 "90", "square"]]
-        t_square_interpret = self.structured_data.get(
-            "interpretation_patterns",
-            {}).get(
-            "t_square",
-            {}).get(
-            "description",
-            "")
+        # Removed unused t_square_interpret variable assignment here
         found_t_squares = []
+
+        planets_data = birth_chart.get("planets", {}) # Get planets data for sign lookup
 
         for opp in oppositions:
             p1 = opp["planet1"]
@@ -2433,25 +2450,69 @@ class InterpretationService:
                 if t_square_key not in found_t_squares:
                     found_t_squares.append(t_square_key)
 
-                    # Fetch template and description
-                    pattern_info = self.structured_data.get(
-                        "interpretation_patterns", {}).get(
-                        "t_square", {})
-                    description = pattern_info.get("description", "")
-                    template = pattern_info.get(
-                        "interpretation_template",
-                        "T-Square involving {p1}, {p2}, and {apex}. {description}")  # Fallback template
+                    # --- Enhance T-Square Interpretation ---
+                    # Get signs for modality/element analysis
+                    p1_sign = planets_data.get(p1, {}).get("sign")
+                    p2_sign = planets_data.get(p2, {}).get("sign")
+                    apex_sign = planets_data.get(apex, {}).get("sign")
 
-                    # Format the interpretation using the template
-                    interpretation_text = template.format(
-                        p1=p1, p2=p2, apex=apex, description=description)
+                    interpretation_text = "" # Initialize interpretation text
+                    if p1_sign and p2_sign and apex_sign:
+                        modality = self._get_sign_modality(p1_sign) # All signs have the same modality
+                        elements_present = {
+                            self._get_sign_element(p1_sign),
+                            self._get_sign_element(p2_sign),
+                            self._get_sign_element(apex_sign)
+                        }
+                        all_elements = {"fire", "earth", "air", "water"}
+                        missing_elements = list(all_elements - elements_present)
+                        missing_element_str = missing_elements[0] if missing_elements else "None" # Should always find one
+
+                        # Basic modality descriptions (can be moved to JSON later)
+                        modality_desc = ""
+                        if modality == "cardinal":
+                            modality_desc = "This Cardinal T-Square creates tension around initiating action and taking charge."
+                        elif modality == "fixed":
+                            modality_desc = "This Fixed T-Square creates tension around stability, resistance to change, and getting stuck."
+                        elif modality == "mutable":
+                            modality_desc = "This Mutable T-Square creates tension around adaptability, decision-making, and scattered energy."
+
+                        # Missing element description
+                        missing_element_desc = f"The missing {missing_element_str.capitalize()} element suggests that integrating qualities like {self._get_element_keywords_simple(missing_element_str, modality)[0]} could help resolve this pattern's challenges." if missing_element_str != "None" else ""
+
+                        # Fetch general description from JSON
+                        pattern_info = self.structured_data.get(
+                            "interpretation_patterns", {}).get(
+                            "t_square", {})
+                        description = pattern_info.get("description", "") # General description
+
+                        # Combine enhanced interpretation
+                        interpretation_text = (
+                            f"T-Square involving {p1}, {p2}, and apex {apex}. "
+                            f"{modality_desc} {description} " # Add general description
+                            f"{missing_element_desc}"
+                        ).strip()
+
+                    else:
+                        # Fallback to original generic interpretation if signs are missing
+                        self.logger.warning(f"Could not retrieve signs for all planets in T-Square: {p1}, {p2}, {apex}. Using generic interpretation.")
+                        pattern_info = self.structured_data.get(
+                            "interpretation_patterns", {}).get(
+                            "t_square", {})
+                        description = pattern_info.get("description", "")
+                        template = pattern_info.get(
+                            "interpretation_template",
+                            "T-Square involving {p1}, {p2}, and {apex}. {description}")
+                        interpretation_text = template.format(
+                            p1=p1, p2=p2, apex=apex, description=description)
+                    # --- End Enhance T-Square Interpretation ---
 
                     patterns.append({
                         "type": "T-Square",
                         "planets": t_square_planets,
                         "opposition": sorted([p1, p2]),
                         "apex": apex,
-                        "interpretation": interpretation_text
+                        "interpretation": interpretation_text # Use the enhanced or fallback text
                     })
                     planets_involved.update(
                         [p1, p2, apex])  # Track planets used
@@ -2463,13 +2524,8 @@ class InterpretationService:
         # --- Yod Detection ---
         self.logger.debug("Checking for Yods...")
         yods = self._find_yod(aspects)
-        yod_interpret = self.structured_data.get(
-            "interpretation_patterns",
-            {}).get(
-            "yod",
-            {}).get(
-            "description",
-            "")
+        # Removed unused yod_interpret variable assignment here
+
         if yods:
             for yod in yods:
                 apex_planet = yod.get("apex")
@@ -2484,27 +2540,50 @@ class InterpretationService:
                         f"Skipping Yod {all_planets} as planets are involved in another pattern.")
                     continue
 
-                # Fetch template and description
-                pattern_info = self.structured_data.get(
-                    "interpretation_patterns", {}).get("yod", {})
-                description = pattern_info.get("description", "")
-                template = pattern_info.get(
-                    "interpretation_template",
-                    "Yod pattern involving {base1}, {base2}, and {apex}. {description}")  # Fallback template
+                # --- Enhance Yod Interpretation ---
+                apex_sign = planets_data.get(apex_planet, {}).get("sign")
+                base1_sign = planets_data.get(base_planets[0], {}).get("sign")
+                base2_sign = planets_data.get(base_planets[1], {}).get("sign")
 
-                # Format the interpretation using the template
-                interpretation_text = template.format(
-                    base1=base_planets[0],
-                    base2=base_planets[1],
-                    apex=apex_planet,
-                    description=description)
+                interpretation_text = "" # Initialize
+                if apex_sign and base1_sign and base2_sign:
+                    # Fetch general description and template from JSON
+                    pattern_info = self.structured_data.get(
+                        "interpretation_patterns", {}).get("yod", {})
+                    description = pattern_info.get("description", "") # General description
+
+                    # Build enhanced interpretation
+                    interpretation_text = (
+                        f"Yod pattern involving {base_planets[0].capitalize()} ({base1_sign}), "
+                        f"{base_planets[1].capitalize()} ({base2_sign}), and apex {apex_planet.capitalize()} ({apex_sign}). "
+                        f"{description} " # General Yod description
+                        f"The apex planet, {apex_planet.capitalize()} in {apex_sign}, indicates the primary point of focus and necessary adjustment. "
+                        f"The harmoniously linked base planets, {base_planets[0].capitalize()} in {base1_sign} and {base_planets[1].capitalize()} in {base2_sign}, "
+                        f"represent skills or resources that can be utilized to navigate the pattern's challenges."
+                    ).strip()
+                else:
+                     # Fallback to original generic interpretation if signs are missing
+                    self.logger.warning(f"Could not retrieve signs for all planets in Yod: {all_planets}. Using generic interpretation.")
+                    pattern_info = self.structured_data.get(
+                        "interpretation_patterns", {}).get("yod", {})
+                    description = pattern_info.get("description", "")
+                    template = pattern_info.get(
+                        "interpretation_template",
+                        "Yod pattern involving {base1}, {base2}, and {apex}. {description}")  # Fallback template
+                    interpretation_text = template.format(
+                        base1=base_planets[0],
+                        base2=base_planets[1],
+                        apex=apex_planet,
+                        description=description)
+                # --- End Enhance Yod Interpretation ---
+
 
                 patterns.append({
                     "type": "Yod",
                     "planets": all_planets,
                     "base": base_planets,
                     "apex": apex_planet,
-                    "interpretation": interpretation_text
+                    "interpretation": interpretation_text # Use enhanced or fallback
                 })
                 planets_involved.update(all_planets)
         self.logger.debug(
@@ -2524,9 +2603,12 @@ class InterpretationService:
                 continue
 
             # Check for trines between all pairs
-            has_trine_12 = any((a["planet1"] == p1 and a["planet2"] == p2) or (a["planet1"] == p2 and a["planet2"] == p1) for a in trines)
-            has_trine_13 = any((a["planet1"] == p1 and a["planet2"] == p3) or (a["planet1"] == p3 and a["planet2"] == p1) for a in trines)
-            has_trine_23 = any((a["planet1"] == p2 and a["planet2"] == p3) or (a["planet1"] == p3 and a["planet2"] == p2) for a in trines)
+            has_trine_12 = any((a["planet1"] == p1 and a["planet2"] == p2) or (
+                a["planet1"] == p2 and a["planet2"] == p1) for a in trines)
+            has_trine_13 = any((a["planet1"] == p1 and a["planet2"] == p3) or (
+                a["planet1"] == p3 and a["planet2"] == p1) for a in trines)
+            has_trine_23 = any((a["planet1"] == p2 and a["planet2"] == p3) or (
+                a["planet1"] == p3 and a["planet2"] == p2) for a in trines)
 
             if has_trine_12 and has_trine_13 and has_trine_23:
                 gt_planets = sorted([p1, p2, p3])
@@ -2535,7 +2617,8 @@ class InterpretationService:
                 if gt_key not in found_grand_trines:
                     found_grand_trines.append(gt_key)
 
-                    pattern_info = self.structured_data.get("interpretation_patterns", {}).get("grand_trine", {})
+                    pattern_info = self.structured_data.get(
+                        "interpretation_patterns", {}).get("grand_trine", {})
                     description = pattern_info.get("description", "")
                     # Add a simple template here, can be refined later
                     interpretation_text = f"Grand Trine involving {p1}, {p2}, and {p3}. {description}"
@@ -2548,7 +2631,8 @@ class InterpretationService:
                     planets_involved.update(gt_planets)
                     self.logger.debug(f"Found Grand Trine: {gt_planets}")
 
-        self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Grand Trine'])} Grand Trines (after overlap check).")
+        self.logger.debug(
+            f"Found {len([p for p in patterns if p['type'] == 'Grand Trine'])} Grand Trines (after overlap check).")
         # --- End Grand Trine Detection ---
 
         # --- Grand Cross Detection ---
@@ -2574,10 +2658,14 @@ class InterpretationService:
                     continue
 
                 # Check required squares (p1-p3, p1-p4, p2-p3, p2-p4)
-                has_square_13 = any((s["planet1"] == p1 and s["planet2"] == p3) or (s["planet1"] == p3 and s["planet2"] == p1) for s in squares)
-                has_square_14 = any((s["planet1"] == p1 and s["planet2"] == p4) or (s["planet1"] == p4 and s["planet2"] == p1) for s in squares)
-                has_square_23 = any((s["planet1"] == p2 and s["planet2"] == p3) or (s["planet1"] == p3 and s["planet2"] == p2) for s in squares)
-                has_square_24 = any((s["planet1"] == p2 and s["planet2"] == p4) or (s["planet1"] == p4 and s["planet2"] == p2) for s in squares)
+                has_square_13 = any((s["planet1"] == p1 and s["planet2"] == p3) or (
+                    s["planet1"] == p3 and s["planet2"] == p1) for s in squares)
+                has_square_14 = any((s["planet1"] == p1 and s["planet2"] == p4) or (
+                    s["planet1"] == p4 and s["planet2"] == p1) for s in squares)
+                has_square_23 = any((s["planet1"] == p2 and s["planet2"] == p3) or (
+                    s["planet1"] == p3 and s["planet2"] == p2) for s in squares)
+                has_square_24 = any((s["planet1"] == p2 and s["planet2"] == p4) or (
+                    s["planet1"] == p4 and s["planet2"] == p2) for s in squares)
 
                 if has_square_13 and has_square_14 and has_square_23 and has_square_24:
                     gc_planets = sorted(list(gc_planets_set))
@@ -2586,7 +2674,9 @@ class InterpretationService:
                     if gc_key not in found_grand_crosses:
                         found_grand_crosses.append(gc_key)
 
-                        pattern_info = self.structured_data.get("interpretation_patterns", {}).get("grand_cross", {})
+                        pattern_info = self.structured_data.get(
+    "interpretation_patterns", {}).get(
+        "grand_cross", {})
                         description = pattern_info.get("description", "")
                         interpretation_text = f"Grand Cross involving {', '.join(gc_planets)}. {description}"
 
@@ -2598,7 +2688,8 @@ class InterpretationService:
                         planets_involved.update(gc_planets)
                         self.logger.debug(f"Found Grand Cross: {gc_planets}")
 
-        self.logger.debug(f"Found {len([p for p in patterns if p['type'] == 'Grand Cross'])} Grand Crosses (after overlap check).")
+        self.logger.debug(
+            f"Found {len([p for p in patterns if p['type'] == 'Grand Cross'])} Grand Crosses (after overlap check).")
         # --- End Grand Cross Detection ---
 
         # Add other pattern analyses here (e.g., Mystic Rectangle, Kite)
