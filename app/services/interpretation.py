@@ -619,7 +619,7 @@ class InterpretationService:
         return planet_interpretations
         
     def _get_planet_interpretation(self, planet: str, sign: str, house: int, retrograde: bool = False) -> str:
-        """Generate interpretation for a planet in a sign and house.
+        """Generate interpretation for a planet in a sign and house using structured data.
         
         Args:
             planet: Planet name
@@ -630,53 +630,68 @@ class InterpretationService:
         Returns:
             Interpretation text
         """
-        self.logger.debug(f"Generating interpretation for {planet} in {sign} (House {house})")
+        self.logger.debug(f"Generating interpretation for {planet} in {sign} (House {house}) using structured data")
         
         # Normalize inputs
         planet_lower = planet.lower()
         sign_lower = sign.lower()
         house_str = str(house)
         
-        # Attempt to get richer descriptions from structured data
-        planet_data = self.structured_data.get("planets", {}).get(planet_lower, {})
-        sign_data = self.structured_data.get("signs", {}).get(sign_lower, {})
-        house_data = self.structured_data.get("houses", {}).get(house_str, {})
-        
-        # Extract descriptions or use fallbacks
-        planet_desc = planet_data.get("description", f"The {planet.capitalize()} represents its core energies.")
-        sign_desc_intro = f"In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_data.get('keywords', [sign_lower])[0]} and {sign_data.get('keywords', [sign_lower])[1]}."
-        sign_detail = sign_data.get("description", f"{sign.capitalize()} brings its characteristic traits.")
-        house_meaning = house_data.get("meaning", f"the area of life associated with House {house}")
-        house_desc = f"Placed in House {house}, this influence manifests particularly in relation to {house_meaning}."
+        # --- Fetch data from caches/structured_data with fallbacks ---
+        planet_data = self._planet_cache.get(planet_lower, {})
+        sign_data = self._sign_cache.get(sign_lower, {})
+        house_data = self._house_cache.get(house_str, {})
+        dignities_data = self.structured_data.get("dignities", {})
 
-        # Build the interpretation using structured data if available
-        interpretation_parts = [
-            f"{planet.capitalize()} in {sign.capitalize()} (House {house}):",
-            planet_desc, 
-            sign_desc_intro,
-            # Include a snippet of the sign's detailed description for context
-            f"Specifically, {sign.capitalize()} influence here suggests {sign_detail.split('.')[0]}.", 
-            house_desc
-        ]
+        # Planet core energy
+        planet_core = planet_data.get("description", f"The core energy of {planet.capitalize()}")
+        if not planet_data:
+             self.logger.warning(f"No data found for planet {planet} in planets.json")
+
+        # Sign keywords and archetype
+        sign_keywords = sign_data.get("keywords", [sign_lower])
+        sign_keyword1 = sign_keywords[0]
+        sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+        sign_archetype_snippet = sign_data.get("description", "").split('.')[0] # Get first sentence
+        if not sign_data:
+             self.logger.warning(f"No data found for sign {sign} in signs.json")
+
+        # House area of life
+        house_focus = house_data.get("focus", f"the area of life associated with House {house}")
+        if not house_data:
+             self.logger.warning(f"No data found for house {house} in houses.json")
+
+        # Retrograde interpretation text (Consider moving to JSON later)
+        retrograde_text = f" With {planet.capitalize()} retrograde, these energies are often internalized, prompting deeper reflection or unconventional expression." if retrograde else ""
+
+        # --- Dignity Interpretation --- 
+        dignity_type = self._get_essential_dignity(planet_lower, sign_lower)
+        dignity_interp = ""
+        if dignity_type != "peregrine": # Only add text if not peregrine
+            dignity_desc_template = dignities_data.get(dignity_type, {}).get("description", "")
+            if dignity_desc_template:
+                # Basic formatting - replace generic terms
+                dignity_interp = dignity_desc_template.split('.')[0] # Get first sentence for brevity
+                dignity_interp = dignity_interp.replace("a planet's", f"{planet.capitalize()}'s")
+                dignity_interp = dignity_interp.replace("a planet", f"{planet.capitalize()}")
+                dignity_interp = dignity_interp.replace("its home sign", f"its home sign {sign.capitalize()}") 
+                dignity_interp = dignity_interp.replace("the planet's", f"{planet.capitalize()}'s")
+                dignity_interp = dignity_interp.replace("the planet", f"{planet.capitalize()}")
+                dignity_interp = f" ({dignity_type.capitalize()}: {dignity_interp})." # Wrap in context
+            else:
+                self.logger.warning(f"No description found for dignity '{dignity_type}' in dignities.json")
+
+        # --- Build Final Interpretation --- 
+        interpretation = (
+            f"{planet.capitalize()} in {sign.capitalize()} (House {house}): "
+            f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}. "
+            f"({sign_archetype_snippet}.) "
+            f"Placed in House {house}, this influence manifests particularly in relation to {house_focus}."
+            f"{retrograde_text}"
+            f"{dignity_interp}"
+        )
         
-        interpretation = " ".join(interpretation_parts)
-        
-        # Add retrograde interpretation if applicable
-        if retrograde:
-            interpretation += f" With {planet.capitalize()} retrograde, these energies are often internalized, prompting deeper reflection or unconventional expression." 
-            
-        # Add dignity interpretation
-        dignity = self._get_essential_dignity(planet_lower, sign_lower)
-        dignity_text = {
-            "rulership": f"{planet.capitalize()} is strongly placed in its rulership sign, {sign.capitalize()}, allowing its energies to flow powerfully and naturally.",
-            "exaltation": f"{planet.capitalize()} is exalted in {sign.capitalize()}, suggesting its highest potential can be expressed here.",
-            "detriment": f"{planet.capitalize()} is in detriment in {sign.capitalize()}, indicating potential challenges or the need for conscious effort in expressing its energy.",
-            "fall": f"{planet.capitalize()} is in its fall in {sign.capitalize()}, suggesting that expressing its energy may require significant awareness and development."
-        }
-        if dignity in dignity_text:
-             interpretation += f" {dignity_text[dignity]}"
-             
-        return interpretation
+        return interpretation.strip() # Remove potential trailing space
         
     def _generate_house_interpretations(self, birth_chart: Dict, level: str = "basic") -> List[Dict]:
         """Generate interpretations for houses in the birth chart.
@@ -752,44 +767,24 @@ class InterpretationService:
         sign_lower = sign.lower()
         house_str = str(house_num)
         
-        # Get house meanings
-        house_meanings = {
-            "1": "identity and self-expression",
-            "2": "resources and values",
-            "3": "communication and learning",
-            "4": "home and family",
-            "5": "creativity and pleasure",
-            "6": "health and service",
-            "7": "relationships and partnerships",
-            "8": "transformation and shared resources",
-            "9": "philosophy and higher learning",
-            "10": "career and public image",
-            "11": "community and aspirations",
-            "12": "spirituality and subconscious",
-        }
+        # Get data from structured_data
+        house_data = self.structured_data.get("houses", {}).get(house_str, {})
+        sign_data = self.structured_data.get("signs", {}).get(sign_lower, {})
 
-        # Get sign qualities
-        sign_qualities = {
-            "aries": "assertive and pioneering",
-            "taurus": "stable and resourceful",
-            "gemini": "curious and adaptable",
-            "cancer": "nurturing and protective",
-            "leo": "creative and expressive",
-            "virgo": "analytical and practical",
-            "libra": "harmonious and fair",
-            "scorpio": "intense and transformative",
-            "sagittarius": "adventurous and philosophical",
-            "capricorn": "disciplined and ambitious",
-            "aquarius": "innovative and humanitarian",
-            "pisces": "intuitive and compassionate",
-        }
+        # Extract relevant information with fallbacks
+        house_focus = house_data.get("focus")
+        if not house_focus:
+            house_focus = f"matters associated with house {house_num}"
+            self.logger.warning(f"No focus found for House {house_num} in houses.json")
 
-        house_meaning = house_meanings.get(house_str, f"house {house_num} matters")
-        sign_quality = sign_qualities.get(sign_lower, sign_lower)
-        
-        # Build interpretation
-        interpretation = f"House {house_num} with {sign.capitalize()} on the cusp influences {house_meaning}. "
-        interpretation += f"This brings {sign_quality} qualities to this area of life. "
+        sign_quality = sign_data.get("qualities", {}).get("general")
+        if not sign_quality:
+            sign_quality = sign_lower # Use sign name as fallback
+            self.logger.warning(f"No general quality found for sign {sign} in signs.json")
+
+        # Build interpretation using data from JSON
+        interpretation = f"House {house_num} with {sign.capitalize()} on the cusp influences {house_focus}. "
+        interpretation += f"This brings {sign_quality} qualities to this area of life."
         
         return interpretation
         
@@ -843,76 +838,48 @@ class InterpretationService:
             orb: Orb of the aspect
             
         Returns:
-            Interpretation text
+            Interpretation text or None if aspect type is unknown.
         """
         self.logger.debug(f"Generating interpretation for {planet1}-{planet2} {aspect_type} aspect")
         
-        # Normalize planets
+        # Normalize inputs
         planet1_lower = planet1.lower()
         planet2_lower = planet2.lower()
-        
-        # Get aspect name and quality
-        aspect_names = {
-            0: "conjunction",
-            "0": "conjunction",
-            "conjunction": "conjunction",
-            60: "sextile",
-            "60": "sextile",
-            "sextile": "sextile",
-            90: "square",
-            "90": "square",
-            "square": "square",
-            120: "trine",
-            "120": "trine",
-            "trine": "trine",
-            180: "opposition",
-            "180": "opposition",
-            "opposition": "opposition"
-        }
-        
-        aspect_qualities = {
-            "conjunction": "combines and intensifies",
-            "sextile": "harmonizes and creates opportunities between",
-            "square": "creates tension and challenges between",
-            "trine": "harmonizes and facilitates flow between",
-            "opposition": "creates polarization and awareness between"
-        }
-        
-        # Get planet keywords
-        planet_keywords = {
-            "sun": "identity and conscious self",
-            "moon": "emotions and instincts",
-            "mercury": "communication and thinking",
-            "venus": "relationships and values",
-            "mars": "action and drive",
-            "jupiter": "expansion and growth",
-            "saturn": "structure and limitations",
-            "uranus": "innovation and rebellion",
-            "neptune": "dreams and spirituality",
-            "pluto": "transformation and power",
-            "north_node": "life direction",
-            "south_node": "past patterns"
-        }
-        
-        # Convert aspect type to string for lookup
-        aspect_str = str(aspect_type)
-        aspect_name = aspect_names.get(aspect_type, None)
-        
-        if not aspect_name or aspect_name == "-1":
+        aspect_key = str(aspect_type).lower() # Use lowercase string key for cache lookup
+
+        # Get data from structured_data cache
+        aspect_data = self._aspect_cache.get(aspect_key)
+        planet1_data = self._planet_cache.get(planet1_lower, {})
+        planet2_data = self._planet_cache.get(planet2_lower, {})
+
+        if not aspect_data:
+            self.logger.warning(f"Unknown aspect type: {aspect_type}. Skipping interpretation.")
             return None
-            
-        aspect_quality = aspect_qualities.get(aspect_name, "influences")
-        planet1_keyword = planet_keywords.get(planet1_lower, planet1)
-        planet2_keyword = planet_keywords.get(planet2_lower, planet2)
         
-        # Build interpretation
-        interpretation = f"{planet1.capitalize()} {aspect_name} {planet2.capitalize()}: This aspect {aspect_quality} {planet1_keyword} and {planet2_keyword}. "
+        # Extract relevant information with fallbacks
+        aspect_name = aspect_data.get("name", aspect_key.capitalize()) 
+        # Try to get a concise action phrase from keywords or interpretation
+        aspect_keywords = aspect_data.get("keywords", [])
+        aspect_action = aspect_keywords[0] if aspect_keywords else aspect_data.get("nature", "influences") # Use first keyword or nature
+        # More sophisticated extraction from interpretation could be added here if needed
+        # Example: aspect_action = aspect_data.get("interpretation", "influences").split('.')[0]
+
+        planet1_keyword = planet1_data.get("keywords", [planet1_lower])[0] # Use first keyword or name
+        planet2_keyword = planet2_data.get("keywords", [planet2_lower])[0] # Use first keyword or name
+
+        # Build interpretation using data from JSON
+        interpretation = (
+            f"{planet1.capitalize()} {aspect_name} {planet2.capitalize()}: "
+            f"This aspect {aspect_action} the themes of {planet1_keyword} ({planet1.capitalize()}) "
+            f"and {planet2_keyword} ({planet2.capitalize()}). "
+        )
         
-        # Add orb significance
-        if orb < 2:
-            interpretation += "This aspect is very strong with a tight orb, making its influence particularly significant. "
-        elif orb > 8:
-            interpretation += "This aspect has a wide orb, so its influence may be more subtle. "
+        # Add orb significance based on defined orb in aspects.json
+        defined_orb = aspect_data.get("orb", 8) # Default to 8 if not defined
+        if orb < (defined_orb / 4.0):
+            interpretation += f"With a tight orb of {orb:.1f}°, its influence is particularly direct and significant. "
+        elif orb > (defined_orb * 0.85): # If close to max orb
+             interpretation += f"With a wider orb of {orb:.1f}°, its influence may be less immediate but still relevant. "
             
         return interpretation
         
@@ -943,30 +910,38 @@ class InterpretationService:
         if modality_balance and "interpretation" in modality_balance:
             interpretation_parts.append(modality_balance["interpretation"])
             
-        # Add aspect balance
+        # Add aspect balance interpretation from structured data
         aspects = birth_chart.get("aspects", [])
         harmonious_count = 0
         challenging_count = 0
         
         for aspect in aspects:
-            aspect_type = aspect.get("type")
-            if aspect_type in [60, "60", "sextile", 120, "120", "trine"]:
-                harmonious_count += 1
-            elif aspect_type in [90, "90", "square", 180, "180", "opposition"]:
-                challenging_count += 1
-                
-        if harmonious_count > challenging_count * 1.5:
-            interpretation_parts.append(
-                "Your chart shows a predominance of harmonious aspects, suggesting natural flow and ease in many areas of life."
-            )
+            aspect_type_str = str(aspect.get("type")).lower()
+            # Fetch aspect nature from cache
+            aspect_data = self._aspect_cache.get(aspect_type_str, {})
+            nature = aspect_data.get("nature")
+
+            if nature == "harmonious":
+                 harmonious_count += 1
+            elif nature == "challenging":
+                 challenging_count += 1
+            # Variable nature aspects like conjunctions are not counted here for balance
+
+        aspect_balance_texts = self.structured_data.get("interpretation_patterns", {}).get("aspect_balance", {})
+        balance_text = ""
+        if harmonious_count == 0 and challenging_count == 0:
+             balance_text = aspect_balance_texts.get("balanced", "") # Default to balanced if no major aspects
+        elif harmonious_count > challenging_count * 1.5:
+            balance_text = aspect_balance_texts.get("harmonious_dominant", "")
         elif challenging_count > harmonious_count * 1.5:
-            interpretation_parts.append(
-                "Your chart features more challenging aspects, indicating opportunities for growth through overcoming obstacles."
-            )
+            balance_text = aspect_balance_texts.get("challenging_dominant", "")
         else:
-            interpretation_parts.append(
-                "Your chart shows a balanced mix of harmonious and challenging aspects, suggesting a well-rounded life experience."
-            )
+            balance_text = aspect_balance_texts.get("balanced", "")
+            
+        if balance_text:
+            interpretation_parts.append(balance_text)
+        else:
+             self.logger.warning("Could not find aspect balance text in interpretation_patterns.json")
             
         # Add summary sentence
         interpretation_parts.append(
@@ -1197,43 +1172,6 @@ class InterpretationService:
             f"a strong focus on {keywords}. The {element} element gives strengths in {element_qual}. "
             f"A chart with dominant {modality.title()} energy indicates a {modality_char}."
         )
-
-    def _get_element_emphasis_interpretation(self, element: str, planets: List[str]) -> str:
-        """Get interpretation for an element emphasis.
-        
-        Args:
-            element: Element with emphasis
-            planets: List of planets in that element
-            
-        Returns:
-            String containing the interpretation
-        """
-        element_descriptions = {
-            "fire": "passion, energy, creativity, and inspiration. Fire dominant charts often indicate a person with enthusiasm, courage, and a need for action and self-expression. You approach life with vigor and spontaneity, though may need to be mindful of impulsiveness or burnout.",
-            "earth": "practicality, stability, reliability, and material focus. Earth dominant charts often indicate a person with patience, realism, and a talent for manifesting tangible results. You approach life methodically and sensibly, though may need to be mindful of becoming too rigid or materialistic.",
-            "air": "intellect, communication, social connection, and conceptual thinking. Air dominant charts often indicate a person with strong mental abilities, objectivity, and social intelligence. You approach life through analysis and exchange of ideas, though may need to be mindful of overthinking or detachment.",
-            "water": "emotion, intuition, sensitivity, and connection. Water dominant charts often indicate a person with empathy, deep feeling, and psychological insight. You approach life through emotional attunement and intuitive understanding, though may need to be mindful of mood swings or becoming overwhelmed.",
-        }
-
-        return f"Emphasis on {element} element with planets: {', '.join(planets)}. This indicates a strong focus on {element_descriptions.get(element, 'qualities associated with this element')}."
-
-    def _get_modality_emphasis_interpretation(self, modality: str, planets: List[str]) -> str:
-        """Get interpretation for a modality emphasis.
-        
-        Args:
-            modality: Modality with emphasis
-            planets: List of planets in that modality
-            
-        Returns:
-            String containing the interpretation
-        """
-        modality_descriptions = {
-            "cardinal": "initiation, leadership, and pioneering action. Cardinal dominant charts often indicate someone who is proactive, ambitious, and oriented toward creating change. You excel at starting projects and taking the lead, though may need to work on follow-through and patience.",
-            "fixed": "persistence, determination, and stability. Fixed dominant charts often indicate someone who is loyal, enduring, and resistant to change. You excel at maintaining momentum and seeing things through, though may need to work on flexibility and adapting to necessary changes.",
-            "mutable": "adaptability, versatility, and responsiveness to change. Mutable dominant charts often indicate someone who is flexible, multifaceted, and able to thrive in changing circumstances. You excel at adjusting and serving varying needs, though may need to work on consistency and establishing clear boundaries.",
-        }
-
-        return f"Emphasis on {modality} modality with planets: {', '.join(planets)}. This indicates a strong focus on {modality_descriptions.get(modality, 'qualities associated with this modality')}."
 
     def _find_yod(self, aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Find Yod (Finger of God) patterns in the aspects."""
@@ -1660,7 +1598,7 @@ class InterpretationService:
             return "unknown"
 
     def _get_rising_sign_summary(self, rising_sign: str) -> str:
-        """Generate a summary based on the rising sign (Ascendant).
+        """Generate a summary based on the rising sign (Ascendant) using structured data.
         
         Args:
             rising_sign: The rising sign
@@ -1670,108 +1608,24 @@ class InterpretationService:
         """
         self.logger.debug(f"Generating rising sign summary for: {rising_sign}")
         
-        # First, try to get a summary from structured data
-        rising_sign_data = self.structured_data.get("descriptions", {}).get("rising_signs", {})
         rising_sign_lower = rising_sign.lower()
+        description = ""
         
-        if rising_sign_lower in rising_sign_data:
-            self.logger.debug(f"Found rising sign summary in structured data for {rising_sign}")
-            return rising_sign_data[rising_sign_lower]
-        
-        # If no structured data, use default descriptions
-        self.logger.debug(f"No structured data for rising sign {rising_sign}, using default description")
-        rising_signs = {
-            "aries": (
-                "With Aries rising, you approach life with dynamism and assertiveness. "
-                "You make a strong first impression with your direct, straightforward manner. "
-                "Your physical appearance may feature distinctive facial features, a athletic build, "
-                "and expressive eyes. Your demeanor is typically confident, enthusiastic, and action-oriented. "
-                "You tend to be perceived as brave, independent, and occasionally impulsive."
-            ),
-            "taurus": (
-                "With Taurus rising, you approach life with stability and dependability. "
-                "You make a solid first impression with your grounded, practical manner. "
-                "Your physical appearance may feature a strong build, expressive eyes, and a sensual quality. "
-                "Your demeanor is typically patient, reliable, and appreciative of beauty and comfort. "
-                "You tend to be perceived as steady, determined, and occasionally stubborn."
-            ),
-            "gemini": (
-                "With Gemini rising, you approach life with curiosity and adaptability. "
-                "You make an engaging first impression with your communicative, versatile manner. "
-                "Your physical appearance may feature expressive hands, a youthful quality, and quick movements. "
-                "Your demeanor is typically animated, inquisitive, and mentally active. "
-                "You tend to be perceived as clever, sociable, and occasionally scattered."
-            ),
-            "cancer": (
-                "With Cancer rising, you approach life with sensitivity and nurturing instincts. "
-                "You make a caring first impression with your receptive, protective manner. "
-                "Your physical appearance may feature a round face, pale complexion, and a gentle quality. "
-                "Your demeanor is typically empathetic, intuitive, and emotionally responsive. "
-                "You tend to be perceived as supportive, cautious, and occasionally moody."
-            ),
-            "leo": (
-                "With Leo rising, you approach life with warmth and confidence. "
-                "You make a charismatic first impression with your dignified, expressive manner. "
-                "Your physical appearance may feature a mane-like hairstyle, a noble bearing, and a radiant smile. "
-                "Your demeanor is typically dramatic, generous, and naturally commanding. "
-                "You tend to be perceived as creative, proud, and occasionally domineering."
-            ),
-            "virgo": (
-                "With Virgo rising, you approach life with analysis and practicality. "
-                "You make a precise first impression with your detailed, helpful manner. "
-                "Your physical appearance may feature clean lines, a neat presentation, and an alert expression. "
-                "Your demeanor is typically organized, discriminating, and methodical. "
-                "You tend to be perceived as intelligent, health-conscious, and occasionally critical."
-            ),
-            "libra": (
-                "With Libra rising, you approach life with harmony and diplomacy. "
-                "You make a graceful first impression with your balanced, cooperative manner. "
-                "Your physical appearance may feature symmetrical features, a refined style, and a pleasant smile. "
-                "Your demeanor is typically fair-minded, artistic, and socially adept. "
-                "You tend to be perceived as charming, peace-loving, and occasionally indecisive."
-            ),
-            "scorpio": (
-                "With Scorpio rising, you approach life with intensity and depth. "
-                "You make a powerful first impression with your magnetic, mysterious manner. "
-                "Your physical appearance may feature penetrating eyes, a focused gaze, and a compelling presence. "
-                "Your demeanor is typically perceptive, passionate, and strategically reserved. "
-                "You tend to be perceived as profound, resourceful, and occasionally intimidating."
-            ),
-            "sagittarius": (
-                "With Sagittarius rising, you approach life with optimism and exploration. "
-                "You make an expansive first impression with your enthusiastic, philosophical manner. "
-                "Your physical appearance may feature a tall stature, an open expression, and athletic qualities. "
-                "Your demeanor is typically honest, adventurous, and freedom-loving. "
-                "You tend to be perceived as jovial, open-minded, and occasionally tactless."
-            ),
-            "capricorn": (
-                "With Capricorn rising, you approach life with discipline and purpose. "
-                "You make a responsible first impression with your serious, ambitious manner. "
-                "Your physical appearance may feature a dignified bearing, pronounced bone structure, and a reserved quality. "
-                "Your demeanor is typically mature, cautious, and goal-oriented. "
-                "You tend to be perceived as reliable, authoritative, and occasionally austere."
-            ),
-            "aquarius": (
-                "With Aquarius rising, you approach life with originality and objectivity. "
-                "You make a distinctive first impression with your independent, progressive manner. "
-                "Your physical appearance may feature unique style choices, electric energy, and a friendly yet detached quality. "
-                "Your demeanor is typically innovative, humanitarian, and intellectually curious. "
-                "You tend to be perceived as unconventional, equality-minded, and occasionally aloof."
-            ),
-            "pisces": (
-                "With Pisces rising, you approach life with receptivity and compassion. "
-                "You make a gentle first impression with your empathetic, dreamy manner. "
-                "Your physical appearance may feature soft features, luminous eyes, and a fluid quality of movement. "
-                "Your demeanor is typically intuitive, artistic, and emotionally attuned. "
-                "You tend to be perceived as imaginative, spiritual, and occasionally evasive."
-            ),
-        }
-        
-        description = rising_signs.get(rising_sign_lower, 
-            f"Your {rising_sign} Ascendant colors how others perceive you initially and shapes your approach to new situations."
-        )
-        
-        self.logger.debug(f"Used default rising sign description for {rising_sign}")
+        # Fetch summary from structured data
+        try:
+            description = self.structured_data.get("descriptions", {}).get(rising_sign_lower, {}).get("rising_sign", "")
+            if description:
+                self.logger.debug(f"Found rising sign summary in structured data for {rising_sign}")
+            else:
+                 self.logger.warning(f"No rising_sign description found for {rising_sign} in descriptions.json")
+        except AttributeError:
+             self.logger.error(f"Error accessing rising sign description for {rising_sign} in structured data.")
+
+        # Fallback if no description found
+        if not description:
+            description = f"Your {rising_sign.capitalize()} Ascendant influences your outward persona and first impressions. It shapes how you meet the world and begin new experiences."
+            self.logger.debug(f"Using default fallback rising sign description for {rising_sign}")
+            
         return description
 
     def _analyze_simple_element_balance(self, birth_chart: Dict) -> Dict:
@@ -1849,7 +1703,7 @@ class InterpretationService:
         return result
         
     def _generate_element_balance_interpretation(self, dominant: str, lacking: List[str], percentages: Dict[str, float]) -> str:
-        """Generate an interpretation of the element balance.
+        """Generate an interpretation of the element balance using structured data.
         
         Args:
             dominant: Dominant element
@@ -1859,37 +1713,42 @@ class InterpretationService:
         Returns:
             Interpretation text
         """
-        element_descriptions = {
-            "fire": "passion, creativity, and assertiveness",
-            "earth": "practicality, stability, and material focus",
-            "air": "mental activity, communication, and social connection",
-            "water": "emotional depth, intuition, and sensitivity"
-        }
-        
         interpretation_parts = []
+        patterns_data = self.structured_data.get("interpretation_patterns", {})
+        elemental_patterns = patterns_data.get("elemental_patterns", {})
+        element_emphasis_patterns = patterns_data.get("element_emphasis", {})
         
         # Describe dominant element
         if dominant:
             percentage = round(percentages[dominant])
-            interpretation_parts.append(
-                f"Your chart emphasizes the {dominant} element ({percentage}% of planets), "
-                f"suggesting a strong focus on {element_descriptions.get(dominant)}."
-            )
-            
+            # Use detailed description if emphasis is strong (e.g., > 40%), otherwise concise
+            if percentage > 40 and f"{dominant}_dominant" in element_emphasis_patterns:
+                 desc = element_emphasis_patterns[f"{dominant}_dominant"].get("description", "")
+                 interpretation_parts.append(f"Your chart shows a strong emphasis on the {dominant} element ({percentage}% of planets). {desc}")
+            elif f"{dominant}_dominant" in elemental_patterns:
+                 desc = elemental_patterns[f"{dominant}_dominant"].get("description", f"a focus on {dominant} qualities.")
+                 interpretation_parts.append(f"Your chart emphasizes the {dominant} element ({percentage}% of planets). {desc}")
+            else:
+                interpretation_parts.append(f"Your chart emphasizes the {dominant} element ({percentage}% of planets).") # Fallback
+                self.logger.warning(f"No description found for dominant element {dominant} in interpretation_patterns.json")
+
         # Describe lacking elements
         if lacking:
-            if len(lacking) == 1:
-                lacking_element = lacking[0]
-                interpretation_parts.append(
-                    f"Your chart shows limited {lacking_element} element energy, which may mean "
-                    f"{element_descriptions.get(lacking_element)} could be areas for conscious development."
-                )
-            else:
-                lacking_elements = ", ".join(lacking)
-                interpretation_parts.append(
-                    f"Your chart shows limited {lacking_elements} elements, suggesting areas "
-                    f"for conscious development in qualities associated with these elements."
-                )
+             # Use detailed description if element is very lacking (e.g., 0 planets)
+            lacking_elements_str = []
+            for element in lacking:
+                count = percentages.get(element, 0) # Get count via percentage (approximate)
+                if count == 0 and f"{element}_lacking" in element_emphasis_patterns:
+                    desc = element_emphasis_patterns[f"{element}_lacking"].get("description", "")
+                    lacking_elements_str.append(f"a notable lack of the {element} element. {desc}")
+                elif f"{element}_lacking" in elemental_patterns:
+                    desc = elemental_patterns[f"{element}_lacking"].get("description", f"potential challenges related to {element} qualities.")
+                    lacking_elements_str.append(f"limited {element} element energy. {desc}")
+                else:
+                     lacking_elements_str.append(f"limited {element} element energy")
+                     self.logger.warning(f"No description found for lacking element {element} in interpretation_patterns.json")
+            if lacking_elements_str:
+                 interpretation_parts.append("Your chart indicates " + "; ".join(lacking_elements_str) + ".")
                 
         # Note balance if neither dominant nor lacking elements
         if not dominant and not lacking:
@@ -1977,7 +1836,7 @@ class InterpretationService:
         return result
         
     def _generate_modality_balance_interpretation(self, dominant: str, lacking: List[str], percentages: Dict[str, float]) -> str:
-        """Generate an interpretation of the modality balance.
+        """Generate an interpretation of the modality balance using structured data.
         
         Args:
             dominant: Dominant modality
@@ -1987,36 +1846,41 @@ class InterpretationService:
         Returns:
             Interpretation text
         """
-        modality_descriptions = {
-            "cardinal": "initiating action, leadership, and pioneering",
-            "fixed": "persistence, stability, and determination",
-            "mutable": "adaptability, flexibility, and versatility"
-        }
-        
         interpretation_parts = []
-        
+        patterns_data = self.structured_data.get("interpretation_patterns", {})
+        modality_patterns = patterns_data.get("modality_patterns", {})
+        modality_emphasis_patterns = patterns_data.get("modality_emphasis", {})
+
         # Describe dominant modality
         if dominant:
             percentage = round(percentages[dominant])
-            interpretation_parts.append(
-                f"Your chart emphasizes the {dominant} modality ({percentage}% of planets), "
-                f"suggesting a strong focus on {modality_descriptions.get(dominant)}."
-            )
+            # Use detailed description if emphasis is strong (e.g., > 40%), otherwise concise
+            if percentage > 40 and f"{dominant}_dominant" in modality_emphasis_patterns:
+                desc = modality_emphasis_patterns[f"{dominant}_dominant"].get("description", "")
+                interpretation_parts.append(f"Your chart shows a strong emphasis on the {dominant} modality ({percentage}% of planets). {desc}")
+            elif f"{dominant}_dominant" in modality_patterns:
+                desc = modality_patterns[f"{dominant}_dominant"].get("description", f"a focus on {dominant} qualities.")
+                interpretation_parts.append(f"Your chart emphasizes the {dominant} modality ({percentage}% of planets). {desc}")
+            else:
+                interpretation_parts.append(f"Your chart emphasizes the {dominant} modality ({percentage}% of planets).") # Fallback
+                self.logger.warning(f"No description found for dominant modality {dominant} in interpretation_patterns.json")
             
         # Describe lacking modalities
         if lacking:
-            if len(lacking) == 1:
-                lacking_modality = lacking[0]
-                interpretation_parts.append(
-                    f"Your chart shows limited {lacking_modality} modality energy, which may mean "
-                    f"{modality_descriptions.get(lacking_modality)} could be areas for conscious development."
-                )
-            else:
-                lacking_modalities = ", ".join(lacking)
-                interpretation_parts.append(
-                    f"Your chart shows limited {lacking_modalities} modalities, suggesting areas "
-                    f"for conscious development in qualities associated with these modalities."
-                )
+            lacking_modalities_str = []
+            for modality in lacking:
+                count = percentages.get(modality, 0) # Get count via percentage (approximate)
+                if count == 0 and f"{modality}_lacking" in modality_emphasis_patterns:
+                    desc = modality_emphasis_patterns[f"{modality}_lacking"].get("description", "")
+                    lacking_modalities_str.append(f"a notable lack of the {modality} modality. {desc}")
+                elif f"{modality}_lacking" in modality_patterns:
+                    desc = modality_patterns[f"{modality}_lacking"].get("description", f"potential challenges related to {modality} qualities.")
+                    lacking_modalities_str.append(f"limited {modality} modality energy. {desc}")
+                else:
+                    lacking_modalities_str.append(f"limited {modality} modality energy")
+                    self.logger.warning(f"No description found for lacking modality {modality} in interpretation_patterns.json")
+            if lacking_modalities_str:
+                 interpretation_parts.append("Your chart indicates " + "; ".join(lacking_modalities_str) + ".")
                 
         # Note balance if neither dominant nor lacking modalities
         if not dominant and not lacking:
@@ -2080,12 +1944,32 @@ class InterpretationService:
         # Find stelliums
         for sign, count in sign_counts.items():
             if count >= 3:  # Consider 3+ planets a stellium
-                    patterns.append({
-                        "type": "stellium",
-                        "sign": sign,
+                # Fetch stellium template and description
+                pattern_info = self.structured_data.get("interpretation_patterns", {}).get("stellium", {})
+                description = pattern_info.get("description", "")
+                template = pattern_info.get("interpretation_template", "Stellium in {sign} ({count} planets). Amplifies {sign} qualities.") # Fallback
+
+                # Fetch sign keywords
+                sign_data = self._sign_cache.get(sign, {})
+                keywords_list = sign_data.get("keywords", [sign])
+                keywords_str = ", ".join(keywords_list[:3]) # Use first 3 keywords
+
+                # Format interpretation
+                planets_list_str = ", ".join(sign_planets[sign])
+                interpretation_text = template.format(
+                    sign=sign.capitalize(), 
+                    count=count, 
+                    planets_list=planets_list_str, 
+                    keywords=keywords_str, 
+                    description=description # Consider adding only a snippet for brevity if needed
+                )
+
+                patterns.append({
+                    "type": "stellium",
+                    "sign": sign,
                     "planets": sign_planets[sign],
                     "count": count,
-                    "interpretation": f"You have a stellium in {sign.capitalize()} with {count} planets ({', '.join(sign_planets[sign])}). This concentration amplifies {sign.capitalize()} qualities in your chart."
+                    "interpretation": interpretation_text
                 })
                 
         self.logger.debug(f"Found {len(patterns)} simple patterns")
@@ -2149,11 +2033,15 @@ class InterpretationService:
                 
                 if t_square_key not in found_t_squares:
                     found_t_squares.append(t_square_key)
-                    interpretation_text = (
-                        f"T-Square involving {p1} opposite {p2}, both square {apex}. "
-                        f"The apex planet {apex} is a focal point of tension and drive. "
-                        f"{t_square_interpret}"
-                    )
+                    
+                    # Fetch template and description
+                    pattern_info = self.structured_data.get("interpretation_patterns", {}).get("t_square", {})
+                    description = pattern_info.get("description", "")
+                    template = pattern_info.get("interpretation_template", "T-Square involving {p1}, {p2}, and {apex}. {description}") # Fallback template
+                    
+                    # Format the interpretation using the template
+                    interpretation_text = template.format(p1=p1, p2=p2, apex=apex, description=description)
+
                     patterns.append({
                         "type": "T-Square",
                         "planets": t_square_planets,
@@ -2181,11 +2069,14 @@ class InterpretationService:
                      self.logger.debug(f"Skipping Yod {all_planets} as planets are involved in another pattern.")
                      continue
                      
-                interpretation_text = (
-                    f"Yod pattern involving {base_planets[0]} and {base_planets[1]} pointing to {apex_planet}. "
-                    f"This indicates a point of adjustment or special focus. "
-                    f"{yod_interpret}"
-                )
+                # Fetch template and description
+                pattern_info = self.structured_data.get("interpretation_patterns", {}).get("yod", {})
+                description = pattern_info.get("description", "")
+                template = pattern_info.get("interpretation_template", "Yod pattern involving {base1}, {base2}, and {apex}. {description}") # Fallback template
+                
+                # Format the interpretation using the template
+                interpretation_text = template.format(base1=base_planets[0], base2=base_planets[1], apex=apex_planet, description=description)
+
                 patterns.append({
                     "type": "Yod",
                     "planets": all_planets,

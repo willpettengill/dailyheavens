@@ -1,17 +1,38 @@
 {
     "sun_moon_combinations": {
-        "same_element": "Natural harmony between conscious and emotional needs",
-        "compatible_elements": "Good balance between different aspects of personality",
-        "incompatible_elements": "Challenge to integrate different needs and approaches"
+        "aries": {
+            "aries": "A powerful blend of initiative and direct emotional expression. Highly independent, potentially impulsive.",
+            "taurus": "Combines Aries drive with Taurean stability. Action is grounded, but potential inner tension between speed and patience.",
+            "gemini": "Energetic mind and direct communication. Needs variety and intellectual stimulation, can be restless.",
+            "cancer": "Assertiveness meets sensitivity. Protective instincts are strong, potential conflict between independence and need for security.",
+            "leo": "Double fire! Highly charismatic, creative, and expressive. Strong leadership potential, needs recognition.",
+            "virgo": "Aries initiative channeled through practical analysis. Drive is focused on improvement, can be self-critical.",
+            "libra": "Balances self-assertion with relational awareness. Needs partnership but maintains independence.",
+            "scorpio": "Intense desires and emotional depth. Powerful will, potential for transformative action but also conflict.",
+            "sagittarius": "Highly adventurous and freedom-loving blend. Needs exploration, philosophical outlook, can be blunt.",
+            "capricorn": "Ambitious drive meets disciplined emotion. Strong leadership, focused on achievement, can be reserved.",
+            "aquarius": "Independent spirit meets progressive ideals. Drive is channeled into unique expression or social causes.",
+            "pisces": "Assertiveness softened by compassion. Drive can be channeled into creative or spiritual pursuits, potential for confusion."
+        },
+        "taurus": {
+            "aries": "Stability meets direct emotional drive. Practical action, potential tension between patience and impulse.",
+            "taurus": "Deeply grounded and stable. Strong need for security, sensuality, and routine. Highly reliable, potentially stubborn.",
+            "gemini": "Practicality meets intellectual curiosity. Values stability but needs mental stimulation.",
+            "leo": "Values stability and comfort, but seeks creative expression and recognition. Potential tension between private needs and public persona."
+        },
+        "gemini": {
+            "aries": "Quick mind meets assertive emotion. Direct communication, needs freedom and action.",
+            "taurus": "Versatile mind seeks emotional stability. Needs security alongside mental stimulation."
+        }
     },
     "sun_rising_combinations": {
-        "same_sign": "Strong and consistent self-expression",
-        "compatible_signs": "Balanced approach to life",
-        "incompatible_signs": "Complex personality with different expressions"
+        "aries": {
+            "aries": "Persona matches core identity: direct, energetic, pioneering."
+        }
     },
     "moon_rising_combinations": {
-        "same_sign": "Emotional nature matches outward expression",
-        "compatible_signs": "Emotional needs align with life approach",
-        "incompatible_signs": "Inner feelings may differ from outer expression"
+        "cancer": {
+            "cancer": "Outer persona aligns with inner emotional needs: nurturing, sensitive, protective."
+        }
     }
 } 
