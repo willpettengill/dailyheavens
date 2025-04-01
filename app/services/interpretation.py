@@ -110,19 +110,19 @@ class InterpretationService:
             # Convert numeric aspect types to strings for consistency
             if "aspects" in self.structured_data:
                 aspect_data = self.structured_data["aspects"]
-                aspect_types_to_add = {}
-                
+            aspect_types_to_add = {}
+            
                 # Iterate through aspect data (corrected indentation)
                 for key, data in list(aspect_data.items()):
-                    if "angle" in data:
+                if "angle" in data:
                         angle_str = str(data["angle"])
                         self.logger.debug(f"Converting aspect type {key} to numeric key {angle_str}")
                         aspect_types_to_add[angle_str] = data
             
                 # Add the new aspect types separately (corrected indentation)
-                for angle, data in aspect_types_to_add.items():
-                    if angle not in aspect_data:
-                        aspect_data[angle] = data
+            for angle, data in aspect_types_to_add.items():
+                if angle not in aspect_data:
+                    aspect_data[angle] = data
             
             # Check if descriptions is loaded
             if "descriptions" in self.structured_data:
@@ -1289,12 +1289,12 @@ class InterpretationService:
                             
                             if match:
                                 # Found a Yod (Corrected Indentation)
-                                planets = sorted([planet1, planet2, third_planet.lower()])
-                                key = "-".join(planets)
-                                
-                                if key not in seen_combinations:
-                                    seen_combinations.add(key)
-                                    yods.append({"planets": planets, "apex": third_planet.lower()})
+                            planets = sorted([planet1, planet2, third_planet.lower()])
+                            key = "-".join(planets)
+                            
+                        if key not in seen_combinations:
+                            seen_combinations.add(key)
+                                yods.append({"planets": planets, "apex": third_planet.lower()})
                             
         return yods
 
@@ -1641,7 +1641,7 @@ class InterpretationService:
         elif sign in water_signs:
             return "water"
         # Corrected indentation for the else block
-        else:
+                    else:
             self.logger.warning(f"Unknown sign for element determination: {sign}")
             return "unknown"
             
@@ -1667,7 +1667,7 @@ class InterpretationService:
         elif sign in mutable_signs:
             return "mutable"
         # Corrected indentation for the else block
-        else:
+            else:
             self.logger.warning(f"Unknown sign for modality determination: {sign}")
             return "unknown"
 
@@ -1690,7 +1690,7 @@ class InterpretationService:
             description = self.structured_data.get("descriptions", {}).get(rising_sign_lower, {}).get("rising_sign", "")
             if description:
                 # Corrected indentation for the logger call
-                self.logger.debug(f"Found rising sign summary in structured data for {rising_sign}")
+            self.logger.debug(f"Found rising sign summary in structured data for {rising_sign}")
             else:
                 # Corrected indentation for the logger call
                  self.logger.warning(f"No rising_sign description found for {rising_sign} in descriptions.json")
@@ -1763,10 +1763,10 @@ class InterpretationService:
         dominant = None # Corrected default
         lacking = [] # Corrected default
         if total_planets > 0: # Corrected
-            sorted_elements = sorted(elements.items(), key=lambda x: x[1], reverse=True)
+        sorted_elements = sorted(elements.items(), key=lambda x: x[1], reverse=True)
             if sorted_elements and sorted_elements[0][1] > 0: # Ensure list is not empty
                 dominant = sorted_elements[0][0]
-            lacking = [element for element, count in elements.items() if count <= 1]
+        lacking = [element for element, count in elements.items() if count <= 1]
         
         # Generate interpretation
         interpretation = self._generate_element_balance_interpretation(dominant, lacking, percentages)
@@ -1881,27 +1881,27 @@ class InterpretationService:
                  _, planet_info = item # Assuming list items are dicts
                  planet_name = planet_info.get("name", "")
 
-            # Skip points like Ascendant, MC
-            if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
-                continue
-                
+                # Skip points like Ascendant, MC
+                if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
+                    continue
+                    
             sign = planet_info.get("sign", "").lower()
-            modality = self._get_sign_modality(sign)
-            
-            if modality in modalities:
-                modalities[modality] += 1
-                modality_planets[modality].append(planet_name)
+                modality = self._get_sign_modality(sign)
+                
+                if modality in modalities:
+                    modalities[modality] += 1
+                    modality_planets[modality].append(planet_name)
                 total_planets += 1 # Increment total_planets here
-        
-        # Calculate percentages
-        percentages = {}
-        if total_planets > 0:
+            
+            # Calculate percentages
+            percentages = {}
+            if total_planets > 0:
             for modality, count in modalities.items():
                 percentages[modality] = round((count / total_planets) * 100, 2)
         else: # Handle case where no planets were counted
             percentages = {m: 0.0 for m in modalities}
             
-        # Determine dominant and lacking modalities
+            # Determine dominant and lacking modalities
         dominant = None
         lacking = [] # Initialize lacking
         if total_planets > 0:
@@ -1909,20 +1909,20 @@ class InterpretationService:
             if sorted_modalities and sorted_modalities[0][1] > 0: 
                 dominant = sorted_modalities[0][0]
             # Define lacking as 1 or 0 planets
-            lacking = [modality for modality, count in modalities.items() if count <= 1] 
+            lacking = [modality for modality, count in modalities.items() if count <= 1]
             
-        # Generate interpretation
-        interpretation = self._generate_modality_balance_interpretation(dominant, lacking, percentages)
-        
-        # Prepare result
-        result = {
-            "counts": modalities,
-            "percentages": percentages,
-            "dominant": dominant,
-            "lacking": lacking,
-            "planets": modality_planets,
-            "interpretation": interpretation
-        }
+            # Generate interpretation
+            interpretation = self._generate_modality_balance_interpretation(dominant, lacking, percentages)
+            
+            # Prepare result
+            result = {
+                "counts": modalities,
+                "percentages": percentages,
+                "dominant": dominant,
+                "lacking": lacking,
+                "planets": modality_planets,
+                "interpretation": interpretation
+            }
         
         self.logger.debug(f"Modality balance analysis: {result['counts']}")
         return result
@@ -1970,7 +1970,7 @@ class InterpretationService:
                 elif f"{modality}_lacking" in modality_patterns: # Handle non-zero lacking
                     desc = modality_patterns[f"{modality}_lacking"].get("description", f"potential challenges related to {modality} qualities.")
                     lacking_modalities_str.append(f"limited {modality} modality energy. {desc}")
-                else:
+            else:
                     lacking_modalities_str.append(f"limited {modality} modality energy")
                     self.logger.warning(f"No description found for lacking modality {modality} in interpretation_patterns.json")
             if lacking_modalities_str:
@@ -2026,18 +2026,18 @@ class InterpretationService:
                  _, planet_info = item # Assuming list items are dicts
                  planet_name = planet_info.get("name", "")
                  
-            # Skip points like Ascendant, MC
-            if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
-                continue
-            
-            sign = planet_info.get("sign")
-            if sign:
-                sign_lower = sign.lower()
-                sign_counts[sign_lower] = sign_counts.get(sign_lower, 0) + 1
+                # Skip points like Ascendant, MC
+                if planet_name.lower() in ["ascendant", "midheaven", "descendant", "ic"]:
+                    continue
                 
-                if sign_lower not in sign_planets:
-                    sign_planets[sign_lower] = []
-                sign_planets[sign_lower].append(planet_name)
+            sign = planet_info.get("sign")
+                if sign:
+                    sign_lower = sign.lower()
+                    sign_counts[sign_lower] = sign_counts.get(sign_lower, 0) + 1
+                    
+                    if sign_lower not in sign_planets:
+                        sign_planets[sign_lower] = []
+                    sign_planets[sign_lower].append(planet_name)
                 
             # Count house placements
             house = planet_info.get("house")
@@ -2071,9 +2071,9 @@ class InterpretationService:
                 )
 
                 # Corrected Indentation for patterns.append
-                patterns.append({ 
-                    "type": "stellium",
-                    "sign": sign,
+                    patterns.append({
+                        "type": "stellium",
+                        "sign": sign,
                     "planets": sign_planets[sign],
                     "count": count,
                     "interpretation": interpretation_text
