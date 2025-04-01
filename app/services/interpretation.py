@@ -643,20 +643,25 @@ class InterpretationService:
         house_data = self._house_cache.get(house_str, {})
         dignities_data = self.structured_data.get("dignities", {})
 
-        # Planet core energy
-        planet_core = planet_data.get("description", f"The core energy of {planet.capitalize()}")
-        if not planet_data:
-             self.logger.warning(f"No data found for planet {planet} in planets.json")
+        # --- Planet in Sign Interpretation (using migrated data) ---
+        level = "basic" # Assuming basic for now, can be passed as arg later
+        sign_interpretations = planet_data.get("sign_interpretations", {})
+        specific_sign_interp = sign_interpretations.get(level, {}).get(sign_lower)
 
-        # Sign keywords and archetype
-        sign_keywords = sign_data.get("keywords", [sign_lower])
-        sign_keyword1 = sign_keywords[0]
-        sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
-        sign_archetype_snippet = sign_data.get("description", "").split('.')[0] # Get first sentence
-        if not sign_data:
-             self.logger.warning(f"No data found for sign {sign} in signs.json")
+        # Use specific interpretation if found, otherwise build a generic one
+        if specific_sign_interp:
+            planet_sign_interp = specific_sign_interp
+            self.logger.debug(f"Using specific {level} interpretation for {planet} in {sign}")
+        else:
+            self.logger.warning(f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic.")
+            # Fallback: Use core energy + sign keywords (existing logic below is generic enough)
+            planet_core = planet_data.get("description", f"The core energy of {planet.capitalize()}")
+            sign_keywords = sign_data.get("keywords", [sign_lower])
+            sign_keyword1 = sign_keywords[0]
+            sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+            planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
 
-        # House area of life
+        # --- House area of life ---
         house_focus = house_data.get("focus", f"the area of life associated with House {house}")
         if not house_data:
              self.logger.warning(f"No data found for house {house} in houses.json")
@@ -681,11 +686,11 @@ class InterpretationService:
             else:
                 self.logger.warning(f"No description found for dignity '{dignity_type}' in dignities.json")
 
-        # --- Build Final Interpretation --- 
+        # --- Build Final Interpretation (Revised) --- 
+        # Combine the specific/generic Planet-in-Sign interp with house placement, retrograde, and dignity
         interpretation = (
             f"{planet.capitalize()} in {sign.capitalize()} (House {house}): "
-            f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}. "
-            f"({sign_archetype_snippet}.) "
+            f"{planet_sign_interp} " # Use the specific or generated interp
             f"Placed in House {house}, this influence manifests particularly in relation to {house_focus}."
             f"{retrograde_text}"
             f"{dignity_interp}"
@@ -771,22 +776,29 @@ class InterpretationService:
         house_data = self.structured_data.get("houses", {}).get(house_str, {})
         sign_data = self.structured_data.get("signs", {}).get(sign_lower, {})
 
-        # Extract relevant information with fallbacks
-        house_focus = house_data.get("focus")
-        if not house_focus:
-            house_focus = f"matters associated with house {house_num}"
-            self.logger.warning(f"No focus found for House {house_num} in houses.json")
-
-        sign_quality = sign_data.get("qualities", {}).get("general")
-        if not sign_quality:
-            sign_quality = sign_lower # Use sign name as fallback
-            self.logger.warning(f"No general quality found for sign {sign} in signs.json")
-
-        # Build interpretation using data from JSON
-        interpretation = f"House {house_num} with {sign.capitalize()} on the cusp influences {house_focus}. "
-        interpretation += f"This brings {sign_quality} qualities to this area of life."
+        # --- Get Specific Cusp Interpretation ---
+        specific_interp = house_data.get("cusp_sign_interpretations", {}).get("basic", {}).get(sign_lower)
         
-        return interpretation
+        if specific_interp:
+            self.logger.debug(f"Using specific interpretation for House {house_num} cusp in {sign}")
+            return f"House {house_num} ({sign.capitalize()} cusp): {specific_interp}"
+        else:
+            self.logger.warning(f"No specific cusp interpretation found for House {house_num} in {sign}. Building generic.")
+            # --- Fallback to Generic Description ---
+            house_focus = house_data.get("focus")
+            if not house_focus:
+                house_focus = f"matters associated with house {house_num}"
+                self.logger.warning(f"No focus found for House {house_num} in houses.json")
+
+            sign_quality = sign_data.get("qualities", {}).get("general")
+            if not sign_quality:
+                sign_quality = sign_lower # Use sign name as fallback
+                self.logger.warning(f"No general quality found for sign {sign} in signs.json")
+
+            # Build interpretation using data from JSON
+            interpretation = f"House {house_num} with {sign.capitalize()} on the cusp influences {house_focus}. "
+            interpretation += f"This brings {sign_quality} qualities to this area of life."
+            return interpretation
         
     def _generate_aspect_interpretations(self, birth_chart: Dict, level: str = "basic") -> List[Dict]:
         """Generate interpretations for aspects in the birth chart.
@@ -845,6 +857,9 @@ class InterpretationService:
         # Normalize inputs
         planet1_lower = planet1.lower()
         planet2_lower = planet2.lower()
+        # Ensure consistent ordering for lookup (e.g., sun_moon not moon_sun)
+        sorted_planets = sorted([planet1_lower, planet2_lower])
+        pair_key = f"{sorted_planets[0]}_{sorted_planets[1]}"
         aspect_key = str(aspect_type).lower() # Use lowercase string key for cache lookup
 
         # Get data from structured_data cache
@@ -856,32 +871,38 @@ class InterpretationService:
             self.logger.warning(f"Unknown aspect type: {aspect_type}. Skipping interpretation.")
             return None
         
-        # Extract relevant information with fallbacks
-        aspect_name = aspect_data.get("name", aspect_key.capitalize()) 
-        # Try to get a concise action phrase from keywords or interpretation
-        aspect_keywords = aspect_data.get("keywords", [])
-        aspect_action = aspect_keywords[0] if aspect_keywords else aspect_data.get("nature", "influences") # Use first keyword or nature
-        # More sophisticated extraction from interpretation could be added here if needed
-        # Example: aspect_action = aspect_data.get("interpretation", "influences").split('.')[0]
+        # --- Try Specific Pair Interpretation First ---
+        specific_interp = aspect_data.get("specific_pairs", {}).get(pair_key)
+        if specific_interp:
+            self.logger.debug(f"Using specific interpretation for {pair_key} {aspect_key} aspect")
+            interpretation_core = specific_interp
+        else:
+            # --- Fallback to Generic Interpretation ---
+            self.logger.debug(f"No specific interpretation found for {pair_key} {aspect_key}. Building generic.")
+            aspect_name = aspect_data.get("name", aspect_key.capitalize()) 
+            aspect_keywords = aspect_data.get("keywords", [])
+            aspect_action = aspect_keywords[0] if aspect_keywords else aspect_data.get("nature", "influences")
+            planet1_keyword = planet1_data.get("keywords", [planet1_lower])[0]
+            planet2_keyword = planet2_data.get("keywords", [planet2_lower])[0]
 
-        planet1_keyword = planet1_data.get("keywords", [planet1_lower])[0] # Use first keyword or name
-        planet2_keyword = planet2_data.get("keywords", [planet2_lower])[0] # Use first keyword or name
+            interpretation_core = (
+                f"{planet1.capitalize()} {aspect_name} {planet2.capitalize()}: "
+                f"This aspect {aspect_action} the themes of {planet1_keyword} ({planet1.capitalize()}) "
+                f"and {planet2_keyword} ({planet2.capitalize()})."
+            )
 
-        # Build interpretation using data from JSON
-        interpretation = (
-            f"{planet1.capitalize()} {aspect_name} {planet2.capitalize()}: "
-            f"This aspect {aspect_action} the themes of {planet1_keyword} ({planet1.capitalize()}) "
-            f"and {planet2_keyword} ({planet2.capitalize()}). "
-        )
-        
-        # Add orb significance based on defined orb in aspects.json
+        # --- Add Orb Significance --- 
+        orb_text = ""
         defined_orb = aspect_data.get("orb", 8) # Default to 8 if not defined
         if orb < (defined_orb / 4.0):
-            interpretation += f"With a tight orb of {orb:.1f}°, its influence is particularly direct and significant. "
+            orb_text = f" With a tight orb of {orb:.1f}°, its influence is particularly direct and significant."
         elif orb > (defined_orb * 0.85): # If close to max orb
-             interpretation += f"With a wider orb of {orb:.1f}°, its influence may be less immediate but still relevant. "
+             orb_text = f" With a wider orb of {orb:.1f}°, its influence may be less immediate but still relevant."
             
-        return interpretation
+        # Combine core interpretation with orb text
+        interpretation = f"{interpretation_core}{orb_text}"
+        
+        return interpretation.strip()
         
     def _generate_overall_interpretation(self, birth_chart: Dict, level: str = "basic") -> str:
         """Generate an overall interpretation of the birth chart.

@@ -3,7 +3,7 @@
     "name": "Sun",
     "symbol": "☉",
     "ruling_planet": "sun",
-    "keywords": ["essence", "vitality", "purpose", "consciousness", "individuality"],
+    "keywords": ["essence", "vitality", "purpose", "consciousness", "individuality", "identity", "ego", "leadership", "creativity"],
     "qualities": {
       "general": "core identity and life force",
       "career": "ambition, authority, and recognition",
@@ -12,7 +12,41 @@
       "spirituality": "divine consciousness and soul purpose",
       "personal_growth": "authentic self-expression and personal radiance"
     },
-    "description": "The Sun represents your essential self and core identity—the conscious ego that actively engages with the world. It governs your vitality, willpower, and sense of purpose, illuminating the unique path you're meant to follow. As the central luminary of our solar system, the Sun symbolizes both your highest aspirations and the integrating force that unifies all aspects of your personality."
+    "description": "The Sun represents your core identity, vitality, and sense of purpose. It illuminates your fundamental nature and life path.",
+    "rulership": "Leo",
+    "exaltation": "Aries",
+    "detriment": "Aquarius",
+    "fall": "Libra",
+    "sign_interpretations": {
+      "basic": {
+        "aries": "Strong leadership qualities and pioneering spirit",
+        "taurus": "Steady determination and practical approach",
+        "gemini": "Versatile expression and quick thinking",
+        "cancer": "Nurturing leadership and emotional depth",
+        "leo": "Natural confidence and creative power",
+        "virgo": "Practical efficiency and analytical mind",
+        "libra": "Diplomatic leadership and balanced approach",
+        "scorpio": "Powerful presence and transformative energy",
+        "sagittarius": "Expansive vision and philosophical nature",
+        "capricorn": "Ambitious drive and structured approach",
+        "aquarius": "Innovative thinking and humanitarian goals",
+        "pisces": "Compassionate vision and spiritual connection"
+      },
+      "detailed": {
+        "aries": "Your core identity expresses through bold initiative and courageous leadership. You naturally take charge and inspire others with your pioneering spirit.",
+        "taurus": "Your essential nature manifests through practical determination and material mastery. You build lasting foundations and value stability.",
+        "gemini": "Your fundamental self expresses through versatile communication and intellectual curiosity. You adapt easily and share knowledge naturally.",
+        "cancer": "Your basic identity flows through emotional sensitivity and nurturing instincts. You lead through care and protective energy.",
+        "leo": "Your core self shines through creative expression and natural authority. You radiate confidence and inspire loyalty.",
+        "virgo": "Your essential nature manifests through practical service and analytical precision. You excel in improving systems and helping others.",
+        "libra": "Your fundamental identity expresses through diplomatic harmony and aesthetic appreciation. You naturally create balance and fairness.",
+        "scorpio": "Your basic self channels through intense transformation and deep investigation. You powerfully influence others and seek truth.",
+        "sagittarius": "Your core nature expresses through philosophical exploration and optimistic vision. You inspire growth and expand horizons.",
+        "capricorn": "Your essential identity manifests through disciplined ambition and structured achievement. You build lasting legacies.",
+        "aquarius": "Your fundamental self flows through innovative thinking and humanitarian vision. You bring unique perspectives and progressive change.",
+        "pisces": "Your basic nature channels through spiritual connection and universal compassion. You intuitively understand and heal others."
+      }
+    }
   },
   "moon": {
     "name": "Moon",

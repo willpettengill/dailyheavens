@@ -14,7 +14,23 @@
       "spirituality": "spiritual identity",
       "personal_growth": "self-awareness"
     },
-    "description": "The First House embodies the realm of identity, self-expression, and personal presence—the essential 'I am' of the chart. As the house of beginnings and personal initiative, it governs how we project ourselves into the world, our appearance, and our approach to new experiences. Planets here strongly color the personality, physical vitality, and overall life approach. The First House represents our most authentic expression and the lens through which we view life. It reveals how we initiate action, present ourselves to others, and navigate our individual path. The sign on the cusp (Ascendant) acts as a mask or filter through which our inner nature is expressed, while planets in this house become prominently integrated into our identity and self-concept."
+    "description": "The First House embodies the realm of identity, self-expression, and personal presence—the essential 'I am' of the chart. As the house of beginnings and personal initiative, it governs how we project ourselves into the world, our appearance, and our approach to new experiences. Planets here strongly color the personality, physical vitality, and overall life approach. The First House represents our most authentic expression and the lens through which we view life. It reveals how we initiate action, present ourselves to others, and navigate our individual path. The sign on the cusp (Ascendant) acts as a mask or filter through which our inner nature is expressed, while planets in this house become prominently integrated into our identity and self-concept.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "aries": "Direct and energetic approach to life",
+        "taurus": "Steady and reliable self-presentation",
+        "gemini": "Adaptable and communicative personality",
+        "cancer": "Sensitive and protective demeanor",
+        "leo": "Confident and dramatic self-expression",
+        "virgo": "Practical and analytical approach",
+        "libra": "Diplomatic and balanced presentation",
+        "scorpio": "Intense and magnetic presence",
+        "sagittarius": "Optimistic and adventurous outlook",
+        "capricorn": "Serious and ambitious demeanor",
+        "aquarius": "Unique and progressive approach",
+        "pisces": "Intuitive and compassionate presence"
+      }
+    }
   },
   "2": {
     "name": "Second House",
