@@ -607,6 +607,47 @@ class InterpretationService:
             interpretation["rising_summary"] = rising_summary
             self.logger.debug("Rising sign summary generated")
 
+        # --- Interpret Other Angles (MC, IC, DSC) ---
+        # MC (Midheaven) - Corresponds to 10th House Cusp
+        mc_sign = birth_chart.get(
+            "angles", {}).get(
+            "midheaven", {}).get(
+            "sign")
+        if mc_sign:
+            self.logger.debug(f"Generating MC interpretation for {mc_sign}")
+            mc_interp = self._get_house_interpretation(10, mc_sign)
+            interpretation["mc_summary"] = mc_interp
+            self.logger.debug("MC interpretation generated")
+        else:
+            self.logger.warning("Midheaven sign not found in birth chart angles.")
+
+        # IC (Imum Coeli) - Corresponds to 4th House Cusp
+        ic_sign = birth_chart.get(
+            "angles", {}).get(
+            "imum_coeli", {}).get(
+            "sign")
+        if ic_sign:
+            self.logger.debug(f"Generating IC interpretation for {ic_sign}")
+            ic_interp = self._get_house_interpretation(4, ic_sign)
+            interpretation["ic_summary"] = ic_interp
+            self.logger.debug("IC interpretation generated")
+        else:
+            self.logger.warning("Imum Coeli sign not found in birth chart angles.")
+
+        # DSC (Descendant) - Corresponds to 7th House Cusp
+        dsc_sign = birth_chart.get(
+            "angles", {}).get(
+            "descendant", {}).get(
+            "sign")
+        if dsc_sign:
+            self.logger.debug(f"Generating DSC interpretation for {dsc_sign}")
+            dsc_interp = self._get_house_interpretation(7, dsc_sign)
+            interpretation["dsc_summary"] = dsc_interp
+            self.logger.debug("DSC interpretation generated")
+        else:
+            self.logger.warning("Descendant sign not found in birth chart angles.")
+        # --- End Angle Interpretation ---
+
         self.logger.info("Interpretation generation completed successfully")
         return interpretation
 
@@ -707,30 +748,61 @@ class InterpretationService:
         sign_data = self._sign_cache.get(sign_lower, {})
         house_data = self._house_cache.get(house_str, {})
         dignities_data = self.structured_data.get("dignities", {})
+        descriptions_data = self.structured_data.get("descriptions", {})
 
         # --- Planet in Sign Interpretation (using migrated data) ---
         level = "basic"  # Assuming basic for now, can be passed as arg later
-        sign_interpretations = planet_data.get("sign_interpretations", {})
-        specific_sign_interp = sign_interpretations.get(
-            level, {}).get(sign_lower)
 
-        # Use specific interpretation if found, otherwise build a generic one
-        if specific_sign_interp:
-            planet_sign_interp = specific_sign_interp
-            self.logger.debug(
-                f"Using specific {level} interpretation for {planet} in {sign}")
+        # --- Special handling for Sun/Moon descriptions ---
+        if planet_lower == 'sun':
+            sun_desc = descriptions_data.get(sign_lower, {}).get('sun_sign')
+            if sun_desc:
+                planet_sign_interp = sun_desc
+                self.logger.debug(f"Using dedicated sun_sign description for Sun in {sign}")
+            else:
+                # Fallback if specific sun description is missing
+                self.logger.warning(f"No dedicated sun_sign description found for {sign} in descriptions.json. Building generic.")
+                planet_core = planet_data.get("description", f"The core energy of {planet.capitalize()}")
+                sign_keywords = sign_data.get("keywords", [sign_lower])
+                sign_keyword1 = sign_keywords[0]
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
+
+        elif planet_lower == 'moon':
+            moon_desc = descriptions_data.get(sign_lower, {}).get('moon_sign')
+            if moon_desc:
+                planet_sign_interp = moon_desc
+                self.logger.debug(f"Using dedicated moon_sign description for Moon in {sign}")
+            else:
+                # Fallback if specific moon description is missing
+                self.logger.warning(f"No dedicated moon_sign description found for {sign} in descriptions.json. Building generic.")
+                planet_core = planet_data.get("description", f"Your emotional nature") # Specific fallback for Moon
+                sign_keywords = sign_data.get("keywords", [sign_lower])
+                sign_keyword1 = sign_keywords[0]
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                planet_sign_interp = f"{planet_core}, influenced by {sign.capitalize()}, shows qualities like {sign_keyword1} and {sign_keyword2}."
+
         else:
-            self.logger.warning(
-                f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic.")
-            # Fallback: Use core energy + sign keywords (existing logic below
-            # is generic enough)
-            planet_core = planet_data.get(
-                "description", f"The core energy of {planet.capitalize()}")
-            sign_keywords = sign_data.get("keywords", [sign_lower])
-            sign_keyword1 = sign_keywords[0]
-            sign_keyword2 = sign_keywords[1] if len(
-                sign_keywords) > 1 else sign_keyword1
-            planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
+            # --- Original logic for other planets ---
+            sign_interpretations = planet_data.get("sign_interpretations", {})
+            specific_sign_interp = sign_interpretations.get(
+                level, {}).get(sign_lower)
+
+            # Use specific interpretation if found, otherwise build a generic one
+            if specific_sign_interp:
+                planet_sign_interp = specific_sign_interp
+                self.logger.debug(
+                    f"Using specific {level} interpretation for {planet} in {sign}")
+            else:
+                self.logger.warning(
+                    f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic.")
+                planet_core = planet_data.get(
+                    "description", f"The core energy of {planet.capitalize()}")
+                sign_keywords = sign_data.get("keywords", [sign_lower])
+                sign_keyword1 = sign_keywords[0]
+                sign_keyword2 = sign_keywords[1] if len(
+                    sign_keywords) > 1 else sign_keyword1
+                planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
 
         # --- House area of life ---
         house_focus = house_data.get(
