@@ -651,6 +651,12 @@ class InterpretationService:
                 "Descendant sign not found in birth chart angles.")
         # --- End Angle Interpretation ---
 
+        # Analyze Chart Shape
+        self.logger.debug("Analyzing chart shape")
+        chart_shape_analysis = self._analyze_chart_shape(birth_chart)
+        interpretation["chart_shape"] = chart_shape_analysis
+        self.logger.debug(f"Chart shape analysis complete: {chart_shape_analysis.get('shape_name', 'N/A')}")
+
         self.logger.info("Interpretation generation completed successfully")
         return interpretation
 
@@ -2852,3 +2858,105 @@ class InterpretationService:
         self.logger.debug(
             f"Found {len(combinations)} planetary combinations in total")
         return combinations
+
+    # --- New Method for Chart Shape Analysis (Placeholder) ---
+    def _analyze_chart_shape(self, birth_chart: Dict) -> Dict:
+        """Analyze the chart shape based on planetary distribution. (Placeholder)
+
+        Args:
+            birth_chart: Birth chart data
+
+        Returns:
+            Dictionary containing chart shape information
+        """
+        # TODO: Implement full chart shape calculation logic
+        # self.logger.info("Chart shape analysis not fully implemented yet.") # Remove placeholder log
+        shape_data = self.structured_data.get("chart_shapes", {})
+        definitions = shape_data.get("definitions", {})
+        interpretations = shape_data.get("interpretations", {})
+
+        if not definitions or not interpretations:
+            self.logger.warning("Chart shape definitions or interpretations not found in structured data.")
+            return {"shape_name": "Undetermined", "interpretation": "Chart shape data unavailable."}
+
+        planets_to_use = definitions.get("planets_to_use", [])
+        planets_in_chart = birth_chart.get("planets", {})
+
+        degrees = [] # List to hold planet degrees
+        for planet_name in planets_to_use:
+            planet_data = None
+            if isinstance(planets_in_chart, dict) and planet_name in planets_in_chart:
+                planet_data = planets_in_chart[planet_name]
+            elif isinstance(planets_in_chart, list):
+                for p in planets_in_chart:
+                    if p.get('name') == planet_name:
+                        planet_data = p
+                        break
+            
+            if planet_data:
+                degree = planet_data.get('degree')
+                if degree is not None:
+                    degrees.append(degree)
+                else:
+                     self.logger.warning(f"Degree not found for planet {planet_name} in chart shape analysis.")
+
+        if len(degrees) < 3: # Need at least 3 planets for meaningful shape
+            self.logger.info(f"Not enough planets ({len(degrees)}) for chart shape analysis.")
+            return {"shape_name": "Undetermined", "occupied_span_degrees": None, "largest_gap_degrees": None, "interpretation": interpretations.get("undetermined", "Chart shape could not be determined.")}
+
+        # Sort degrees
+        degrees.sort()
+
+        # Calculate gaps (including wrap-around)
+        gaps = []
+        for i in range(len(degrees) - 1):
+            gap = degrees[i+1] - degrees[i]
+            gaps.append(gap)
+        # Add wrap-around gap
+        wrap_gap = (360.0 - degrees[-1]) + degrees[0]
+        gaps.append(wrap_gap)
+
+        if not gaps: # Should not happen if len(degrees) >= 3
+             self.logger.error("Could not calculate gaps for chart shape analysis.")
+             return {"shape_name": "Error", "occupied_span_degrees": None, "largest_gap_degrees": None, "interpretation": "Error calculating gaps."}
+
+        largest_gap = max(gaps)
+        occupied_span = 360.0 - largest_gap
+
+        # Determine shape based on definitions
+        shape_name = "undetermined" # Default
+
+        # Load definitions for comparison
+        bundle_def = definitions.get("bundle", {})
+        bowl_def = definitions.get("bowl", {})
+        locomotive_def = definitions.get("locomotive", {})
+        splash_def = definitions.get("splash", {})
+        # Note: Seesaw and Splay require cluster analysis, not implemented here
+
+        # Check shapes in order of potential overlap (most restrictive first)
+        if occupied_span <= bundle_def.get("max_span_degrees", 120):
+            shape_name = "bundle"
+        elif occupied_span <= bowl_def.get("max_span_degrees", 180) and largest_gap >= bowl_def.get("min_gap_degrees", 180):
+             # Make sure the gap is actually the defining feature, not just a small span
+             if largest_gap > occupied_span: # Ensure gap is larger than span for a true bowl
+                shape_name = "bowl"
+        elif largest_gap >= locomotive_def.get("min_gap_degrees", 120) and largest_gap <= locomotive_def.get("max_gap_degrees", 240):
+            # Check locomotive *after* bowl/bundle as it can overlap
+             shape_name = "locomotive"
+        elif largest_gap <= splash_def.get("max_gap_degrees", 90):
+             # Basic Splash Check (more conditions like occupied signs could be added)
+             shape_name = "splash"
+        # More checks can be added here
+
+        # Get interpretation
+        interpretation = interpretations.get(shape_name, interpretations.get("undetermined", "")) # Use determined shape_name
+
+        self.logger.debug(f"Determined chart shape: {shape_name} (Span: {occupied_span:.1f}, Gap: {largest_gap:.1f})")
+
+        return {
+            "shape_name": shape_name.capitalize(),
+            "occupied_span_degrees": round(occupied_span, 1),
+            "largest_gap_degrees": round(largest_gap, 1),
+            "interpretation": interpretation
+        }
+    # --- End Chart Shape Analysis Method ---
