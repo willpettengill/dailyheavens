@@ -81,7 +81,23 @@
       "spirituality": "inner sanctuary",
       "personal_growth": "emotional security"
     },
-    "description": "The Fourth House embodies the realm of home, roots, and emotional foundations—the essential 'I feel' and 'I belong' of the chart. As the house of personal foundations, it governs our connection to family (both of origin and chosen), home environment, and ancestral patterns. This house represents our most private self, the inner emotional landscape that forms the foundation for all other life experiences. Planets here influence our sense of belonging, emotional security, and relationship to the past. The Fourth House represents the internalized parent, our capacity for nurturing, and our deepest emotional needs. The sign on the cusp (IC) colors our approach to home and family matters, while planets in this house shape our emotional patterns, sense of roots, and the nature of our innermost private life."
+    "description": "The Fourth House embodies the realm of home, roots, and emotional foundations—the essential 'I feel' and 'I belong' of the chart. As the house of personal foundations, it governs our connection to family (both of origin and chosen), home environment, and ancestral patterns. This house represents our most private self, the inner emotional landscape that forms the foundation for all other life experiences. Planets here influence our sense of belonging, emotional security, and relationship to the past. The Fourth House represents the internalized parent, our capacity for nurturing, and our deepest emotional needs. The sign on the cusp (IC) colors our approach to home and family matters, while planets in this house shape our emotional patterns, sense of roots, and the nature of our innermost private life.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "leo": "Warm and expressive home environment. You seek to create a space that feels regal, generous, and reflects your personal vitality.",
+        "cancer": "Deeply nurturing and protective home life",
+        "aries": "Active and energetic approach to home and family",
+        "taurus": "Stable and comfort-focused home environment",
+        "gemini": "Mentally stimulating and versatile home life",
+        "virgo": "Well-organized and health-conscious home",
+        "libra": "Harmonious and aesthetically pleasing home environment",
+        "scorpio": "Private and emotionally intense home life",
+        "sagittarius": "Expansive and freedom-loving home environment",
+        "capricorn": "Traditional and structured approach to home and family",
+        "aquarius": "Unconventional and community-oriented home life",
+        "pisces": "Spiritually nurturing and boundaryless home environment"
+      }
+    }
   },
   "5": {
     "name": "Fifth House",
@@ -132,7 +148,23 @@
       "spirituality": "spiritual partnerships",
       "personal_growth": "self-through-other"
     },
-    "description": "The Seventh House embodies the realm of partnership, collaboration, and relational balance—the essential 'We are' of the chart. As the house of significant one-to-one relationships, it governs marriage, business partnerships, contracts, and open negotiations. This house represents our approach to cooperation, compromise, and the integration of opposing viewpoints. Planets here influence our partnership patterns, expectations in relationships, and how we manage conflict. The Seventh House represents the 'not-self'—qualities we often project onto others or access through relationship. The sign on the cusp (Descendant) indicates qualities we seek in partners or develop through relationships, while planets in this house shape our relationship dynamics, contractual agreements, and the ways we navigate the delicate dance of independence and interdependence."
+    "description": "The Seventh House embodies the realm of partnership, collaboration, and relational balance—the essential 'We are' of the chart. As the house of significant one-to-one relationships, it governs marriage, business partnerships, contracts, and open negotiations. This house represents our approach to cooperation, compromise, and the integration of opposing viewpoints. Planets here influence our partnership patterns, expectations in relationships, and how we manage conflict. The Seventh House represents the 'not-self'—qualities we often project onto others or access through relationship. The sign on the cusp (Descendant) indicates qualities we seek in partners or develop through relationships, while planets in this house shape our relationship dynamics, contractual agreements, and the ways we navigate the delicate dance of independence and interdependence.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "sagittarius": "Adventurous and philosophical partnerships. You seek relationships that expand your horizons and offer freedom to explore and grow together.",
+        "aries": "Dynamic and initiative-taking partnerships",
+        "taurus": "Stable and sensual relationship approach",
+        "gemini": "Intellectually stimulating partnerships",
+        "cancer": "Emotionally nurturing relationship approach",
+        "leo": "Passionate and loyal partnerships",
+        "virgo": "Practical and service-oriented relationship approach",
+        "libra": "Harmonious and balanced partnerships",
+        "scorpio": "Intense and transformative relationship approach",
+        "capricorn": "Committed and responsibility-oriented partnerships",
+        "aquarius": "Independent and friendship-based relationship approach",
+        "pisces": "Compassionate and spiritually connected partnerships"
+      }
+    }
   },
   "8": {
     "name": "Eighth House",
@@ -183,7 +215,23 @@
       "spirituality": "spiritual authority",
       "personal_growth": "maturation"
     },
-    "description": "The Tenth House embodies the realm of vocation, public identity, and contribution to society—the essential 'I achieve' and 'I contribute' of the chart. As the house of career and reputation, it governs our relationship to authority, professional ambitions, and the legacy we create through our life's work. This house represents our most visible self, the role we play in the broader social structure. Planets here influence our approach to achievement, responsibility, and the development of personal authority. The Tenth House represents the internalized parent figure that guides our sense of duty and discipline. The sign on the cusp (MC) indicates qualities we manifest in our public role, while planets in this house shape our professional path, relationship to social structures, and the ways we establish credibility and make meaningful contributions through sustained effort and commitment."
+    "description": "The Tenth House embodies the realm of vocation, public identity, and contribution to society—the essential 'I achieve' and 'I contribute' of the chart. As the house of career and reputation, it governs our relationship to authority, professional ambitions, and the legacy we create through our life's work. This house represents our most visible self, the role we play in the broader social structure. Planets here influence our approach to achievement, responsibility, and the development of personal authority. The Tenth House represents the internalized parent figure that guides our sense of duty and discipline. The sign on the cusp (MC) indicates qualities we manifest in our public role, while planets in this house shape our professional path, relationship to social structures, and the ways we establish credibility and make meaningful contributions through sustained effort and commitment.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "aquarius": "Innovative and humanitarian career path. You seek to make your mark through progressive ideas, technological advancement, or social reform.",
+        "aries": "Pioneering and leadership-oriented professional approach",
+        "taurus": "Steady and resource-building career path",
+        "gemini": "Versatile and communication-focused professional life",
+        "cancer": "Nurturing and emotionally attuned career path",
+        "leo": "Creative and recognition-seeking professional approach",
+        "virgo": "Detail-oriented and service-focused career path",
+        "libra": "Diplomatic and relationship-oriented professional approach",
+        "scorpio": "Transformative and deeply impactful career path",
+        "sagittarius": "Expansive and meaning-oriented professional approach",
+        "capricorn": "Ambitious and structured career path",
+        "pisces": "Compassionate and visionary professional approach"
+      }
+    }
   },
   "11": {
     "name": "Eleventh House",
@@ -206,17 +254,33 @@
     "name": "Twelfth House",
     "type": "cadent",
     "natural_sign": "pisces",
-    "keywords": ["unconscious", "transcendence", "sacrifice", "compassion", "hidden strengths", "spirituality", "healing"],
+    "keywords": ["unconscious", "spiritual connection", "hidden influences", "surrender", "compassion", "isolation", "transcendence"],
     "ruler": "neptune",
     "focus": "Transcendence, dissolution, and spiritual connection",
     "qualities": {
-      "general": "spirituality and surrender",
+      "general": "unconscious patterns and spiritual connection",
       "career": "behind-the-scenes work",
-      "relationships": "karmic connections",
-      "health": "subtle energies",
-      "spirituality": "mystical experiences",
-      "personal_growth": "self-transcendence"
+      "relationships": "soulful connection",
+      "health": "psychosomatic patterns",
+      "spirituality": "mystical experience",
+      "personal_growth": "dissolution of ego"
     },
-    "description": "The Twelfth House embodies the realm of the collective unconscious, spiritual dissolution, and transcendent compassion—the essential 'I merge' and 'I transcend' of the chart. As the final house of the zodiac, it governs the dissolution of individual boundaries, hidden influences, spiritual practice, and the integration of the soul's journey before a new cycle begins. This house represents our relationship to that which lies beyond ordinary consciousness, including dreams, meditation, and mystical experiences. Planets here influence our capacity for compassion, surrender, and accessing hidden strengths through vulnerability. The Twelfth House represents both our greatest spiritual resources and our most challenging blind spots. The sign on the cusp colors our approach to spiritual and subconscious matters, while planets in this house shape our relationship to sacrifice, seclusion, and the transcendent dimensions of experience that ultimately lead to wholeness and spiritual integration."
+    "description": "The Twelfth House embodies the realm of the collective unconscious, spiritual transcendence, and hidden aspects of self—the essential 'I dissolve' and 'I connect beyond bounds' of the chart. As the final house before the cycle begins anew, it governs our relationship to that which is beyond ordinary consciousness: dreams, spiritual experiences, and unconscious patterns inherited from the collective. This house represents where we surrender individual identity to connect with all-that-is. Planets here influence our spiritual sensitivity, relationship to suffering, and the ways we face our deepest fears and transcendent longings. The Twelfth House represents both our greatest spiritual potential and our most challenging blind spots. The sign on the cusp colors our approach to surrender and spiritual connection, while planets in this house shape our experience of isolation, compassion, and the spiritual dimensions that lie beyond the material world.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "aries": "Pioneering and courageous approach to the spiritual realm. You may unconsciously initiate spiritual pathways or face hidden challenges requiring independent action.",
+        "taurus": "Grounded and sensual approach to spiritual connection",
+        "gemini": "Mentally curious and communicative spiritual approach",
+        "cancer": "Emotionally receptive and nurturing spiritual approach",
+        "leo": "Creative and self-expressive spiritual approach",
+        "virgo": "Analytical and service-oriented spiritual approach",
+        "libra": "Harmonious and relationship-focused spiritual approach",
+        "scorpio": "Transformative and deeply probing spiritual approach",
+        "sagittarius": "Expansive and philosophically seeking spiritual approach",
+        "capricorn": "Disciplined and structured spiritual approach",
+        "aquarius": "Innovative and humanitarian spiritual approach",
+        "pisces": "Compassionate and boundary-dissolving spiritual approach"
+      }
+    }
   }
 } 

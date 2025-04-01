@@ -91,7 +91,23 @@
       "spirituality": "divine love, beauty, and harmonious connection",
       "personal_growth": "self-worth and capacity for joy"
     },
-    "description": "Venus embodies your capacity for love, beauty, and pleasure—the qualities that draw you toward harmonious relationships and aesthetic experiences. It reveals what you value and how you express affection. Venus governs not only romantic attachments but also your relationship with beauty, art, and sensory pleasures, reflecting your ability to receive and appreciate the richness of life."
+    "description": "Venus embodies your capacity for love, beauty, and pleasure—the qualities that draw you toward harmonious relationships and aesthetic experiences. It reveals what you value and how you express affection. Venus governs not only romantic attachments but also your relationship with beauty, art, and sensory pleasures, reflecting your ability to receive and appreciate the richness of life.",
+    "sign_interpretations": {
+      "basic": {
+        "leo": "Expressive and generous approach to love and creativity. You love with dramatic flair and expect admiration in return.",
+        "aries": "Direct and passionate approach to love and pleasure",
+        "taurus": "Sensual and steady approach to love and beauty",
+        "gemini": "Social and intellectually stimulating approach to love",
+        "cancer": "Nurturing and emotionally connected approach to love",
+        "virgo": "Thoughtful and service-oriented approach to love",
+        "libra": "Harmonious and partnership-focused approach to love",
+        "scorpio": "Intense and transformative approach to love",
+        "sagittarius": "Freedom-loving and adventurous approach to love",
+        "capricorn": "Committed and responsible approach to love",
+        "aquarius": "Unconventional and friendship-based approach to love",
+        "pisces": "Compassionate and dreamy approach to love"
+      }
+    }
   },
   "mars": {
     "name": "Mars",
@@ -106,7 +122,23 @@
       "spirituality": "spiritual warrior archetype and transformative will",
       "personal_growth": "courage, healthy boundaries, and self-assertion"
     },
-    "description": "Mars represents your personal power and how you assert yourself to achieve your desires. As the cosmic warrior, it governs your courage, physical energy, and sexual drive. Mars shows how you take initiative, face challenges, and handle conflict, revealing the raw vitality and primal force that propels you into action and helps you overcome obstacles."
+    "description": "Mars represents your personal power and how you assert yourself to achieve your desires. As the cosmic warrior, it governs your courage, physical energy, and sexual drive. Mars shows how you take initiative, face challenges, and handle conflict, revealing the raw vitality and primal force that propels you into action and helps you overcome obstacles.",
+    "sign_interpretations": {
+      "basic": {
+        "scorpio": "Strategic and intensely focused energy. You pursue goals with unwavering determination and the capacity to transform obstacles.",
+        "aries": "Direct and forceful approach to action and conflict",
+        "taurus": "Persistent and steady approach to goals",
+        "gemini": "Versatile and adaptive approach to challenges",
+        "cancer": "Emotionally driven and protective approach to action",
+        "leo": "Dramatic and confident approach to challenges",
+        "virgo": "Precise and methodical approach to action",
+        "libra": "Diplomatic and partnership-oriented approach to conflict",
+        "sagittarius": "Adventurous and expansive approach to challenges",
+        "capricorn": "Disciplined and strategic approach to goals",
+        "aquarius": "Innovative and group-oriented approach to action",
+        "pisces": "Subtle and intuitive approach to pursuing desires"
+      }
+    }
   },
   "jupiter": {
     "name": "Jupiter",
@@ -121,7 +153,23 @@
       "spirituality": "faith, meaning, and higher understanding",
       "personal_growth": "vision, wisdom, and expanding consciousness"
     },
-    "description": "Jupiter embodies the principle of expansion—your quest for meaning, growth, and abundance in life. Known as the Greater Benefic, Jupiter reveals where you experience good fortune, opportunities, and the freedom to explore. It governs your philosophical outlook, faith, and capacity for optimism, showing how you connect to the larger purpose of your existence and expand beyond perceived limitations."
+    "description": "Jupiter embodies the principle of expansion—your quest for meaning, growth, and abundance in life. Known as the Greater Benefic, Jupiter reveals where you experience good fortune, opportunities, and the freedom to explore. It governs your philosophical outlook, faith, and capacity for optimism, showing how you connect to the larger purpose of your existence and expand beyond perceived limitations.",
+    "sign_interpretations": {
+      "basic": {
+        "sagittarius": "Expansive vision and natural philosophical insight. You seek truth and meaning with boundless enthusiasm and inspire others with your optimism.",
+        "aries": "Bold and pioneering approach to growth and opportunity",
+        "taurus": "Steady and resource-building approach to abundance",
+        "gemini": "Intellectually curious and versatile approach to learning",
+        "cancer": "Emotionally expansive and nurturing approach to growth",
+        "leo": "Generous and creative approach to opportunities",
+        "virgo": "Practical and discerning approach to improvement",
+        "libra": "Harmonious and relationship-oriented approach to expansion",
+        "scorpio": "Transformative and psychologically deep approach to wisdom",
+        "capricorn": "Structured and ambitious approach to achievement",
+        "aquarius": "Innovative and humanitarian approach to possibilities",
+        "pisces": "Spiritually receptive and compassionate approach to meaning"
+      }
+    }
   },
   "saturn": {
     "name": "Saturn",
