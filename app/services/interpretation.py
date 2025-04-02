@@ -563,6 +563,75 @@ class InterpretationService:
             f"{len(birth_chart.get('houses', {}))} houses")
         self.logger.debug(
             f"Planets in chart: {list(birth_chart.get('planets', {}).keys())}")
+            
+        # Add sign details to each planet
+        description_data = self.structured_data.get("descriptions", {})
+        self.logger.debug(f"Adding sign details to planets from descriptions data")
+        
+        # Iterate through each planet and add relevant sign details from descriptions
+        for planet_name, planet_data in birth_chart.get("planets", {}).items():
+            sign = planet_data.get("sign", "")
+            if sign and sign.lower() in description_data:
+                # Create sign_details dictionary if it doesn't exist
+                if "sign_details" not in planet_data:
+                    planet_data["sign_details"] = {}
+                
+                # Get description fields for this sign
+                sign_descriptions = description_data[sign.lower()]
+                
+                # Select only the relevant fields based on planet type
+                planet_lower = planet_name.lower()
+                
+                # Map of planets to their corresponding description fields
+                planet_to_description_fields = {
+                    "sun": ["sun_sign", "sun_sign_medium", "sun_sign_long"],
+                    "moon": ["moon_sign", "moon_sign_long"],
+                    # For other planets, we'll use the generic sign description
+                    "default": ["sun_sign"]
+                }
+                
+                # Get the appropriate fields for this planet
+                fields_to_add = planet_to_description_fields.get(planet_lower, planet_to_description_fields["default"])
+                
+                # Add only the relevant fields to sign_details
+                for key in fields_to_add:
+                    if key in sign_descriptions:
+                        planet_data["sign_details"][key] = sign_descriptions[key]
+                    else:
+                        self.logger.warning(f"Field {key} not found in descriptions for {sign.lower()}")
+                
+                # Make sure we have at least the basic description
+                if "sun_sign" in sign_descriptions and "sun_sign" not in fields_to_add:
+                    planet_data["sign_details"]["description"] = sign_descriptions["sun_sign"]
+                
+                self.logger.debug(f"Added specific sign details to {planet_name} in {sign}")
+            else:
+                self.logger.warning(f"Could not find sign details for {planet_name} in {sign}")
+        
+        # Also add sign details for the ascendant if available
+        if "angles" in birth_chart and "ascendant" in birth_chart["angles"]:
+            asc_data = birth_chart["angles"]["ascendant"]
+            asc_sign = asc_data.get("sign", "")
+            
+            if asc_sign and asc_sign.lower() in description_data:
+                # Create sign_details dictionary if it doesn't exist
+                if "sign_details" not in asc_data:
+                    asc_data["sign_details"] = {}
+                
+                # Get description fields for this sign
+                sign_descriptions = description_data[asc_sign.lower()]
+                
+                # Add rising sign specific fields
+                rising_fields = ["rising_sign", "rising_sign_long"]
+                for key in rising_fields:
+                    if key in sign_descriptions:
+                        asc_data["sign_details"][key] = sign_descriptions[key]
+                    else:
+                        self.logger.warning(f"Field {key} not found in descriptions for {asc_sign.lower()}")
+                
+                self.logger.debug(f"Added rising sign details to Ascendant in {asc_sign}")
+            else:
+                self.logger.warning(f"Could not find sign details for Ascendant in {asc_sign}")
 
         # Create interpretation object
         interpretation = {
@@ -850,8 +919,7 @@ class InterpretationService:
             specific_sign_interp = sign_interpretations.get(
                 level, {}).get(sign_lower)
 
-            # Use specific interpretation if found, otherwise build a generic
-            # one
+            # Use specific interpretation if found, otherwise build a generic one
             if specific_sign_interp:
                 planet_sign_interp = specific_sign_interp
                 self.logger.debug(
@@ -907,11 +975,11 @@ class InterpretationService:
                 dignity_interp_sentence = f"In terms of essential dignity, {planet.capitalize()} is in {dignity_type.capitalize()} here, which influences its expression."
 
         # --- Build Final Interpretation (Revised) ---
-        # Combine the specific/generic Planet-in-Sign interp with house
-        # placement, dignity, and retrograde status
+        # Combine the specific/generic Planet-in-Sign interp without house parentheses
 
         interpretation_parts = [
-            f"{planet.capitalize()} in {sign.capitalize()} (House {house}):",
+            # Remove the parentheses format from the introduction
+            f"Your {planet.lower()} in {sign.capitalize()}:",
             planet_sign_interp # Planet-in-Sign interpretation
         ]
         if dignity_interp_sentence: # Add dignity interpretation if available

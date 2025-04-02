@@ -51,26 +51,80 @@ NEXT_PUBLIC_INTERPRETATION_API_URL=http://localhost:8002/api/v1/interpretation
      ```bash
      uvicorn app.birth_chart_server:app --host 0.0.0.0 --port 8001
      ```
+   - You should see confirmation that the server is running on http://0.0.0.0:8001
+   - The API documentation will be available at http://localhost:8001/api/docs
 
 2. **Start the Interpretation Service**:
    - In a separate terminal, run:
      ```bash
-     uvicorn app.main:app --host 0.0.0.0 --port 8002
+     uvicorn app.interpretation_server:app --host 0.0.0.0 --port 8002
      ```
+   - You should see confirmation that the server is running on http://0.0.0.0:8002
+   - The API documentation will be available at http://localhost:8002/api/docs
 
-3. **Start the Frontend**:
+3. **Start the Frontend** (optional):
    - Navigate to the `dailyheavens-frontend` directory.
    - Run:
      ```bash
      pnpm dev
      ```
 
+## Generating a Birth Chart and Interpretation
+
+### Using cURL
+
+1. **Generate a Birth Chart**:
+   ```bash
+   curl -X POST http://localhost:8001/api/v1/birthchart \
+     -H "Content-Type: application/json" \
+     -d '{
+       "date": "1988-06-20T04:15:00",
+       "latitude": 42.3370,
+       "longitude": -71.2092,
+       "timezone": "America/New_York"
+     }' > birth_chart.json
+   ```
+
+2. **Generate an Interpretation** (using the birth chart data):
+   ```bash
+   curl -X POST http://localhost:8002/api/v1/interpretation \
+     -H "Content-Type: application/json" \
+     -d @birth_chart.json
+   ```
+
+### Using the API Documentation UI
+
+1. Open the Birth Chart API docs at http://localhost:8001/api/docs
+2. Click on the POST /api/v1/birthchart endpoint
+3. Click "Try it out"
+4. Enter birth data in the request body (example below) and click "Execute":
+   ```json
+   {
+     "date": "1988-06-20T04:15:00",
+     "latitude": 42.3370,
+     "longitude": -71.2092,
+     "timezone": "America/New_York"
+   }
+   ```
+5. Copy the response body containing the birth chart data
+6. Open the Interpretation API docs at http://localhost:8002/api/docs
+7. Click on the POST /api/v1/interpretation endpoint
+8. Click "Try it out"
+9. Paste the birth chart data into the request body
+10. Click "Execute" to get your interpretation
+
 ## Troubleshooting
 
-- **404 Not Found**: Ensure the `.env.local` file is correctly configured and services are running on the specified ports.
-- **Syntax Errors**: Check for syntax errors in the Python files and fix them before starting the services.
-- **Port Already in Use**: Ensure no other processes are using the required ports before starting the services.
-- **ModuleNotFoundError**: Ensure the correct working directory and module paths are used.
+- **404 Not Found**: Check that you're using the correct endpoint path (`/api/v1/birthchart` or `/api/v1/interpretation`)
+- **Syntax Errors**: Check for syntax or indentation errors in Python files before starting services
+- **Port Already in Use**: Kill existing processes using the required ports:
+   ```bash
+   pkill -f 'uvicorn app.birth_chart_server:app'  # For birth chart service
+   pkill -f 'uvicorn app.interpretation_server:app'  # For interpretation service
+   ```
+- **ModuleNotFoundError**: Ensure you're running commands from the project root directory
+- **Missing Outer Planets**: Warnings about missing Uranus, Neptune, or Pluto in charts are normal and don't affect core functionality
+- **JSON Formatting**: When copying birth chart data for interpretation, ensure proper JSON formatting is maintained
 
 ## Verifying the Setup
 
