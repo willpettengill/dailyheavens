@@ -318,6 +318,35 @@ class InterpretationService:
                 keywords.extend(["healing", "compassion", "transcendence"])
         return keywords
 
+    def _get_element_keywords_simple(self, element: str, modality: str = None) -> List[str]:
+        """Get general keywords for an element, optionally filtered by modality.
+        
+        Args:
+            element: The astrological element (fire, earth, air, water)
+            modality: Optional modality to filter keywords (cardinal, fixed, mutable)
+            
+        Returns:
+            List of keywords associated with the element
+        """
+        keywords = []
+        if element == "fire":
+            keywords.extend(["energy", "passion", "action", "inspiration", "creativity"])
+            if modality:
+                return self._get_element_modality_keywords_simple(element, modality)
+        elif element == "earth":
+            keywords.extend(["stability", "practicality", "reliability", "structure", "material"])
+            if modality:
+                return self._get_element_modality_keywords_simple(element, modality)
+        elif element == "air":
+            keywords.extend(["intellect", "communication", "social", "ideas", "perspective"])
+            if modality:
+                return self._get_element_modality_keywords_simple(element, modality)
+        elif element == "water":
+            keywords.extend(["emotion", "intuition", "sensitivity", "flow", "connection"])
+            if modality:
+                return self._get_element_modality_keywords_simple(element, modality)
+        return keywords
+
     def _validate_birth_chart(self, birth_chart: Dict[str, Any]) -> bool:
         """Validate birth chart data structure.
 
