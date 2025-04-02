@@ -4,10 +4,15 @@
 from datetime import datetime
 import json
 import logging
+import math
 import os
-from typing import Dict, Any, List, Tuple, Union
+import random
+import re
+import warnings
+from typing import Dict, Any, List, Tuple, Union, Optional
 
 # Third-party imports
+from jinja2 import Environment, FileSystemLoader
 from flatlib.datetime import Datetime
 
 # Local application imports
@@ -62,6 +67,15 @@ class InterpretationService:
         self._house_cache = {}
         self._sign_cache = {}
 
+        # Set up Jinja2 for template rendering
+        templates_dir = os.path.join(self.project_root, "app", "templates")
+        self.logger.debug(f"Templates directory: {templates_dir}")
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(templates_dir),
+            trim_blocks=True,
+            lstrip_blocks=True
+        )
+        
         # Load structured data
         self._load_all_structured_data()
 
@@ -1164,66 +1178,148 @@ class InterpretationService:
         element_balance = self._analyze_simple_element_balance(birth_chart)
         modality_balance = self._analyze_simple_modality_balance(birth_chart)
 
-        # Generate interpretation
-        interpretation_parts = []
-
-        # Add element balance interpretation
-        if element_balance and "interpretation" in element_balance:
-            interpretation_parts.append(element_balance["interpretation"])
-
-        # Add modality balance interpretation
-        if modality_balance and "interpretation" in modality_balance:
-            interpretation_parts.append(modality_balance["interpretation"])
-
-        # Add aspect balance interpretation from structured data
-        aspects = birth_chart.get("aspects", [])
-        harmonious_count = 0
-        challenging_count = 0
-
-        for aspect in aspects:
-            aspect_type_str = str(aspect.get("type")).lower()
-            # Fetch aspect nature from cache
-            aspect_data = self._aspect_cache.get(aspect_type_str, {})
-            nature = aspect_data.get("nature")
-
-            if nature == "harmonious":
-                harmonious_count += 1
-            elif nature == "challenging":
-                challenging_count += 1
-            # Variable nature aspects like conjunctions are not counted here
-            # for balance
-
-        aspect_balance_texts = self.structured_data.get(
-            "interpretation_patterns", {}).get(
-            "aspect_balance", {})
-        balance_text = ""
-        if harmonious_count == 0 and challenging_count == 0:
-            balance_text = aspect_balance_texts.get(
-                "balanced", "")  # Default to balanced if no major aspects
-        elif harmonious_count > challenging_count * 1.5:
-            balance_text = aspect_balance_texts.get("harmonious_dominant", "")
-        elif challenging_count > harmonious_count * 1.5:
-            balance_text = aspect_balance_texts.get("challenging_dominant", "")
-        else:
-            balance_text = aspect_balance_texts.get("balanced", "")
-
-        if balance_text:
-            interpretation_parts.append(balance_text)
-        else:
-            self.logger.warning(
-                "Could not find aspect balance text in interpretation_patterns.json")
-
-        # Add summary sentence
-        interpretation_parts.append(
-            "This natal chart represents a unique combination of energies and potential that unfolds throughout your life."
-        )
-
-        # Combine all parts
-        interpretation = " ".join(interpretation_parts)
-
-        self.logger.debug(
-            f"Generated overall interpretation: {interpretation[:50]}...")
-        return interpretation
+        # Find chart patterns
+        patterns = self._analyze_complex_patterns(birth_chart)
+        
+        # Find simple patterns (stelliums, house emphasis)
+        simple_patterns = self._analyze_simple_patterns(birth_chart)
+        
+        # Get combinations
+        combinations = self._analyze_combinations(birth_chart)
+        
+        # Get chart shape
+        chart_shape = self._analyze_chart_shape(birth_chart)
+        
+        # Get angles interpretations
+        mc_sign = birth_chart.get("angles", {}).get("midheaven", {}).get("sign")
+        ic_sign = birth_chart.get("angles", {}).get("imum_coeli", {}).get("sign")
+        dsc_sign = birth_chart.get("angles", {}).get("descendant", {}).get("sign")
+        
+        mc_summary = ""
+        ic_summary = ""
+        dsc_summary = ""
+        
+        if mc_sign:
+            mc_house_data = self._house_cache.get("10", {})
+            mc_sign_specific = mc_house_data.get(mc_sign.lower(), "")
+            mc_summary = mc_sign_specific or f"House 10 with {mc_sign} on the cusp influences Career and public life"
+            
+        if ic_sign:
+            ic_house_data = self._house_cache.get("4", {})
+            ic_sign_specific = ic_house_data.get(ic_sign.lower(), "")
+            ic_summary = ic_sign_specific or f"House 4 with {ic_sign} on the cusp influences Home and emotional foundation"
+            
+        if dsc_sign:
+            dsc_house_data = self._house_cache.get("7", {})
+            dsc_sign_specific = dsc_house_data.get(dsc_sign.lower(), "")
+            dsc_summary = dsc_sign_specific or f"House 7 with {dsc_sign} on the cusp influences Relationships and partnerships"
+            
+        # Get rising sign interpretation
+        asc_sign = birth_chart.get("angles", {}).get("ascendant", {}).get("sign")
+        asc_interpretation = ""
+        if asc_sign:
+            asc_interpretation = self._get_rising_sign_summary(asc_sign)
+        
+        # Generate planet interpretations
+        planet_interpretations = self._generate_planet_interpretations(birth_chart, level)
+        self.logger.debug(f"Generated {len(planet_interpretations)} planet interpretations")
+        
+        # Generate house interpretations
+        house_interpretations = self._generate_house_interpretations(birth_chart, level)
+        self.logger.debug(f"Generated {len(house_interpretations)} house interpretations")
+        
+        # Generate aspect interpretations  
+        aspect_interpretations = self._generate_aspect_interpretations(birth_chart, level)
+        self.logger.debug(f"Generated {len(aspect_interpretations)} aspect interpretations")
+            
+        # Prepare template variables
+        template_vars = {
+            "birth_chart": birth_chart,
+            "planets": planet_interpretations,
+            "houses": house_interpretations,
+            "aspects": aspect_interpretations,
+            "patterns": patterns,
+            "simple_patterns": simple_patterns,
+            "element_balance": element_balance,
+            "modality_balance": modality_balance,
+            "combinations": combinations,
+            "chart_shape": chart_shape,
+            "mc_summary": mc_summary,
+            "ic_summary": ic_summary,
+            "dsc_summary": dsc_summary,
+            "asc_interpretation": asc_interpretation
+        }
+        
+        # Debug some key template variables
+        self.logger.debug(f"Sun in birth chart: {birth_chart.get('planets', {}).get('Sun', {}).get('sign', 'Not found')}")
+        self.logger.debug(f"Number of planets: {len(planet_interpretations)}")
+        self.logger.debug(f"Number of patterns: {len(patterns)}")
+        
+        try:
+            # Render the template
+            template = self.jinja_env.get_template("overall_interpretation.txt.j2")
+            interpretation = template.render(**template_vars)
+            self.logger.debug(f"Generated overall interpretation: {interpretation[:50]}...")
+            return interpretation
+        except Exception as e:
+            self.logger.error(f"Error rendering overall interpretation template: {str(e)}", exc_info=True)
+            
+            # Fallback to old method if template rendering fails
+            interpretation_parts = []
+            
+            # Add element balance interpretation
+            if element_balance and "interpretation" in element_balance:
+                interpretation_parts.append(element_balance["interpretation"])
+                
+            # Add modality balance interpretation
+            if modality_balance and "interpretation" in modality_balance:
+                interpretation_parts.append(modality_balance["interpretation"])
+                
+            # Add aspect balance interpretation
+            aspects = birth_chart.get("aspects", [])
+            harmonious_count = 0
+            challenging_count = 0
+            
+            for aspect in aspects:
+                aspect_type_str = str(aspect.get("type")).lower()
+                aspect_data = self._aspect_cache.get(aspect_type_str, {})
+                nature = aspect_data.get("nature")
+                
+                if nature == "harmonious":
+                    harmonious_count += 1
+                elif nature == "challenging":
+                    challenging_count += 1
+                    
+            aspect_balance_texts = self.structured_data.get(
+                "interpretation_patterns", {}).get(
+                "aspect_balance", {})
+            balance_text = ""
+            if harmonious_count == 0 and challenging_count == 0:
+                balance_text = aspect_balance_texts.get(
+                    "balanced", "")
+            elif harmonious_count > challenging_count * 1.5:
+                balance_text = aspect_balance_texts.get("harmonious_dominant", "")
+            elif challenging_count > harmonious_count * 1.5:
+                balance_text = aspect_balance_texts.get("challenging_dominant", "")
+            else:
+                balance_text = aspect_balance_texts.get("balanced", "")
+                
+            if balance_text:
+                interpretation_parts.append(balance_text)
+            else:
+                self.logger.warning(
+                    "Could not find aspect balance text in interpretation_patterns.json")
+                    
+            # Add summary sentence
+            interpretation_parts.append(
+                "This natal chart represents a unique combination of energies and potential that unfolds throughout your life."
+            )
+            
+            # Combine all parts
+            interpretation = " ".join(interpretation_parts)
+            self.logger.debug(
+                f"Generated fallback overall interpretation: {interpretation[:50]}...")
+            return interpretation
 
     def _calculate_planetary_positions(self, date: Datetime) -> dict:
         """Calculate positions of planets using flatlib."""

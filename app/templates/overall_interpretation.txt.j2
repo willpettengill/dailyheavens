@@ -4,12 +4,22 @@
 
 {% if birth_chart.planets.Sun %}
 **Sun in {{ birth_chart.planets.Sun.sign }} (House {{ birth_chart.planets.Sun.house }})**
-The Sun represents your core self and purpose in life. {{ planets.Sun.interpretation | truncate(150) }}
+The Sun represents your core self and purpose in life. 
+{% for planet_data in planets %}
+{% if planet_data.planet == "Sun" %}
+{{ planet_data.interpretation | truncate(150) }}
+{% endif %}
+{% endfor %}
 {% endif %}
 
 {% if birth_chart.planets.Moon %}
 **Moon in {{ birth_chart.planets.Moon.sign }} (House {{ birth_chart.planets.Moon.house }})**
-The Moon represents your emotional nature and instinctive reactions. {{ planets.Moon.interpretation | truncate(150) }}
+The Moon represents your emotional nature and instinctive reactions. 
+{% for planet_data in planets %}
+{% if planet_data.planet == "Moon" %}
+{{ planet_data.interpretation | truncate(150) }}
+{% endif %}
+{% endfor %}
 {% endif %}
 
 {% if birth_chart.angles.ascendant %}
