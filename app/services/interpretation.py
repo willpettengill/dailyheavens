@@ -1961,12 +1961,14 @@ class InterpretationService:
         # Process planets (handling both dictionary and list formats)
         planets_data = birth_chart.get("planets", {})
 
+        # Define points to exclude (non-planetary objects)
+        excluded_points = ["ascendant", "midheaven", "descendant", "ic", "north_node", "south_node"]
+
         if isinstance(planets_data, dict):
             # Dictionary format (new)
             for planet_name, planet_data in planets_data.items():
-                # Skip points like Ascendant, MC
-                if planet_name.lower() in [
-                        "ascendant", "midheaven", "descendant", "ic"]:
+                # Skip points like Ascendant, MC, and Nodes
+                if planet_name.lower() in excluded_points:
                     continue
 
                 sign = planet_data.get("sign", "").lower()
@@ -1978,14 +1980,8 @@ class InterpretationService:
         elif isinstance(planets_data, list):
             # List format (old)
             for planet in planets_data:
-                # Skip points like Ascendant, MC
-                if planet.get(
-                        "name",
-                        "").lower() in [
-                        "ascendant",
-                        "midheaven",
-                        "descendant",
-                        "ic"]:
+                # Skip points like Ascendant, MC, and Nodes
+                if planet.get("name", "").lower() in excluded_points:
                     continue
 
                 sign = planet.get("sign", "").lower()
@@ -2120,12 +2116,14 @@ class InterpretationService:
         # Process planets (handling both dictionary and list formats)
         planets_data = birth_chart.get("planets", {})
 
+        # Define points to exclude (non-planetary objects)
+        excluded_points = ["ascendant", "midheaven", "descendant", "ic", "north_node", "south_node"]
+
         if isinstance(planets_data, dict):
             # Dictionary format (new)
             for planet_name, planet_data in planets_data.items():
-                # Skip points like Ascendant, MC
-                if planet_name.lower() in [
-                        "ascendant", "midheaven", "descendant", "ic"]:
+                # Skip points like Ascendant, MC, and Nodes
+                if planet_name.lower() in excluded_points:
                     continue
 
                 sign = planet_data.get("sign", "").lower()
@@ -2137,14 +2135,8 @@ class InterpretationService:
         elif isinstance(planets_data, list):
             # List format (old)
             for planet in planets_data:
-                # Skip points like Ascendant, MC
-                if planet.get(
-                        "name",
-                        "").lower() in [
-                        "ascendant",
-                        "midheaven",
-                        "descendant",
-                        "ic"]:
+                # Skip points like Ascendant, MC, and Nodes
+                if planet.get("name", "").lower() in excluded_points:
                     continue
 
                 sign = planet.get("sign", "").lower()

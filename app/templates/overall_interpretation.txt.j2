@@ -1,0 +1,121 @@
+# Birth Chart Interpretation
+
+## Core Identity
+
+{% if birth_chart.planets.Sun %}
+**Sun in {{ birth_chart.planets.Sun.sign }} (House {{ birth_chart.planets.Sun.house }})**
+The Sun represents your core self and purpose in life. {{ planets.Sun.interpretation | truncate(150) }}
+{% endif %}
+
+{% if birth_chart.planets.Moon %}
+**Moon in {{ birth_chart.planets.Moon.sign }} (House {{ birth_chart.planets.Moon.house }})**
+The Moon represents your emotional nature and instinctive reactions. {{ planets.Moon.interpretation | truncate(150) }}
+{% endif %}
+
+{% if birth_chart.angles.ascendant %}
+**Ascendant in {{ birth_chart.angles.ascendant.sign }}**
+Your Ascendant represents how you approach the world and how others initially perceive you. {{ asc_interpretation | truncate(150) }}
+{% endif %}
+
+## Chart Patterns
+
+{% if patterns|length > 0 %}
+Your chart contains the following significant patterns:
+
+{% for pattern in patterns %}
+**{{ pattern.type }}**: {{ pattern.interpretation | truncate(200) }}
+
+{% endfor %}
+{% else %}
+Your chart doesn't contain any of the major traditional patterns such as Grand Trines, T-Squares, or Yods. This suggests a more balanced distribution of planetary energies.
+{% endif %}
+
+## Element & Modality Balance
+
+{% set significant_element_imbalance = element_balance.percentages.values() | list | sort | reverse | first > 45 or element_balance.percentages.values() | list | sort | first < 10 %}
+{% set significant_modality_imbalance = modality_balance.percentages.values() | list | sort | reverse | first > 60 or modality_balance.percentages.values() | list | sort | first < 10 %}
+
+{% if significant_element_imbalance %}
+**Element Balance:**
+{% if element_balance.percentages[element_balance.dominant] > 45 %}
+Your chart shows a strong emphasis on the {{ element_balance.dominant }} element ({{ "%.0f"|format(element_balance.percentages[element_balance.dominant]) }}% of planets). {{ element_balance.interpretation | truncate(200) }}
+{% endif %}
+
+{% if element_balance.lacking|length > 0 and element_balance.percentages[element_balance.lacking[0]] < 10 %}
+Your chart shows a notable lack of the {{ element_balance.lacking[0] }} element ({{ "%.0f"|format(element_balance.percentages[element_balance.lacking[0]]) }}% of planets). This suggests {{ element_balance.interpretation | truncate(200) }}
+{% endif %}
+{% endif %}
+
+{% if significant_modality_imbalance %}
+**Modality Balance:**
+{% if modality_balance.percentages[modality_balance.dominant] > 60 %}
+Your chart shows a significant emphasis on the {{ modality_balance.dominant }} modality ({{ "%.0f"|format(modality_balance.percentages[modality_balance.dominant]) }}% of planets). {{ modality_balance.interpretation | truncate(200) }}
+{% endif %}
+
+{% if modality_balance.lacking|length > 0 and modality_balance.percentages[modality_balance.lacking[0]] < 10 %}
+Your chart shows a notable lack of the {{ modality_balance.lacking[0] }} modality ({{ "%.0f"|format(modality_balance.percentages[modality_balance.lacking[0]]) }}% of planets). This suggests {{ modality_balance.interpretation | truncate(200) }}
+{% endif %}
+{% endif %}
+
+## Planetary Concentrations
+
+{% if simple_patterns|length > 0 %}
+{% for pattern in simple_patterns %}
+{% if pattern.type == "stellium" %}
+**Stellium in {{ pattern.sign|capitalize }}**: You have {{ pattern.count }} planets ({{ pattern.planets|join(", ") }}) in {{ pattern.sign|capitalize }}. {{ pattern.interpretation | truncate(200) }}
+{% endif %}
+
+{% if pattern.type == "house_emphasis" %}
+**House {{ pattern.house }} Emphasis**: You have {{ pattern.count }} planets ({{ pattern.planets|join(", ") }}) in your {{ pattern.house }}{% if pattern.house == 1 %}st{% elif pattern.house == 2 %}nd{% elif pattern.house == 3 %}rd{% else %}th{% endif %} house. {{ pattern.interpretation | truncate(200) }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+## Important Aspects
+
+{% set important_aspects = [] %}
+{% for aspect in aspects %}
+{% if aspect.orb < 2.0 and aspect.type in ["conjunction", "opposition", "square", "trine"] %}
+{% if important_aspects.append(aspect) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if important_aspects|length > 0 %}
+The following tight aspects in your chart are particularly influential:
+
+{% for aspect in important_aspects %}
+**{{ aspect.planet1 }} {{ aspect.type|capitalize }} {{ aspect.planet2 }}** ({{ "%.1f"|format(aspect.orb) }}° orb): {{ aspect.interpretation | truncate(150) }}
+{% endfor %}
+{% endif %}
+
+## Career and Life Path
+
+{% if mc_summary %}
+**Career and Public Role**: {{ mc_summary }}
+{% endif %}
+
+## Emotional Foundation
+
+{% if ic_summary %}
+**Home and Inner World**: {{ ic_summary }}
+{% endif %}
+
+## Relationships
+
+{% if dsc_summary %}
+**Relationship Approach**: {{ dsc_summary }}
+{% endif %}
+
+{% if combinations|length > 0 %}
+{% for combo in combinations %}
+{% if combo.type == "Sun-Moon Elemental Theme" %}
+**Sun-Moon Elemental Theme**: {{ combo.interpretation | truncate(200) }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+## Chart Shape
+
+{% if chart_shape.shape_name != "Undetermined" %}
+Your chart has a {{ chart_shape.shape_name }} shape. {{ chart_shape.interpretation | truncate(150) }}
+{% endif %} 
