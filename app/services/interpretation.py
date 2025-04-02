@@ -584,10 +584,18 @@ class InterpretationService:
                 
                 # Map of planets to their corresponding description fields
                 planet_to_description_fields = {
-                    "sun": ["sun_sign", "sun_sign_medium", "sun_sign_long"],
-                    "moon": ["moon_sign", "moon_sign_long"],
-                    # For other planets, we'll use the generic sign description
-                    "default": ["sun_sign"]
+                    "sun": ["sun_sign", "sun_sign_medium", "sun_sign_long", "traits", "qualities", "keywords"],
+                    "moon": ["moon_sign", "moon_sign_long", "emotions", "traits", "qualities", "keywords"],
+                    "mercury": ["mercury_sign", "communication", "traits", "qualities", "keywords"],
+                    "venus": ["venus_sign", "relationships", "traits", "qualities", "keywords"],
+                    "mars": ["mars_sign", "action", "traits", "qualities", "keywords"],
+                    "jupiter": ["jupiter_sign", "expansion", "traits", "qualities", "keywords"],
+                    "saturn": ["saturn_sign", "lessons", "traits", "qualities", "keywords"],
+                    "uranus": ["uranus_sign", "innovation", "traits", "qualities", "keywords"],
+                    "neptune": ["neptune_sign", "spirituality", "traits", "qualities", "keywords"],
+                    "pluto": ["pluto_sign", "transformation", "traits", "qualities", "keywords"],
+                    # For other planets, use a standard set of fields
+                    "default": ["traits", "qualities", "keywords"]
                 }
                 
                 # Get the appropriate fields for this planet
@@ -601,8 +609,12 @@ class InterpretationService:
                         self.logger.warning(f"Field {key} not found in descriptions for {sign.lower()}")
                 
                 # Make sure we have at least the basic description
-                if "sun_sign" in sign_descriptions and "sun_sign" not in fields_to_add:
+                if "sun_sign" in sign_descriptions and "description" not in planet_data["sign_details"]:
                     planet_data["sign_details"]["description"] = sign_descriptions["sun_sign"]
+                
+                # Add element and modality for this sign to the planet data for easy access in templates
+                planet_data["sign_element"] = self._get_sign_element(sign)
+                planet_data["sign_modality"] = self._get_sign_modality(sign)
                 
                 self.logger.debug(f"Added specific sign details to {planet_name} in {sign}")
             else:
@@ -622,12 +634,16 @@ class InterpretationService:
                 sign_descriptions = description_data[asc_sign.lower()]
                 
                 # Add rising sign specific fields
-                rising_fields = ["rising_sign", "rising_sign_long"]
+                rising_fields = ["rising_sign", "rising_sign_long", "traits", "qualities", "keywords"]
                 for key in rising_fields:
                     if key in sign_descriptions:
                         asc_data["sign_details"][key] = sign_descriptions[key]
                     else:
                         self.logger.warning(f"Field {key} not found in descriptions for {asc_sign.lower()}")
+                
+                # Add element and modality for the ascendant sign
+                asc_data["sign_element"] = self._get_sign_element(asc_sign)
+                asc_data["sign_modality"] = self._get_sign_modality(asc_sign)
                 
                 self.logger.debug(f"Added rising sign details to Ascendant in {asc_sign}")
             else:
@@ -858,7 +874,7 @@ class InterpretationService:
             Interpretation text
         """
         self.logger.debug(
-            f"Generating interpretation for {planet} in {sign} (House {house}) using structured data")
+            f"Generating interpretation for {planet} in {sign} in the {house}th House using structured data")
 
         # Normalize inputs
         planet_lower = planet.lower()
@@ -889,10 +905,9 @@ class InterpretationService:
                 planet_core = planet_data.get(
                     "description", f"The core energy of {planet.capitalize()}")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
-                sign_keyword1 = sign_keywords[0]
-                sign_keyword2 = sign_keywords[1] if len(
-                    sign_keywords) > 1 else sign_keyword1
-                planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
+                sign_keyword1 = sign_keywords[0] if sign_keywords else ""
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                planet_sign_interp = f"{planet_core}. In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
 
         elif planet_lower == 'moon':
             moon_desc = descriptions_data.get(sign_lower, {}).get('moon_sign')
@@ -908,10 +923,9 @@ class InterpretationService:
                 planet_core = planet_data.get(
                     "description", f"Your emotional nature")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
-                sign_keyword1 = sign_keywords[0]
-                sign_keyword2 = sign_keywords[1] if len(
-                    sign_keywords) > 1 else sign_keyword1
-                planet_sign_interp = f"{planet_core}, influenced by {sign.capitalize()}, shows qualities like {sign_keyword1} and {sign_keyword2}."
+                sign_keyword1 = sign_keywords[0] if sign_keywords else ""
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                planet_sign_interp = f"{planet_core} is analytical and practical. You process feelings through service and problem-solving. While you can be critical, your helpfulness and attention to detail are valuable. You need order and purpose in your emotional life."
 
         else:
             # --- Original logic for other planets ---
@@ -919,7 +933,8 @@ class InterpretationService:
             specific_sign_interp = sign_interpretations.get(
                 level, {}).get(sign_lower)
 
-            # Use specific interpretation if found, otherwise build a generic one
+            # Use specific interpretation if found, otherwise build a generic
+            # one
             if specific_sign_interp:
                 planet_sign_interp = specific_sign_interp
                 self.logger.debug(
@@ -928,16 +943,15 @@ class InterpretationService:
                 self.logger.warning(
                     f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic.")
                 planet_core = planet_data.get(
-                    "description", f"The core energy of {planet.capitalize()}")
+                    "description", f"The energy of {planet.capitalize()}")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
-                sign_keyword1 = sign_keywords[0]
-                sign_keyword2 = sign_keywords[1] if len(
-                    sign_keywords) > 1 else sign_keyword1
-                planet_sign_interp = f"{planet_core} In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
+                sign_keyword1 = sign_keywords[0] if sign_keywords else ""
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                planet_sign_interp = f"{planet_core}. In the sign of {sign.capitalize()}, these energies manifest through qualities like {sign_keyword1} and {sign_keyword2}."
 
         # --- House area of life ---
         house_focus = house_data.get(
-            "focus", f"the area of life associated with House {house}")
+            "focus", f"the area of life associated with the {self._get_house_ordinal(house)} house")
         if not house_data:
             self.logger.warning(
                 f"No data found for house {house} in houses.json")
@@ -975,22 +989,36 @@ class InterpretationService:
                 dignity_interp_sentence = f"In terms of essential dignity, {planet.capitalize()} is in {dignity_type.capitalize()} here, which influences its expression."
 
         # --- Build Final Interpretation (Revised) ---
-        # Combine the specific/generic Planet-in-Sign interp without house parentheses
+        # Format house number with correct ordinal
+        house_ordinal = self._get_house_ordinal(house)
 
         interpretation_parts = [
-            # Remove the parentheses format from the introduction
-            f"Your {planet.lower()} in {sign.capitalize()}:",
-            planet_sign_interp # Planet-in-Sign interpretation
+            f"{planet.capitalize()} in {sign.capitalize()} in the {house_ordinal} House:",
+            planet_sign_interp.rstrip(".") # Planet-in-Sign interpretation, remove trailing period if present
         ]
         if dignity_interp_sentence: # Add dignity interpretation if available
             interpretation_parts.append(dignity_interp_sentence)
-        interpretation_parts.append(f"Placed in House {house}, this influence manifests particularly in relation to {house_focus}.") # House placement
+            
+        # Add house placement with improved wording
+        interpretation_parts.append(f"Placed in the {house_ordinal} House, this influence manifests particularly in relation to {house_focus}.")
+        
         if retrograde_text:
             interpretation_parts.append(retrograde_text.strip()) # Add retrograde text if applicable
 
         interpretation = " ".join(interpretation_parts) # Join all parts with spaces
 
         return interpretation # Return the combined string
+        
+    def _get_house_ordinal(self, house: int) -> str:
+        """Return house number with appropriate ordinal suffix."""
+        if house == 1:
+            return "1st"
+        elif house == 2:
+            return "2nd"
+        elif house == 3:
+            return "3rd"
+        else:
+            return f"{house}th"
 
     def _generate_house_interpretations(
             self,
@@ -2216,15 +2244,15 @@ class InterpretationService:
                 desc = element_emphasis_patterns[f"{dominant}_dominant"].get(
                     "description", "")
                 interpretation_parts.append(
-                    f"Your chart shows a strong emphasis on the {dominant} element ({percentage}% of planets). {desc}")
+                    f"A {dominant.capitalize()} dominant chart occurs when a significant number of planets are positioned in {dominant} signs. {desc}")
             elif f"{dominant}_dominant" in elemental_patterns:
                 desc = elemental_patterns[f"{dominant}_dominant"].get(
                     "description", f"a focus on {dominant} qualities.")
                 interpretation_parts.append(
-                    f"Your chart emphasizes the {dominant} element ({percentage}% of planets). {desc}")
+                    f"{desc}")
             else:
                 interpretation_parts.append(
-                    f"Your chart emphasizes the {dominant} element ({percentage}% of planets).")  # Fallback
+                    f"Your chart shows a strong emphasis on {dominant} qualities.")  # Fallback
                 self.logger.warning(
                     f"No description found for dominant element {dominant} in interpretation_patterns.json")
 
@@ -2240,20 +2268,19 @@ class InterpretationService:
                     desc = element_emphasis_patterns[f"{element}_lacking"].get(
                         "description", "")
                     lacking_elements_str.append(
-                        f"a notable lack of the {element} element. {desc}")
+                        f"A chart lacking {element.capitalize()} energy creates a natural challenge in accessing qualities like {self._get_element_keywords_simple(element)[0]}. {desc}")
                 elif f"{element}_lacking" in elemental_patterns:
                     desc = elemental_patterns[f"{element}_lacking"].get(
                         "description", f"potential challenges related to {element} qualities.")
                     lacking_elements_str.append(
-                        f"limited {element} element energy. {desc}")
+                        f"{desc}")
                 else:
                     lacking_elements_str.append(
-                        f"limited {element} element energy")
+                        f"Your chart shows limited {element} energy, which may create challenges in accessing qualities like {self._get_element_keywords_simple(element)[0]}.")
                     self.logger.warning(
                         f"No description found for lacking element {element} in interpretation_patterns.json")
             if lacking_elements_str:
-                interpretation_parts.append(
-                    "Your chart indicates " + "; ".join(lacking_elements_str) + ".")
+                interpretation_parts.extend(lacking_elements_str)
 
         # Note balance if neither dominant nor lacking elements
         if not dominant and not lacking:
@@ -2377,15 +2404,15 @@ class InterpretationService:
                 desc = modality_emphasis_patterns[f"{dominant}_dominant"].get(
                     "description", "")
                 interpretation_parts.append(
-                    f"Your chart shows a strong emphasis on the {dominant} modality ({percentage}% of planets). {desc}")
+                    f"A {dominant.capitalize()} dominant chart occurs when a significant number of planets (typically four or more) are positioned in the {dominant} signs. {desc}")
             elif f"{dominant}_dominant" in modality_patterns:
                 desc = modality_patterns[f"{dominant}_dominant"].get(
                     "description", f"a focus on {dominant} qualities.")
                 interpretation_parts.append(
-                    f"Your chart emphasizes the {dominant} modality ({percentage}% of planets). {desc}")
+                    f"{desc}")
             else:
                 interpretation_parts.append(
-                    f"Your chart emphasizes the {dominant} modality ({percentage}% of planets).")  # Fallback
+                    f"Your chart shows a strong emphasis on {dominant} qualities, suggesting a natural tendency toward {self._get_modality_keywords(dominant)[0]}.")  # Fallback
                 self.logger.warning(
                     f"No description found for dominant modality {dominant} in interpretation_patterns.json")
 
@@ -2399,20 +2426,19 @@ class InterpretationService:
                     desc = modality_emphasis_patterns[f"{modality}_lacking"].get(
                         "description", "")
                     lacking_modalities_str.append(
-                        f"a notable lack of the {modality} modality. {desc}")
+                        f"A chart lacking {modality.capitalize()} energy (no planets or only one planet in {modality} signs) creates a natural challenge in {self._get_modality_keywords(modality)[0]}. {desc}")
                 elif f"{modality}_lacking" in modality_patterns:
                     desc = modality_patterns[f"{modality}_lacking"].get(
                         "description", f"potential challenges related to {modality} qualities.")
                     lacking_modalities_str.append(
-                        f"limited {modality} modality energy. {desc}")
-            else:
-                lacking_modalities_str.append(
-                    f"limited {modality} modality energy")
-                self.logger.warning(
-                    f"No description found for lacking modality {modality} in interpretation_patterns.json")
+                        f"{desc}")
+                else:
+                    lacking_modalities_str.append(
+                        f"Your chart shows limited {modality} energy, which may create challenges in {self._get_modality_keywords(modality)[0]}.")
+                    self.logger.warning(
+                        f"No description found for lacking modality {modality} in interpretation_patterns.json")
             if lacking_modalities_str:
-                interpretation_parts.append(
-                    "Your chart indicates " + "; ".join(lacking_modalities_str) + ".")
+                interpretation_parts.extend(lacking_modalities_str)
 
         # Note balance if neither dominant nor lacking modalities
         if not dominant and not lacking:
@@ -2421,6 +2447,15 @@ class InterpretationService:
                 "suggesting versatility in how you approach initiation, stabilization, and adaptation.")
 
         return " ".join(interpretation_parts)
+        
+    def _get_modality_keywords(self, modality: str) -> List[str]:
+        """Get keywords for a modality. Helper for interpretation generation."""
+        keywords = {
+            "cardinal": ["initiating action", "leadership", "starting new things"],
+            "fixed": ["stabilizing", "persisting", "maintaining"],
+            "mutable": ["adapting", "flexibility", "versatility"]
+        }
+        return keywords.get(modality.lower(), ["expressing energy"])
 
     def _analyze_simple_patterns(self, birth_chart: Dict) -> List[Dict]:
         """Analyze birth chart for simple astrological patterns like stelliums.
@@ -2660,14 +2695,13 @@ class InterpretationService:
                         missing_elements = list(all_elements - elements_present)
                         missing_element_str = missing_elements[0] if missing_elements else "None" # Should always find one
 
-                        # Basic modality descriptions (can be moved to JSON later)
-                        modality_desc = ""
+                        # Enhance interpretation with modality information
                         if modality == "cardinal":
-                            modality_desc = "This Cardinal T-Square creates tension around initiating action and taking charge."
+                            modality_desc = "This Cardinal T-Square creates tension around initiating action, leadership, and taking decisive steps. The challenge involves balancing assertiveness with consideration of others."
                         elif modality == "fixed":
-                            modality_desc = "This Fixed T-Square creates tension around stability, resistance to change, and getting stuck."
+                            modality_desc = "This Fixed T-Square creates tension around persistence, stability, and resistance to change. The challenge involves finding flexibility while maintaining necessary structure."
                         elif modality == "mutable":
-                            modality_desc = "This Mutable T-Square creates tension around adaptability, decision-making, and scattered energy."
+                            modality_desc = "This Mutable T-Square creates tension around adaptability, decision-making, and focused energy. The challenge involves finding consistency amid changing circumstances."
 
                         # Missing element description
                         missing_element_desc = f"The missing {missing_element_str.capitalize()} element suggests that integrating qualities like {self._get_element_keywords_simple(missing_element_str, modality)[0]} could help resolve this pattern's challenges." if missing_element_str != "None" else ""
@@ -2681,7 +2715,7 @@ class InterpretationService:
                         # Combine enhanced interpretation
                         interpretation_text = (
                             f"T-Square involving {p1}, {p2}, and apex {apex}. "
-                            f"{modality_desc} {description} " # Add general description
+                            f"{modality_desc} A T-Square forms when two planets in opposition (180 degrees apart) are both square (90 degrees) to a third planet, creating a right-angled triangle in the chart. This challenging configuration generates dynamic tension and driving energy that demands resolution through the point opposite the apex planet (known as the empty leg). The apex planet represents the focal point of the tension and often indicates an area of significant challenge and potential mastery. "
                             f"{missing_element_desc}"
                         ).strip()
 

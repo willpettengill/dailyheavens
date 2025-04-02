@@ -75,21 +75,29 @@ NEXT_PUBLIC_INTERPRETATION_API_URL=http://localhost:8002/api/v1/interpretation
 
 1. **Generate a Birth Chart**:
    ```bash
-   curl -X POST http://localhost:8001/api/v1/birthchart \
-     -H "Content-Type: application/json" \
-     -d '{
-       "date": "1988-06-20T04:15:00",
-       "latitude": 42.3370,
-       "longitude": -71.2092,
-       "timezone": "America/New_York"
-     }' > birth_chart.json
+   curl -X POST http://localhost:8001/api/v1/birthchart \\
+     -H "Content-Type: application/json" \\
+     -d \'{\"date\": \"1988-06-20T04:15:00\", \"latitude\": 42.3370, \"longitude\": -71.2092, \"timezone\": \"America/New_York\"}\' \\
+     -o birth_chart_response.json
+   ```
+   *(Note: Ensure the JSON data is on a single line or use appropriate escaping for multi-line JSON in your shell.)*
+
+2. **Format the Birth Chart for Interpretation**: The interpretation service expects the birth chart data nested under a `birth_chart` key. Use `jq` to extract the chart data (`.data`) and wrap it to create the correct payload:
+   ```bash
+   jq '{birth_chart: .data}' birth_chart_response.json > interpretation_payload.json
    ```
 
-2. **Generate an Interpretation** (using the birth chart data):
+3. **Generate an Interpretation** (using the formatted payload):
    ```bash
-   curl -X POST http://localhost:8002/api/v1/interpretation \
-     -H "Content-Type: application/json" \
-     -d @birth_chart.json
+   curl -X POST http://localhost:8002/api/v1/interpretation \\
+     -H "Content-Type: application/json" \\
+     -d @interpretation_payload.json \\
+     -o interpretation_response.json
+   ```
+
+4. **Extract the Overall Interpretation**: Use `jq` again to extract just the overall interpretation text (located under `data.interpretations.overall`) and save it to a Markdown file:
+   ```bash
+   jq -r '.data.interpretations.overall' interpretation_response.json > overall_interpretation.md
    ```
 
 ### Using the API Documentation UI
@@ -110,7 +118,17 @@ NEXT_PUBLIC_INTERPRETATION_API_URL=http://localhost:8002/api/v1/interpretation
 6. Open the Interpretation API docs at http://localhost:8002/api/docs
 7. Click on the POST /api/v1/interpretation endpoint
 8. Click "Try it out"
-9. Paste the birth chart data into the request body
+9. Paste the birth chart data into the request body. **Important:** You must manually wrap the copied birth chart data within a `birth_chart` key like this:
+   ```json
+   {
+     "birth_chart": {
+       // Paste the entire birth chart response from step 5 here
+       "planets": { ... },
+       "houses": { ... },
+       // ... etc ...
+     }
+   }
+   ```
 10. Click "Execute" to get your interpretation
 
 ## Troubleshooting
