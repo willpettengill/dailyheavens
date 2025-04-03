@@ -95,9 +95,9 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
+          <div className="w-16 h-16 mx-auto border-b-2 rounded-full animate-spin border-primary"></div>
           <p className="mt-4 text-lg">Loading your cosmic data...</p>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function Dashboard() {
 
   if (!chartData) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container px-4 py-8 mx-auto">
         <Card className="max-w-md mx-auto">
           <CardHeader>
             <CardTitle>No Birth Chart Data Found</CardTitle>
@@ -173,7 +173,7 @@ export default function Dashboard() {
         activeTab={activeTab} 
         onTabChange={setActiveTab} 
       />
-      <div className="container mx-auto py-8 px-4">
+      <div className="container px-4 py-8 mx-auto">
         {activeTab === "birth-chart" ? (
           <Card>
             <CardHeader>
@@ -185,8 +185,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-6">
                 <section>
-                  <h3 className="text-lg font-semibold mb-4">Core Signs</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <h3 className="mb-4 text-lg font-semibold">Core Signs</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <PlanetCard
                       key="sun"
                       planet="sun"
@@ -220,8 +220,8 @@ export default function Dashboard() {
                 <Separator />
 
                 <section>
-                  <h3 className="text-lg font-semibold mb-4">Planets</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <h3 className="mb-4 text-lg font-semibold">Planets</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].map((planet) => {
                       const planetData = getPlanetData(planets, planet);
                       return (
@@ -242,8 +242,8 @@ export default function Dashboard() {
                 <Separator />
 
                 <section>
-                  <h3 className="text-lg font-semibold mb-4">Houses</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <h3 className="mb-4 text-lg font-semibold">Houses</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {Array.from({ length: 12 }, (_, i) => i + 1).map((house) => (
                       <HouseCard
                         key={house}
@@ -258,8 +258,8 @@ export default function Dashboard() {
                 <Separator />
 
                 <section>
-                  <h3 className="text-lg font-semibold mb-4">Other Placements</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <h3 className="mb-4 text-lg font-semibold">Other Placements</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {["north_node", "south_node", "chiron"].map((placement) => {
                       const placementData = getPlanetData(planets, placement);
                       // Only show the card if we have some valid data for this placement
@@ -295,7 +295,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="prose prose-invert max-w-none">
                 <div className="mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Overview</h3>
+                  <h3 className="mb-2 text-xl font-semibold">Overview</h3>
                   <p className="text-base leading-relaxed">{interpretation.summary ? "Your birth chart reveals your cosmic blueprint at birth." : "Your birth chart shows your unique cosmic blueprint at the moment of your birth."}</p>
                 </div>
 
@@ -303,11 +303,11 @@ export default function Dashboard() {
                   {/* Sign Descriptions Section - New */}
                   {interpretation.summary && (
                     <div className="mb-8">
-                      <h4 className="text-lg font-semibold mb-2">Your Core Signs</h4>
+                      <h4 className="mb-2 text-lg font-semibold">Your Core Signs</h4>
                       <div className="space-y-4">
                         {interpretation.summary.includes("Sun in") && (
-                          <div className="p-4 border border-slate-800 rounded-md bg-slate-900">
-                            <h5 className="text-md font-medium mb-2 flex items-center">
+                          <div className="p-4 border rounded-md border-slate-800 bg-slate-900">
+                            <h5 className="flex items-center mb-2 font-medium text-md">
                               <span className="mr-2">{planetIcons.sun}</span>
                               Sun Sign
                             </h5>
@@ -319,8 +319,8 @@ export default function Dashboard() {
                         )}
                         
                         {interpretation.summary.includes("Moon in") && (
-                          <div className="p-4 border border-slate-800 rounded-md bg-slate-900">
-                            <h5 className="text-md font-medium mb-2 flex items-center">
+                          <div className="p-4 border rounded-md border-slate-800 bg-slate-900">
+                            <h5 className="flex items-center mb-2 font-medium text-md">
                               <span className="mr-2">{planetIcons.moon}</span>
                               Moon Sign
                             </h5>
@@ -332,8 +332,8 @@ export default function Dashboard() {
                         )}
                         
                         {interpretation.summary.includes("Rising Sign") && (
-                          <div className="p-4 border border-slate-800 rounded-md bg-slate-900">
-                            <h5 className="text-md font-medium mb-2 flex items-center">
+                          <div className="p-4 border rounded-md border-slate-800 bg-slate-900">
+                            <h5 className="flex items-center mb-2 font-medium text-md">
                               <span className="mr-2">{planetIcons.ascendant}</span>
                               Rising Sign
                             </h5>
@@ -348,11 +348,11 @@ export default function Dashboard() {
                   )}
 
                   <div className="mb-8">
-                    <h4 className="text-lg font-semibold mb-2">Element & Modality Balance</h4>
+                    <h4 className="mb-2 text-lg font-semibold">Element & Modality Balance</h4>
                     {elementBalance && (
                       <div className="mb-4">
-                        <h5 className="text-md font-medium">Elements</h5>
-                        <p className="text-base leading-relaxed mb-2">{elementBalance.interpretation}</p>
+                        <h5 className="font-medium text-md">Elements</h5>
+                        <p className="mb-2 text-base leading-relaxed">{elementBalance.interpretation}</p>
                         <div className="flex flex-wrap gap-2 mb-4">
                           {Object.entries(elementBalance.percentages || {}).map(([element, percentage]) => (
                             <Badge key={element} variant="outline" className="py-1">
@@ -365,8 +365,8 @@ export default function Dashboard() {
                     
                     {modalityBalance && (
                       <div>
-                        <h5 className="text-md font-medium">Modalities</h5>
-                        <p className="text-base leading-relaxed mb-2">{modalityBalance.interpretation}</p>
+                        <h5 className="font-medium text-md">Modalities</h5>
+                        <p className="mb-2 text-base leading-relaxed">{modalityBalance.interpretation}</p>
                         <div className="flex flex-wrap gap-2">
                           {Object.entries(modalityBalance.percentages || {}).map(([modality, percentage]) => (
                             <Badge key={modality} variant="outline" className="py-1">
@@ -380,10 +380,10 @@ export default function Dashboard() {
 
                   {patterns && patterns.length > 0 && (
                     <div className="mb-8">
-                      <h4 className="text-lg font-semibold mb-2">Chart Patterns</h4>
+                      <h4 className="mb-2 text-lg font-semibold">Chart Patterns</h4>
                       {patterns.map((pattern: any, index: number) => (
                         <div key={index} className="mb-4">
-                          <h5 className="text-md font-medium">
+                          <h5 className="font-medium text-md">
                             {pattern.type.charAt(0).toUpperCase() + pattern.type.slice(1)}
                             {pattern.sign && ` in ${pattern.sign}`}
                             {pattern.planets && ` (${pattern.planets.join(", ")})`}
@@ -395,10 +395,10 @@ export default function Dashboard() {
                   )}
 
                   <div className="mb-8">
-                    <h4 className="text-lg font-semibold mb-2">Planets</h4>
+                    <h4 className="mb-2 text-lg font-semibold">Planets</h4>
                     {interpretations.map((item: any, index: number) => (
                       <div key={index} className="mb-6">
-                        <h5 className="text-md font-medium">
+                        <h5 className="font-medium text-md">
                           {item.planet} in {item.sign} (House {item.house})
                           {item.retrograde && <Badge className="ml-2 bg-orange-600" variant="secondary">Retrograde</Badge>}
                         </h5>
@@ -409,7 +409,7 @@ export default function Dashboard() {
 
                   {aspects && aspects.length > 0 && (
                     <div className="mb-8">
-                      <h4 className="text-lg font-semibold mb-2">Aspects</h4>
+                      <h4 className="mb-2 text-lg font-semibold">Aspects</h4>
                       <Accordion type="multiple" className="w-full">
                         {aspects
                           .filter((aspect: any) => 
