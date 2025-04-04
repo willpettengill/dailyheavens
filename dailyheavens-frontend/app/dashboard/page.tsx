@@ -10,6 +10,14 @@ import { PlanetCard } from "@/components/planet-card"
 import { HouseCard } from "@/components/house-card"
 import { marked } from "marked"
 import React from "react"
+import { 
+  ResponsiveContainer,
+  PieChart, 
+  Pie, 
+  Cell,
+  Legend,
+  Label 
+} from 'recharts'
 
 interface ChartData {
   user: {
@@ -420,6 +428,43 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
+                                {/* Add Element Balance Pie Chart */}
+                                {elementBalance.percentages && (
+                                  <div className="h-64">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <PieChart>
+                                        <Pie
+                                          data={Object.entries(elementBalance.percentages).map(([name, value]) => ({ name, value }))}
+                                          cx="50%"
+                                          cy="50%"
+                                          labelLine={true}
+                                          label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                          outerRadius={80}
+                                          fill="#8884d8"
+                                          dataKey="value"
+                                        >
+                                          {Object.entries(elementBalance.percentages).map(([element, _], index) => {
+                                            // Color scheme for elements
+                                            const COLORS = {
+                                              fire: '#FF5733',
+                                              earth: '#8B4513',
+                                              air: '#87CEEB',
+                                              water: '#1E90FF'
+                                            };
+                                            return (
+                                              <Cell 
+                                                key={`cell-${index}`} 
+                                                fill={COLORS[element as keyof typeof COLORS] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
+                                              />
+                                            )
+                                          })}
+                                        </Pie>
+                                        <Legend />
+                                      </PieChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                )}
+                                
                                 {/* Display percentages */}
                                 {elementBalance.percentages && (
                                   <div>
@@ -465,6 +510,42 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
+                                {/* Add Modality Balance Pie Chart */}
+                                {modalityBalance.percentages && (
+                                  <div className="h-64">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <PieChart>
+                                        <Pie
+                                          data={Object.entries(modalityBalance.percentages).map(([name, value]) => ({ name, value }))}
+                                          cx="50%"
+                                          cy="50%"
+                                          labelLine={true}
+                                          label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                          outerRadius={80}
+                                          fill="#8884d8"
+                                          dataKey="value"
+                                        >
+                                          {Object.entries(modalityBalance.percentages).map(([modality, _], index) => {
+                                            // Color scheme for modalities
+                                            const COLORS = {
+                                              cardinal: '#DC143C',
+                                              fixed: '#006400',
+                                              mutable: '#9370DB'
+                                            };
+                                            return (
+                                              <Cell 
+                                                key={`cell-${index}`} 
+                                                fill={COLORS[modality as keyof typeof COLORS] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
+                                              />
+                                            )
+                                          })}
+                                        </Pie>
+                                        <Legend />
+                                      </PieChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                )}
+                                
                                 {/* Display percentages */}
                                 {modalityBalance.percentages && (
                                   <div>
