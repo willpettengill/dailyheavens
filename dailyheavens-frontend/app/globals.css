@@ -119,6 +119,22 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom chart colors for elements and modalities */
+  :root {
+    --color-fire: hsl(var(--chart-1));
+    --color-earth: hsl(var(--chart-2));
+    --color-air: hsl(var(--chart-3));
+    --color-water: hsl(var(--chart-4));
+    
+    --color-cardinal: hsl(var(--chart-1));
+    --color-fixed: hsl(var(--chart-3));
+    --color-mutable: hsl(var(--chart-5));
+    
+    /* Zodiac sign colors */
+    --color-sign-planets: var(--color-chart-1);
+    --color-sign-houses: var(--color-chart-3);
+  }
 }
 
 /* Custom animations */

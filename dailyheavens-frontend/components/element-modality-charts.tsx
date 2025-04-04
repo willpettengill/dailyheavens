@@ -1,6 +1,6 @@
 "use client"
 
-import { Cell, LabelList, Pie, PieChart } from "recharts"
+import { Cell, LabelList, Pie, PieChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Rectangle } from "recharts"
 
 import {
   Card,
@@ -135,8 +135,8 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
       <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
         <div className="space-y-1">
           <div><span className="font-medium">Fire:</span> Energy, passion, impulsivity, creativity</div>
-          <div><span className="font-medium">Earth:</span> Stability, practicality, groundedness</div>
-          <div><span className="font-medium">Air:</span> Intellect, communication, social connection</div>
+          <div><span className="font-medium">Earth:</span> Stability, practicality, reliability, groundedness</div>
+          <div><span className="font-medium">Air:</span> Intellect, communication, social connection, ideas</div>
           <div><span className="font-medium">Water:</span> Emotion, intuition, sensitivity, empathy</div>
         </div>
       </CardContent>
@@ -257,9 +257,122 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
       </CardContent>
       <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
         <div className="space-y-1">
-          <div><span className="font-medium">Cardinal:</span> Initiative, leadership, ambition</div>
-          <div><span className="font-medium">Fixed:</span> Stability, persistence, determination</div>
-          <div><span className="font-medium">Mutable:</span> Adaptability, flexibility, versatility</div>
+          <div><span className="font-medium">Cardinal:</span> Initiating, leadership, active, ambitious</div>
+          <div><span className="font-medium">Fixed:</span> Stable, persistent, determined, reliable</div>
+          <div><span className="font-medium">Mutable:</span> Adaptable, flexible, versatile, changeable</div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Sign Distribution Chart
+export interface SignDistributionData {
+  planets: Record<string, string[]>;
+  houses: Record<string, string[]>;
+}
+
+export function SignDistributionChart({ signDistribution }: { signDistribution: SignDistributionData }) {
+  // Zodiac signs in traditional order
+  const zodiacSigns = [
+    'Aries', 'Taurus', 'Gemini', 'Cancer', 
+    'Leo', 'Virgo', 'Libra', 'Scorpio', 
+    'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+  ];
+
+  // Transform data for the stacked bar chart
+  const chartData = zodiacSigns.map((sign) => {
+    const planetCount = signDistribution.planets[sign]?.length || 0;
+    const houseCount = signDistribution.houses[sign]?.length || 0;
+    
+    return {
+      name: sign,
+      planets: planetCount,
+      houses: houseCount
+    };
+  });
+
+  const chartConfig = {
+    planets: {
+      label: "Planets",
+      color: "var(--color-chart-1)"
+    },
+    houses: {
+      label: "Houses",
+      color: "var(--color-chart-3)"
+    }
+  } satisfies ChartConfig;
+
+  // Get dominant sign (most planets and houses combined)
+  const dominantSign = [...chartData]
+    .sort((a, b) => (b.planets + b.houses) - (a.planets + a.houses))[0]?.name;
+
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="pb-0">
+        <CardTitle className="text-base">Sign Distribution</CardTitle>
+        {dominantSign && (
+          <div className="mt-2 space-y-1 text-sm">
+            <div>
+              <span className="font-medium">Dominant Sign: </span>
+              <span className="capitalize text-muted-foreground">{dominantSign}</span>
+            </div>
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="flex-1 pt-4 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto min-h-[300px] w-full"
+        >
+          <BarChart 
+            data={chartData}
+            margin={{ top: 10, right: 10, left: 0, bottom: 55 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis 
+              dataKey="name" 
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 10 }}
+              angle={-45}
+              textAnchor="end"
+              interval={0}
+            />
+            <YAxis 
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 10 }}
+              domain={[0, 'dataMax + 1']}
+            />
+            <Tooltip content={<ChartTooltipContent />} />
+            <Legend />
+            <Bar 
+              dataKey="planets" 
+              name="Planets" 
+              stackId="a" 
+              fill={chartConfig.planets.color} 
+              radius={[4, 4, 0, 0]}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              shape={(props: any) => <Rectangle {...props} fill={chartConfig.planets.color} />}
+            />
+            <Bar 
+              dataKey="houses" 
+              name="Houses" 
+              stackId="a" 
+              fill={chartConfig.houses.color}
+              radius={[4, 4, 0, 0]}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              shape={(props: any) => <Rectangle {...props} fill={chartConfig.houses.color} />}
+            />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
+        <div className="space-y-1">
+          <div>
+            <span className="font-medium">What This Shows:</span> Distribution of planets and houses across zodiac signs, revealing where your chart&apos;s energy is concentrated.
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -10,14 +10,8 @@ import { PlanetCard } from "@/components/planet-card"
 import { HouseCard } from "@/components/house-card"
 import { marked } from "marked"
 import React from "react"
-import { 
-  ResponsiveContainer,
-  PieChart, 
-  Pie, 
-  Cell,
-  Legend,
-  Label 
-} from 'recharts'
+import { ElementBalanceChart, ModalityBalanceChart, SignDistributionChart, ElementBalanceData, ModalityBalanceData } from "@/components/element-modality-charts"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface ChartData {
   user: {
@@ -258,6 +252,36 @@ export default function Dashboard() {
   // Log the interpretation state just before rendering
   console.log("Rendering Dashboard - interpretation state:", interpretation);
 
+  // Process birth chart data to get planets and houses by sign
+  const planets_by_sign: Record<string, string[]> = {};
+  const houses_by_sign: Record<string, string[]> = {};
+  
+  // Process planets by sign
+  if (birth_chart?.planets) {
+    Object.entries(birth_chart.planets).forEach(([planet, data]: [string, Record<string, unknown>]) => {
+      const sign = data.sign as string;
+      if (sign) {
+        if (!planets_by_sign[sign]) {
+          planets_by_sign[sign] = [];
+        }
+        planets_by_sign[sign].push(planet);
+      }
+    });
+  }
+  
+  // Process houses by sign
+  if (birth_chart?.houses) {
+    Object.entries(birth_chart.houses).forEach(([house, data]: [string, Record<string, unknown>]) => {
+      const sign = data.sign as string;
+      if (sign) {
+        if (!houses_by_sign[sign]) {
+          houses_by_sign[sign] = [];
+        }
+        houses_by_sign[sign].push(house);
+      }
+    });
+  }
+
   return (
     <>
       <Nav 
@@ -266,205 +290,194 @@ export default function Dashboard() {
         onTabChange={setActiveTab} 
       />
       <div className="container px-4 py-8 mx-auto">
-        {activeTab === "birth-chart" ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Birth Chart Placements</CardTitle>
-              <CardDescription>
-                These planetary positions reveal your cosmic blueprint at the moment of your birth.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <section>
-                  <h3 className="mb-4 text-lg font-semibold">Core Signs</h3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <PlanetCard
-                      key="sun"
-                      planet="sun"
-                      sign={getPlanetData(planets, "sun")?.sign}
-                      house={getPlanetData(planets, "sun")?.house}
-                      degree={getPlanetData(planets, "sun")?.degree}
-                      description={getPlanetData(planets, "sun")?.description}
-                      retrograde={isRetrograde("sun")}
-                    />
-                    <PlanetCard
-                      key="moon"
-                      planet="moon"
-                      sign={getPlanetData(planets, "moon")?.sign}
-                      house={getPlanetData(planets, "moon")?.house}
-                      degree={getPlanetData(planets, "moon")?.degree}
-                      description={getPlanetData(planets, "moon")?.description}
-                      retrograde={isRetrograde("moon")}
-                    />
-                    <PlanetCard
-                      key="ascendant"
-                      planet="ascendant"
-                      sign={ascendantData.sign}
-                      house={ascendantData.house}
-                      degree={ascendantData.degree}
-                      description="Your rising sign - how others see you"
-                      retrograde={false}
-                    />
-                  </div>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h3 className="mb-4 text-lg font-semibold">Planets</h3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].map((planet) => {
-                      const planetData = getPlanetData(planets, planet);
-                      return (
-                        <PlanetCard
-                          key={planet}
-                          planet={planet}
-                          sign={planetData?.sign}
-                          house={planetData?.house?.toString()}
-                          degree={planetData?.degree || 0}
-                          description={planetData?.description}
-                          retrograde={isRetrograde(planet)}
-                        />
-                      );
-                    })}
-                  </div>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h3 className="mb-4 text-lg font-semibold">Houses</h3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((house) => (
-                      <HouseCard
-                        key={house}
-                        house={house.toString()}
-                        sign={houses[house]?.sign}
-                        description={houses[house]?.description}
+        <Tabs defaultValue="birth-chart">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="birth-chart">Birth Chart</TabsTrigger>
+            <TabsTrigger value="interpretation">Interpretation</TabsTrigger>
+          </TabsList>
+          <TabsContent value="birth-chart" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Birth Chart Placements</CardTitle>
+                <CardDescription>
+                  These planetary positions reveal your cosmic blueprint at the moment of your birth.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <section>
+                    <h3 className="mb-4 text-lg font-semibold">Core Signs</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      <PlanetCard
+                        key="sun"
+                        planet="sun"
+                        sign={getPlanetData(planets, "sun")?.sign}
+                        house={getPlanetData(planets, "sun")?.house}
+                        degree={getPlanetData(planets, "sun")?.degree}
+                        description={getPlanetData(planets, "sun")?.description}
+                        retrograde={isRetrograde("sun")}
                       />
-                    ))}
-                  </div>
-                </section>
-
-                <Separator />
-
-                <section>
-                  <h3 className="mb-4 text-lg font-semibold">Other Placements</h3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {["north_node", "south_node", "chiron"].map((placement) => {
-                      const placementData = getPlanetData(planets, placement);
-                      // Only show the card if we have some valid data for this placement
-                      if (!placementData || !placementData.sign) {
-                        return null;
-                      }
-                      
-                      return (
-                        <PlanetCard
-                          key={placement}
-                          planet={placement}
-                          sign={placementData.sign}
-                          house={placementData.house?.toString()}
-                          degree={placementData.degree || 0}
-                          description={placementData.description}
-                          retrograde={isRetrograde(placement)}
-                        />
-                      );
-                    })}
-                  </div>
-                </section>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Overall Interpretation Section */}
-                {interpretation?.overall && (
-                  <section className="text-card-foreground">
-                    <div className="space-y-4">
-                      {interpretation.overall.startsWith('<') ? (
-                        <div 
-                          className="text-card-foreground"
-                          dangerouslySetInnerHTML={{ 
-                            __html: interpretation.overall
-                              .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
-                              .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
-                              .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
-                              .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
-                              .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
-                              .replace(/<li>/g, '<li class="text-card-foreground">')
-                          }} 
-                        />
-                      ) : (
-                        <div 
-                          className="text-card-foreground"
-                          dangerouslySetInnerHTML={{ 
-                            __html: parseMarkdown(interpretation.overall)
-                              .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
-                              .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
-                              .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
-                              .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
-                              .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
-                              .replace(/<li>/g, '<li class="text-card-foreground">')
-                          }} 
-                        />
-                      )}
+                      <PlanetCard
+                        key="moon"
+                        planet="moon"
+                        sign={getPlanetData(planets, "moon")?.sign}
+                        house={getPlanetData(planets, "moon")?.house}
+                        degree={getPlanetData(planets, "moon")?.degree}
+                        description={getPlanetData(planets, "moon")?.description}
+                        retrograde={isRetrograde("moon")}
+                      />
+                      <PlanetCard
+                        key="ascendant"
+                        planet="ascendant"
+                        sign={ascendantData.sign}
+                        house={ascendantData.house}
+                        degree={ascendantData.degree}
+                        description="Your rising sign - how others see you"
+                        retrograde={false}
+                      />
                     </div>
                   </section>
-                )}
 
-                {(elementBalance || modalityBalance) && (
-                  <>
-                    <Separator />
-                    <section>
-                      <h3 className="mb-4 text-lg font-semibold">Element & Modality Balance</h3>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        {elementBalance && (
+                  <Separator />
+
+                  <section>
+                    <h3 className="mb-4 text-lg font-semibold">Planets</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].map((planet) => {
+                        const planetData = getPlanetData(planets, planet);
+                        return (
+                          <PlanetCard
+                            key={planet}
+                            planet={planet}
+                            sign={planetData?.sign}
+                            house={planetData?.house?.toString()}
+                            degree={planetData?.degree || 0}
+                            description={planetData?.description}
+                            retrograde={isRetrograde(planet)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section>
+                    <h3 className="mb-4 text-lg font-semibold">Houses</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((house) => (
+                        <HouseCard
+                          key={house}
+                          house={house.toString()}
+                          sign={houses[house]?.sign}
+                          description={houses[house]?.description}
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section>
+                    <h3 className="mb-4 text-lg font-semibold">Other Placements</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {["north_node", "south_node", "chiron"].map((placement) => {
+                        const placementData = getPlanetData(planets, placement);
+                        // Only show the card if we have some valid data for this placement
+                        if (!placementData || !placementData.sign) {
+                          return null;
+                        }
+                        
+                        return (
+                          <PlanetCard
+                            key={placement}
+                            planet={placement}
+                            sign={placementData.sign}
+                            house={placementData.house?.toString()}
+                            degree={placementData.degree || 0}
+                            description={placementData.description}
+                            retrograde={isRetrograde(placement)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </section>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="interpretation" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="md:col-span-2 lg:col-span-3">
+                <SignDistributionChart 
+                  signDistribution={{
+                    planets: planets_by_sign,
+                    houses: houses_by_sign
+                  }} 
+                />
+              </div>
+              <ElementBalanceChart elementBalance={{ 
+                percentages: interpretation.element_balance?.percentages || {},
+                dominant: interpretation.element_balance?.dominant,
+                lacking: interpretation.element_balance?.lacking
+              }} />
+              <ModalityBalanceChart modalityBalance={{ 
+                percentages: interpretation.modality_balance?.percentages || {},
+                dominant: interpretation.modality_balance?.dominant,
+                lacking: interpretation.modality_balance?.lacking
+              }} />
+            </div>
+            <div className="space-y-6">
+              {/* Overall Interpretation Section */}
+              {interpretation?.overall && (
+                <section className="text-card-foreground">
+                  <div className="space-y-4">
+                    {interpretation.overall.startsWith('<') ? (
+                      <div 
+                        className="text-card-foreground"
+                        dangerouslySetInnerHTML={{ 
+                          __html: interpretation.overall
+                            .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
+                            .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
+                            .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
+                            .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
+                            .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
+                            .replace(/<li>/g, '<li class="text-card-foreground">')
+                        }} 
+                      />
+                    ) : (
+                      <div 
+                        className="text-card-foreground"
+                        dangerouslySetInnerHTML={{ 
+                          __html: parseMarkdown(interpretation.overall)
+                            .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
+                            .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
+                            .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
+                            .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
+                            .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
+                            .replace(/<li>/g, '<li class="text-card-foreground">')
+                        }} 
+                      />
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {(elementBalance || modalityBalance) && (
+                <>
+                  <Separator />
+                  <section>
+                    <h3 className="mb-4 text-lg font-semibold">Element & Modality Balance</h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {elementBalance && elementBalance.percentages && (
+                        <div className="space-y-4">
+                          <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
                           <Card>
                             <CardHeader className="pb-2">
-                              <CardTitle className="text-base">Element Balance</CardTitle>
+                              <CardTitle className="text-base">Element Details</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
-                                {/* Add Element Balance Pie Chart */}
-                                {elementBalance.percentages && (
-                                  <div className="h-64">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <PieChart>
-                                        <Pie
-                                          data={Object.entries(elementBalance.percentages).map(([name, value]) => ({ name, value }))}
-                                          cx="50%"
-                                          cy="50%"
-                                          labelLine={true}
-                                          label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                          outerRadius={80}
-                                          fill="#8884d8"
-                                          dataKey="value"
-                                        >
-                                          {Object.entries(elementBalance.percentages).map(([element, _], index) => {
-                                            // Color scheme for elements
-                                            const COLORS = {
-                                              fire: '#FF5733',
-                                              earth: '#8B4513',
-                                              air: '#87CEEB',
-                                              water: '#1E90FF'
-                                            };
-                                            return (
-                                              <Cell 
-                                                key={`cell-${index}`} 
-                                                fill={COLORS[element as keyof typeof COLORS] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
-                                              />
-                                            )
-                                          })}
-                                        </Pie>
-                                        <Legend />
-                                      </PieChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                )}
-                                
                                 {/* Display percentages */}
                                 {elementBalance.percentages && (
                                   <div>
@@ -501,51 +514,18 @@ export default function Dashboard() {
                               </div>
                             </CardContent>
                           </Card>
-                        )}
-                        
-                        {modalityBalance && (
+                        </div>
+                      )}
+                      
+                      {modalityBalance && modalityBalance.percentages && (
+                        <div className="space-y-4">
+                          <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
                           <Card>
                             <CardHeader className="pb-2">
-                              <CardTitle className="text-base">Modality Balance</CardTitle>
+                              <CardTitle className="text-base">Modality Details</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
-                                {/* Add Modality Balance Pie Chart */}
-                                {modalityBalance.percentages && (
-                                  <div className="h-64">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <PieChart>
-                                        <Pie
-                                          data={Object.entries(modalityBalance.percentages).map(([name, value]) => ({ name, value }))}
-                                          cx="50%"
-                                          cy="50%"
-                                          labelLine={true}
-                                          label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                          outerRadius={80}
-                                          fill="#8884d8"
-                                          dataKey="value"
-                                        >
-                                          {Object.entries(modalityBalance.percentages).map(([modality, _], index) => {
-                                            // Color scheme for modalities
-                                            const COLORS = {
-                                              cardinal: '#DC143C',
-                                              fixed: '#006400',
-                                              mutable: '#9370DB'
-                                            };
-                                            return (
-                                              <Cell 
-                                                key={`cell-${index}`} 
-                                                fill={COLORS[modality as keyof typeof COLORS] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
-                                              />
-                                            )
-                                          })}
-                                        </Pie>
-                                        <Legend />
-                                      </PieChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                )}
-                                
                                 {/* Display percentages */}
                                 {modalityBalance.percentages && (
                                   <div>
@@ -582,31 +562,31 @@ export default function Dashboard() {
                               </div>
                             </CardContent>
                           </Card>
-                        )}
-                      </div>
-                    </section>
-                  </>
-                )}
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                </>
+              )}
 
-                {patterns.length > 0 && (
-                  <>
-                    <Separator />
-                    <section>
-                      <h3 className="mb-4 text-lg font-semibold">Chart Patterns</h3>
-                      <ul className="pl-6 space-y-2 list-disc text-card-foreground">
-                        {patterns.map((pattern, index) => (
-                          <li key={index} className="text-card-foreground">
-                            <strong className="text-card-foreground">{pattern.name}:</strong> {pattern.description}
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              {patterns.length > 0 && (
+                <>
+                  <Separator />
+                  <section>
+                    <h3 className="mb-4 text-lg font-semibold">Chart Patterns</h3>
+                    <ul className="pl-6 space-y-2 list-disc text-card-foreground">
+                      {patterns.map((pattern, index) => (
+                        <li key={index} className="text-card-foreground">
+                          <strong className="text-card-foreground">{pattern.name}:</strong> {pattern.description}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   );
