@@ -5,7 +5,6 @@ import { Cell, LabelList, Pie, PieChart } from "recharts"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -73,11 +72,29 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
+      <CardHeader className="pb-0">
         <CardTitle className="text-base">Element Balance</CardTitle>
-        <CardDescription>{elementBalance.dominant || 'No dominant element'} dominant</CardDescription>
+        <div className="mt-2 space-y-1 text-sm">
+          {elementBalance.dominant && (
+            <div>
+              <span className="font-medium">Dominant: </span>
+              <span className="capitalize text-muted-foreground">
+                {elementBalance.dominant}
+              </span>
+            </div>
+          )}
+          {elementBalance.lacking && Array.isArray(elementBalance.lacking) && elementBalance.lacking.length > 0 && (
+            <div>
+              <span className="font-medium">Lacking: </span>
+              <span className="text-muted-foreground">
+                {elementBalance.lacking.map(e => 
+                  typeof e === 'string' ? e.charAt(0).toUpperCase() + e.slice(1) : '').join(', ')}
+              </span>
+            </div>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
+      <CardContent className="flex-1 pt-4 pb-0">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square max-h-[200px] [&_.recharts-text]:fill-background"
@@ -115,17 +132,12 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardContent className="pt-2">
-        <div className="space-y-1 text-sm">
-          {elementBalance.lacking && Array.isArray(elementBalance.lacking) && elementBalance.lacking.length > 0 && (
-            <div>
-              <span className="font-medium">Lacking: </span>
-              <span className="text-muted-foreground">
-                {elementBalance.lacking.map(e => 
-                  typeof e === 'string' ? e.charAt(0).toUpperCase() + e.slice(1) : '').join(', ')}
-              </span>
-            </div>
-          )}
+      <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
+        <div className="space-y-1">
+          <div><span className="font-medium">Fire:</span> Energy, passion, impulsivity, creativity</div>
+          <div><span className="font-medium">Earth:</span> Stability, practicality, groundedness</div>
+          <div><span className="font-medium">Air:</span> Intellect, communication, social connection</div>
+          <div><span className="font-medium">Water:</span> Emotion, intuition, sensitivity, empathy</div>
         </div>
       </CardContent>
     </Card>
@@ -183,11 +195,29 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
+      <CardHeader className="pb-0">
         <CardTitle className="text-base">Modality Balance</CardTitle>
-        <CardDescription>{modalityBalance.dominant || 'No dominant modality'} dominant</CardDescription>
+        <div className="mt-2 space-y-1 text-sm">
+          {modalityBalance.dominant && (
+            <div>
+              <span className="font-medium">Dominant: </span>
+              <span className="capitalize text-muted-foreground">
+                {modalityBalance.dominant}
+              </span>
+            </div>
+          )}
+          {modalityBalance.lacking && Array.isArray(modalityBalance.lacking) && modalityBalance.lacking.length > 0 && (
+            <div>
+              <span className="font-medium">Lacking: </span>
+              <span className="text-muted-foreground">
+                {modalityBalance.lacking.map(m => 
+                  typeof m === 'string' ? m.charAt(0).toUpperCase() + m.slice(1) : '').join(', ')}
+              </span>
+            </div>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
+      <CardContent className="flex-1 pt-4 pb-0">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square max-h-[200px] [&_.recharts-text]:fill-background"
@@ -225,17 +255,11 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardContent className="pt-2">
-        <div className="space-y-1 text-sm">
-          {modalityBalance.lacking && Array.isArray(modalityBalance.lacking) && modalityBalance.lacking.length > 0 && (
-            <div>
-              <span className="font-medium">Lacking: </span>
-              <span className="text-muted-foreground">
-                {modalityBalance.lacking.map(m => 
-                  typeof m === 'string' ? m.charAt(0).toUpperCase() + m.slice(1) : '').join(', ')}
-              </span>
-            </div>
-          )}
+      <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
+        <div className="space-y-1">
+          <div><span className="font-medium">Cardinal:</span> Initiative, leadership, ambition</div>
+          <div><span className="font-medium">Fixed:</span> Stability, persistence, determination</div>
+          <div><span className="font-medium">Mutable:</span> Adaptability, flexibility, versatility</div>
         </div>
       </CardContent>
     </Card>
