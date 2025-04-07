@@ -14,6 +14,7 @@ from typing import Dict, Any, List, Tuple, Union, Optional
 # Third-party imports
 from jinja2 import Environment, FileSystemLoader
 from flatlib.datetime import Datetime
+import markdown2
 
 # Local application imports
 from app.services.birth_chart import BirthChartService
@@ -1266,7 +1267,7 @@ class InterpretationService:
             level: Level of detail for the interpretation
 
         Returns:
-            Overall interpretation text
+            Overall interpretation as HTML
         """
         self.logger.debug(f"Generating {level} overall interpretation")
 
@@ -1354,9 +1355,21 @@ class InterpretationService:
         try:
             # Render the template
             template = self.jinja_env.get_template("overall_interpretation.txt.j2")
-            interpretation = template.render(**template_vars)
-            self.logger.debug(f"Generated overall interpretation: {interpretation[:50]}...")
-            return interpretation
+            markdown_interpretation = template.render(**template_vars)
+            
+            # Convert markdown to HTML with extras for better formatting
+            html_interpretation = markdown2.markdown(
+                markdown_interpretation,
+                extras=[
+                    'break-on-newline',
+                    'tables',
+                    'header-ids',
+                    'fenced-code-blocks'
+                ]
+            )
+            
+            self.logger.debug(f"Generated overall interpretation as HTML: {html_interpretation[:50]}...")
+            return html_interpretation
         except Exception as e:
             self.logger.error(f"Error rendering overall interpretation template: {str(e)}", exc_info=True)
             
@@ -1411,11 +1424,21 @@ class InterpretationService:
                 "This natal chart represents a unique combination of energies and potential that unfolds throughout your life."
             )
             
-            # Combine all parts
-            interpretation = " ".join(interpretation_parts)
+            # Combine all parts and convert to HTML
+            markdown_interpretation = " ".join(interpretation_parts)
+            html_interpretation = markdown2.markdown(
+                markdown_interpretation,
+                extras=[
+                    'break-on-newline',
+                    'tables',
+                    'header-ids',
+                    'fenced-code-blocks'
+                ]
+            )
+            
             self.logger.debug(
-                f"Generated fallback overall interpretation: {interpretation[:50]}...")
-            return interpretation
+                f"Generated fallback overall interpretation as HTML: {html_interpretation[:50]}...")
+            return html_interpretation
 
     def _calculate_planetary_positions(self, date: Datetime) -> dict:
         """Calculate positions of planets using flatlib."""

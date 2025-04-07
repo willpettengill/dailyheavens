@@ -1,19 +1,24 @@
 "use client"
 
-import { Cell, LabelList, Pie, PieChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Rectangle } from "recharts"
+import { Cell, LabelList, Pie, PieChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardFooter,
 } from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { TrendingUp } from "lucide-react"
 
 // Element Balance Chart
 export interface ElementBalanceData {
@@ -135,8 +140,8 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
       <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
         <div className="space-y-1">
           <div><span className="font-medium">Fire:</span> Energy, passion, impulsivity, creativity</div>
-          <div><span className="font-medium">Earth:</span> Stability, practicality, reliability, groundedness</div>
-          <div><span className="font-medium">Air:</span> Intellect, communication, social connection, ideas</div>
+          <div><span className="font-medium">Earth:</span> Stability, practicality, groundedness</div>
+          <div><span className="font-medium">Air:</span> Intellect, communication, social connection</div>
           <div><span className="font-medium">Water:</span> Emotion, intuition, sensitivity, empathy</div>
         </div>
       </CardContent>
@@ -257,124 +262,207 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
       </CardContent>
       <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
         <div className="space-y-1">
-          <div><span className="font-medium">Cardinal:</span> Initiating, leadership, active, ambitious</div>
-          <div><span className="font-medium">Fixed:</span> Stable, persistent, determined, reliable</div>
-          <div><span className="font-medium">Mutable:</span> Adaptable, flexible, versatile, changeable</div>
+          <div><span className="font-medium">Cardinal:</span> Initiative, leadership, ambition</div>
+          <div><span className="font-medium">Fixed:</span> Stability, persistence, determination</div>
+          <div><span className="font-medium">Mutable:</span> Adaptability, flexibility, versatility</div>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// Sign Distribution Chart
+// Sign Distribution Chart 
 export interface SignDistributionData {
-  planets: Record<string, string[]>;
-  houses: Record<string, string[]>;
+  planets: Record<string, number>;
+  houses: Record<string, number>;
 }
 
 export function SignDistributionChart({ signDistribution }: { signDistribution: SignDistributionData }) {
-  // Zodiac signs in traditional order
-  const zodiacSigns = [
-    'Aries', 'Taurus', 'Gemini', 'Cancer', 
-    'Leo', 'Virgo', 'Libra', 'Scorpio', 
-    'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
-  ];
+  const planets = signDistribution.planets || {};
+  const houses = signDistribution.houses || {};
 
-  // Transform data for the stacked bar chart
-  const chartData = zodiacSigns.map((sign) => {
-    const planetCount = signDistribution.planets[sign]?.length || 0;
-    const houseCount = signDistribution.houses[sign]?.length || 0;
+  // Get all unique signs from both planets and houses
+  const allSigns = [...new Set([...Object.keys(planets), ...Object.keys(houses)])];
+
+  // Transform data for stacked bar chart, iterating through all unique signs
+  const chartData = allSigns
+    .map(sign => ({
+      sign: sign,
+      planets: planets[sign] || 0, // Default to 0 if sign not in planets
+      houses: houses[sign] || 0,  // Default to 0 if sign not in houses
+      // Calculate total for sorting
+      total: (planets[sign] || 0) + (houses[sign] || 0)
+    }))
+    // Filter out signs with zero total count (optional, but keeps chart clean)
+    .filter(data => data.total > 0)
+    // Sort by total count descending
+    .sort((a, b) => b.total - a.total);
     
-    return {
-      name: sign,
-      planets: planetCount,
-      houses: houseCount
-    };
-  });
-
+  // Updated chartConfig to remove hsl() wrapper as per ShadCN v4 docs with @theme inline
   const chartConfig = {
     planets: {
       label: "Planets",
-      color: "var(--color-chart-1)"
+      color: "var(--chart-1)"
     },
     houses: {
       label: "Houses",
-      color: "var(--color-chart-3)"
+      color: "var(--chart-2)"
     }
   } satisfies ChartConfig;
 
-  // Get dominant sign (most planets and houses combined)
-  const dominantSign = [...chartData]
-    .sort((a, b) => (b.planets + b.houses) - (a.planets + a.houses))[0]?.name;
+  // Format sign name to title case with full names
+  const formatSignName = (sign: string): string => {
+    const zodiacSigns: Record<string, string> = {
+      'aries': 'Aries',
+      'taurus': 'Taurus',
+      'gemini': 'Gemini',
+      'cancer': 'Cancer',
+      'leo': 'Leo',
+      'virgo': 'Virgo',
+      'libra': 'Libra',
+      'scorpio': 'Scorpio',
+      'sagittarius': 'Sagittarius',
+      'capricorn': 'Capricorn',
+      'aquarius': 'Aquarius',
+      'pisces': 'Pisces'
+    };
+    return zodiacSigns[sign.toLowerCase()] || sign;
+  };
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="pb-0">
+      <CardHeader className="pb-2">
         <CardTitle className="text-base">Sign Distribution</CardTitle>
-        {dominantSign && (
-          <div className="mt-2 space-y-1 text-sm">
-            <div>
-              <span className="font-medium">Dominant Sign: </span>
-              <span className="capitalize text-muted-foreground">{dominantSign}</span>
-            </div>
-          </div>
-        )}
       </CardHeader>
-      <CardContent className="flex-1 pt-4 pb-0">
+      <CardContent className="pt-2">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto min-h-[300px] w-full"
+          className="min-h-[300px] w-full [&_.recharts-text]:fill-card-foreground"
         >
           <BarChart 
+            accessibilityLayer 
             data={chartData}
-            margin={{ top: 10, right: 10, left: 0, bottom: 55 }}
+            margin={{ top: 10, right: 30, left: 15, bottom: 80 }}
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis 
-              dataKey="name" 
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="sign"
               tickLine={false}
+              tickMargin={20}
               axisLine={false}
-              tick={{ fontSize: 10 }}
               angle={-45}
               textAnchor="end"
-              interval={0}
+              tick={{ fontSize: 12 }}
+              tickFormatter={formatSignName}
             />
             <YAxis 
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 10 }}
-              domain={[0, 'dataMax + 1']}
+              tickMargin={10}
+              label={{ 
+                value: 'Count', 
+                angle: -90, 
+                position: 'insideLeft',
+                style: { textAnchor: 'middle' },
+                className: "fill-card-foreground text-xs"
+              }}
             />
-            <Tooltip content={<ChartTooltipContent />} />
-            <Legend />
-            <Bar 
-              dataKey="planets" 
-              name="Planets" 
-              stackId="a" 
-              fill={chartConfig.planets.color} 
-              radius={[4, 4, 0, 0]}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              shape={(props: any) => <Rectangle {...props} fill={chartConfig.planets.color} />}
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <ChartLegend content={<ChartLegendContent />} />
+            {/* Updated fill properties to use --color-KEY pattern */}
+            <Bar
+              dataKey="planets"
+              stackId="a"
+              name="Planets"
+              fill="var(--color-planets)" // Corrected fill
+              radius={[0, 0, 4, 4]}
             />
-            <Bar 
-              dataKey="houses" 
-              name="Houses" 
-              stackId="a" 
-              fill={chartConfig.houses.color}
+            <Bar
+              dataKey="houses"
+              stackId="a"
+              name="Houses"
+              fill="var(--color-houses)" // Corrected fill
               radius={[4, 4, 0, 0]}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              shape={(props: any) => <Rectangle {...props} fill={chartConfig.houses.color} />}
             />
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
-        <div className="space-y-1">
-          <div>
-            <span className="font-medium">What This Shows:</span> Distribution of planets and houses across zodiac signs, revealing where your chart&apos;s energy is concentrated.
-          </div>
+      <CardContent className="pt-1 pb-3 text-xs text-muted-foreground">
+        <div className="text-center">
+          Distribution of planets and houses across zodiac signs
         </div>
       </CardContent>
+    </Card>
+  );
+}
+
+// Boilerplate Stacked Bar Chart for Comparison
+const boilerplateChartData = [
+  { month: "January", desktop: 186, mobile: 80 },
+  { month: "February", desktop: 305, mobile: 200 },
+  { month: "March", desktop: 237, mobile: 120 },
+  { month: "April", desktop: 73, mobile: 190 },
+  { month: "May", desktop: 209, mobile: 130 },
+  { month: "June", desktop: 214, mobile: 140 },
+];
+
+const boilerplateChartConfig = {
+  desktop: {
+    label: "Desktop",
+    // Use var() directly because of @theme inline
+    color: "var(--chart-1)",
+  },
+  mobile: {
+    label: "Mobile",
+    // Use var() directly because of @theme inline
+    color: "var(--chart-2)",
+  },
+} satisfies ChartConfig;
+
+export function BoilerplateStackedBarChart() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Boilerplate - Stacked + Legend</CardTitle>
+        <CardDescription>January - June 2024 (Test)</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={boilerplateChartConfig}>
+          <BarChart accessibilityLayer data={boilerplateChartData}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <ChartLegend content={<ChartLegendContent />} />
+            <Bar
+              dataKey="desktop"
+              stackId="a"
+              fill="var(--color-desktop)"
+              radius={[0, 0, 4, 4]}
+            />
+            <Bar
+              dataKey="mobile"
+              stackId="a"
+              fill="var(--color-mobile)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="leading-none text-muted-foreground">
+          Showing total visitors for the last 6 months
+        </div>
+      </CardFooter>
     </Card>
   );
 } 
