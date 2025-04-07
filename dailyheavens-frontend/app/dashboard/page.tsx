@@ -57,6 +57,13 @@ interface ChartData {
       name: string;
       description: string;
     }>;
+    // New fields for structured content
+    structured_sections?: Record<string, {
+      title: string;
+      content: string;
+      data?: any;
+    }>;
+    display_order?: string[];
   };
 }
 
@@ -128,6 +135,32 @@ const generateSignDistribution = (
     planets: planetCounts,
     houses: houseCounts
   };
+};
+
+// Helper to render markdown content with proper styling
+const renderMarkdownSection = (content: string) => {
+  if (!content) return null;
+  
+  // Process the markdown
+  let processedHtml = content.startsWith('<') 
+    ? content 
+    : parseMarkdown(content);
+    
+  // Add styling classes
+  processedHtml = processedHtml
+    .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
+    .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
+    .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
+    .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
+    .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
+    .replace(/<li>/g, '<li class="text-card-foreground">');
+    
+  return (
+    <div 
+      className="text-card-foreground"
+      dangerouslySetInnerHTML={{ __html: processedHtml }} 
+    />
+  );
 };
 
 export default function Dashboard() {
@@ -421,182 +454,358 @@ export default function Dashboard() {
           <Card>
             <CardContent>
               <div className="space-y-6">
-                {/* Overall Interpretation Section */}
-                {interpretation?.overall && (
-                  <section className="text-card-foreground">
-                    <div className="space-y-4">
-                      {interpretation.overall.startsWith('<') ? (
-                        <div 
-                          className="text-card-foreground"
-                          dangerouslySetInnerHTML={{ 
-                            __html: interpretation.overall
-                              .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
-                              .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
-                              .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
-                              .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
-                              .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
-                              .replace(/<li>/g, '<li class="text-card-foreground">')
-                          }} 
-                        />
-                      ) : (
-                        <div 
-                          className="text-card-foreground"
-                          dangerouslySetInnerHTML={{ 
-                            __html: parseMarkdown(interpretation.overall)
-                              .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
-                              .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
-                              .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
-                              .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
-                              .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
-                              .replace(/<li>/g, '<li class="text-card-foreground">')
-                          }} 
-                        />
-                      )}
-                    </div>
-                  </section>
-                )}
-
-                {(elementBalance || modalityBalance) && (
+                {/* Render based on structured_sections if available, otherwise fall back to overall */}
+                {interpretation?.structured_sections && interpretation?.display_order ? (
+                  // Structured sections render
+                  interpretation.display_order.map((sectionKey) => {
+                    const section = interpretation.structured_sections?.[sectionKey];
+                    if (!section) return null;
+                    
+                    // Special handling for element balance section
+                    if (sectionKey === 'element_balance' && elementBalance) {
+                      return (
+                        <section key={sectionKey}>
+                          <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {/* Chart visualization */}
+                            <div className="space-y-4">
+                              <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-base">Element Details</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-4">
+                                    {/* Display percentages */}
+                                    {elementBalance.percentages && (
+                                      <div>
+                                        <h4 className="mb-2 text-sm font-medium text-card-foreground">Distribution</h4>
+                                        <ul className="space-y-1 text-sm">
+                                          {Object.entries(elementBalance.percentages).map(([element, percentage]) => (
+                                            <li key={element} className="flex items-center justify-between">
+                                              <span className="capitalize text-card-foreground">{element}</span>
+                                              <span className="text-card-foreground">{percentage}%</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Display dominant element */}
+                                    {elementBalance.dominant && (
+                                      <div>
+                                        <h4 className="mb-2 text-sm font-medium text-card-foreground">Dominant</h4>
+                                        <p className="text-sm capitalize text-card-foreground">{elementBalance.dominant}</p>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Display lacking elements */}
+                                    {elementBalance.lacking && Array.isArray(elementBalance.lacking) && elementBalance.lacking.length > 0 && (
+                                      <div>
+                                        <h4 className="mb-2 text-sm font-medium text-card-foreground">Lacking</h4>
+                                        <p className="text-sm text-card-foreground">
+                                          {elementBalance.lacking.map(e => 
+                                            typeof e === 'string' ? e.charAt(0).toUpperCase() + e.slice(1) : '').join(', ')}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                            
+                            {/* Interpretation text */}
+                            <div>
+                              {renderMarkdownSection(section.content)}
+                              <div className="mt-4">
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Fire:</strong> Passion, energy, inspiration, assertiveness
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Earth:</strong> Practicality, stability, sensuality, reliability
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Air:</strong> Intellect, communication, social connection, detachment
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Water:</strong> Emotion, intuition, sensitivity, receptivity
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <Separator className="my-6" />
+                        </section>
+                      );
+                    }
+                    
+                    // Special handling for modality balance section
+                    if (sectionKey === 'modality_balance' && modalityBalance) {
+                      return (
+                        <section key={sectionKey}>
+                          <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {/* Chart visualization */}
+                            <div className="space-y-4">
+                              <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-base">Modality Details</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-4">
+                                    {/* Display percentages */}
+                                    {modalityBalance.percentages && (
+                                      <div>
+                                        <h4 className="mb-2 text-sm font-medium text-card-foreground">Distribution</h4>
+                                        <ul className="space-y-1 text-sm">
+                                          {Object.entries(modalityBalance.percentages).map(([modality, percentage]) => (
+                                            <li key={modality} className="flex items-center justify-between">
+                                              <span className="capitalize text-card-foreground">{modality}</span>
+                                              <span className="text-card-foreground">{percentage}%</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Display dominant modality */}
+                                    {modalityBalance.dominant && (
+                                      <div>
+                                        <h4 className="mb-2 text-sm font-medium text-card-foreground">Dominant</h4>
+                                        <p className="text-sm capitalize text-card-foreground">{modalityBalance.dominant}</p>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Display lacking modalities */}
+                                    {modalityBalance.lacking && Array.isArray(modalityBalance.lacking) && modalityBalance.lacking.length > 0 && (
+                                      <div>
+                                        <h4 className="mb-2 text-sm font-medium text-card-foreground">Lacking</h4>
+                                        <p className="text-sm text-card-foreground">
+                                          {modalityBalance.lacking.map(m => 
+                                            typeof m === 'string' ? m.charAt(0).toUpperCase() + m.slice(1) : '').join(', ')}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                            
+                            {/* Interpretation text */}
+                            <div>
+                              {renderMarkdownSection(section.content)}
+                              <div className="mt-4">
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Cardinal:</strong> Initiating, active, leadership, pioneering
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Fixed:</strong> Stabilizing, persistent, determined, thorough
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  <strong>Mutable:</strong> Adaptable, flexible, versatile, changeable
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <Separator className="my-6" />
+                        </section>
+                      );
+                    }
+                    
+                    // Special handling for sign distribution
+                    if (sectionKey === 'sign_distribution') {
+                      return (
+                        <section key={sectionKey}>
+                          <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
+                          <SignDistributionChart 
+                            signDistribution={generateSignDistribution(planets, houses)} 
+                          />
+                          {section.content && renderMarkdownSection(section.content)}
+                          <Separator className="my-6" />
+                        </section>
+                      );
+                    }
+                    
+                    // Default section rendering
+                    return (
+                      <section key={sectionKey}>
+                        <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
+                        {renderMarkdownSection(section.content)}
+                        <Separator className="my-6" />
+                      </section>
+                    );
+                  })
+                ) : (
+                  // Original rendering using 'overall' field
                   <>
-                    <Separator />
-                    <section>
-                      <h3 className="mb-4 text-lg font-semibold">Element & Modality Balance</h3>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        {elementBalance && elementBalance.percentages && (
-                          <div className="space-y-4">
-                            <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
-                            <Card>
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-base">Element Details</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-4">
-                                  {/* Display percentages */}
-                                  {elementBalance.percentages && (
-                                    <div>
-                                      <h4 className="mb-2 text-sm font-medium text-card-foreground">Distribution</h4>
-                                      <ul className="space-y-1 text-sm">
-                                        {Object.entries(elementBalance.percentages).map(([element, percentage]) => (
-                                          <li key={element} className="flex items-center justify-between">
-                                            <span className="capitalize text-card-foreground">{element}</span>
-                                            <span className="text-card-foreground">{percentage}%</span>
-                                          </li>
-                                        ))}
-                                      </ul>
+                    {interpretation?.overall && (
+                      <section className="text-card-foreground">
+                        <div className="space-y-4">
+                          {interpretation.overall.startsWith('<') ? (
+                            <div 
+                              className="text-card-foreground"
+                              dangerouslySetInnerHTML={{ 
+                                __html: interpretation.overall
+                                  .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
+                                  .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
+                                  .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
+                                  .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
+                                  .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
+                                  .replace(/<li>/g, '<li class="text-card-foreground">')
+                              }} 
+                            />
+                          ) : (
+                            <div 
+                              className="text-card-foreground"
+                              dangerouslySetInnerHTML={{ 
+                                __html: parseMarkdown(interpretation.overall)
+                                  .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
+                                  .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
+                                  .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
+                                  .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
+                                  .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
+                                  .replace(/<li>/g, '<li class="text-card-foreground">')
+                              }} 
+                            />
+                          )}
+                        </div>
+                      </section>
+                    )}
+
+                    {(elementBalance || modalityBalance) && (
+                      <>
+                        <Separator />
+                        <section>
+                          <h3 className="mb-4 text-lg font-semibold">Element & Modality Balance</h3>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {elementBalance && elementBalance.percentages && (
+                              <div className="space-y-4">
+                                <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
+                                <Card>
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-base">Element Details</CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-4">
+                                      {/* Display percentages */}
+                                      {elementBalance.percentages && (
+                                        <div>
+                                          <h4 className="mb-2 text-sm font-medium text-card-foreground">Distribution</h4>
+                                          <ul className="space-y-1 text-sm">
+                                            {Object.entries(elementBalance.percentages).map(([element, percentage]) => (
+                                              <li key={element} className="flex items-center justify-between">
+                                                <span className="capitalize text-card-foreground">{element}</span>
+                                                <span className="text-card-foreground">{percentage}%</span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Display dominant element */}
+                                      {elementBalance.dominant && (
+                                        <div>
+                                          <h4 className="mb-2 text-sm font-medium text-card-foreground">Dominant</h4>
+                                          <p className="text-sm capitalize text-card-foreground">{elementBalance.dominant}</p>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Display lacking elements */}
+                                      {elementBalance.lacking && Array.isArray(elementBalance.lacking) && elementBalance.lacking.length > 0 && (
+                                        <div>
+                                          <h4 className="mb-2 text-sm font-medium text-card-foreground">Lacking</h4>
+                                          <p className="text-sm text-card-foreground">
+                                            {elementBalance.lacking.map(e => 
+                                              typeof e === 'string' ? e.charAt(0).toUpperCase() + e.slice(1) : '').join(', ')}
+                                          </p>
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
-                                  
-                                  {/* Display dominant element */}
-                                  {elementBalance.dominant && (
-                                    <div>
-                                      <h4 className="mb-2 text-sm font-medium text-card-foreground">Dominant</h4>
-                                      <p className="text-sm capitalize text-card-foreground">{elementBalance.dominant}</p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            )}
+                            
+                            {modalityBalance && modalityBalance.percentages && (
+                              <div className="space-y-4">
+                                <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
+                                <Card>
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-base">Modality Details</CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-4">
+                                      {/* Display percentages */}
+                                      {modalityBalance.percentages && (
+                                        <div>
+                                          <h4 className="mb-2 text-sm font-medium text-card-foreground">Distribution</h4>
+                                          <ul className="space-y-1 text-sm">
+                                            {Object.entries(modalityBalance.percentages).map(([modality, percentage]) => (
+                                              <li key={modality} className="flex items-center justify-between">
+                                                <span className="capitalize text-card-foreground">{modality}</span>
+                                                <span className="text-card-foreground">{percentage}%</span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Display dominant modality */}
+                                      {modalityBalance.dominant && (
+                                        <div>
+                                          <h4 className="mb-2 text-sm font-medium text-card-foreground">Dominant</h4>
+                                          <p className="text-sm capitalize text-card-foreground">{modalityBalance.dominant}</p>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Display lacking modalities */}
+                                      {modalityBalance.lacking && Array.isArray(modalityBalance.lacking) && modalityBalance.lacking.length > 0 && (
+                                        <div>
+                                          <h4 className="mb-2 text-sm font-medium text-card-foreground">Lacking</h4>
+                                          <p className="text-sm text-card-foreground">
+                                            {modalityBalance.lacking.map(m => 
+                                              typeof m === 'string' ? m.charAt(0).toUpperCase() + m.slice(1) : '').join(', ')}
+                                          </p>
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
-                                  
-                                  {/* Display lacking elements */}
-                                  {elementBalance.lacking && Array.isArray(elementBalance.lacking) && elementBalance.lacking.length > 0 && (
-                                    <div>
-                                      <h4 className="mb-2 text-sm font-medium text-card-foreground">Lacking</h4>
-                                      <p className="text-sm text-card-foreground">
-                                        {elementBalance.lacking.map(e => 
-                                          typeof e === 'string' ? e.charAt(0).toUpperCase() + e.slice(1) : '').join(', ')}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        
-                        {modalityBalance && modalityBalance.percentages && (
-                          <div className="space-y-4">
-                            <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
-                            <Card>
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-base">Modality Details</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-4">
-                                  {/* Display percentages */}
-                                  {modalityBalance.percentages && (
-                                    <div>
-                                      <h4 className="mb-2 text-sm font-medium text-card-foreground">Distribution</h4>
-                                      <ul className="space-y-1 text-sm">
-                                        {Object.entries(modalityBalance.percentages).map(([modality, percentage]) => (
-                                          <li key={modality} className="flex items-center justify-between">
-                                            <span className="capitalize text-card-foreground">{modality}</span>
-                                            <span className="text-card-foreground">{percentage}%</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                  
-                                  {/* Display dominant modality */}
-                                  {modalityBalance.dominant && (
-                                    <div>
-                                      <h4 className="mb-2 text-sm font-medium text-card-foreground">Dominant</h4>
-                                      <p className="text-sm capitalize text-card-foreground">{modalityBalance.dominant}</p>
-                                    </div>
-                                  )}
-                                  
-                                  {/* Display lacking modalities */}
-                                  {modalityBalance.lacking && Array.isArray(modalityBalance.lacking) && modalityBalance.lacking.length > 0 && (
-                                    <div>
-                                      <h4 className="mb-2 text-sm font-medium text-card-foreground">Lacking</h4>
-                                      <p className="text-sm text-card-foreground">
-                                        {modalityBalance.lacking.map(m => 
-                                          typeof m === 'string' ? m.charAt(0).toUpperCase() + m.slice(1) : '').join(', ')}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        )}
-                      </div>
-                    </section>
+                        </section>
+                      </>
+                    )}
+
+                    {patterns.length > 0 && (
+                      <>
+                        <Separator />
+                        <section>
+                          <h3 className="mb-4 text-lg font-semibold">Chart Patterns</h3>
+                          <ul className="pl-6 space-y-2 list-disc text-card-foreground">
+                            {patterns.map((pattern, index) => (
+                              <li key={index} className="text-card-foreground">
+                                <strong className="text-card-foreground">{pattern.name}:</strong> {pattern.description}
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      </>
+                    )}
+                    
+                    {/* Sign Distribution Chart */}
+                    <>
+                      <Separator />
+                      <section>
+                        <h3 className="mb-4 text-lg font-semibold">Sign Distribution</h3>
+                        <SignDistributionChart 
+                          signDistribution={generateSignDistribution(planets, houses)} 
+                        />
+                      </section>
+                    </>
                   </>
                 )}
-
-                {patterns.length > 0 && (
-                  <>
-                    <Separator />
-                    <section>
-                      <h3 className="mb-4 text-lg font-semibold">Chart Patterns</h3>
-                      <ul className="pl-6 space-y-2 list-disc text-card-foreground">
-                        {patterns.map((pattern, index) => (
-                          <li key={index} className="text-card-foreground">
-                            <strong className="text-card-foreground">{pattern.name}:</strong> {pattern.description}
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  </>
-                )}
-                
-                {/* Sign Distribution Chart */}
-                <>
-                  <Separator />
-                  <section>
-                    <h3 className="mb-4 text-lg font-semibold">Sign Distribution</h3>
-                    <SignDistributionChart 
-                      signDistribution={generateSignDistribution(planets, houses)} 
-                    />
-                  </section>
-                </>
-
-                {/* Boilerplate Chart for Comparison */}
-                <>
-                  <Separator />
-                  <section>
-                    <h3 className="mb-4 text-lg font-semibold">Boilerplate Comparison Chart</h3>
-                    <BoilerplateStackedBarChart />
-                  </section>
-                </>
               </div>
             </CardContent>
           </Card>
