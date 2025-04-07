@@ -14,6 +14,7 @@ from typing import Dict, Any, List, Tuple, Union, Optional
 # Third-party imports
 from jinja2 import Environment, FileSystemLoader
 from flatlib.datetime import Datetime
+import markdown2
 
 # Local application imports
 from app.services.birth_chart import BirthChartService
@@ -541,7 +542,7 @@ class InterpretationService:
         """Generate an interpretation based on the birth chart.
 
         Args:
-            birth_chart: Birth chart data
+            birth_chart: Birth chart data with planets, houses, aspects
             level: Interpretation detail level ('basic', 'intermediate', 'detailed')
 
         Returns:
@@ -549,245 +550,352 @@ class InterpretationService:
         """
         self.logger.info(f"Generating {level} interpretation for birth chart")
 
-        # Validate birth chart
-        if not self._validate_birth_chart(birth_chart):
-            self.logger.error("Invalid birth chart provided")
-            return {"status": "error", "message": "Invalid birth chart data"}
-
-        # Store birth chart for use in methods
-        self.birth_chart = birth_chart
-
-        # Log birth chart details
-        self.logger.debug(
-            f"Birth chart has {len(birth_chart.get('planets', {}))} planets and "
-            f"{len(birth_chart.get('houses', {}))} houses")
-        self.logger.debug(
-            f"Planets in chart: {list(birth_chart.get('planets', {}).keys())}")
-            
-        # Add sign details to each planet
-        description_data = self.structured_data.get("descriptions", {})
-        self.logger.debug(f"Adding sign details to planets from descriptions data")
-        
-        # Iterate through each planet and add relevant sign details from descriptions
-        for planet_name, planet_data in birth_chart.get("planets", {}).items():
-            sign = planet_data.get("sign", "")
-            if sign and sign.lower() in description_data:
-                # Create sign_details dictionary if it doesn't exist
-                if "sign_details" not in planet_data:
-                    planet_data["sign_details"] = {}
-                
-                # Get description fields for this sign
-                sign_descriptions = description_data[sign.lower()]
-                
-                # Select only the relevant fields based on planet type
-                planet_lower = planet_name.lower()
-                
-                # Map of planets to their corresponding description fields
-                planet_to_description_fields = {
-                    "sun": ["sun_sign", "sun_sign_medium", "sun_sign_long", "traits", "qualities", "keywords"],
-                    "moon": ["moon_sign", "moon_sign_long", "emotions", "traits", "qualities", "keywords"],
-                    "mercury": ["mercury_sign", "communication", "traits", "qualities", "keywords"],
-                    "venus": ["venus_sign", "relationships", "traits", "qualities", "keywords"],
-                    "mars": ["mars_sign", "action", "traits", "qualities", "keywords"],
-                    "jupiter": ["jupiter_sign", "expansion", "traits", "qualities", "keywords"],
-                    "saturn": ["saturn_sign", "lessons", "traits", "qualities", "keywords"],
-                    "uranus": ["uranus_sign", "innovation", "traits", "qualities", "keywords"],
-                    "neptune": ["neptune_sign", "spirituality", "traits", "qualities", "keywords"],
-                    "pluto": ["pluto_sign", "transformation", "traits", "qualities", "keywords"],
-                    # For other planets, use a standard set of fields
-                    "default": ["traits", "qualities", "keywords"]
+        try:
+            # Validate birth chart data
+            if not self._validate_birth_chart(birth_chart):
+                self.logger.error("Invalid birth chart data")
+                return {
+                    "error": "Invalid birth chart data",
+                    "success": False
                 }
-                
-                # Get the appropriate fields for this planet
-                fields_to_add = planet_to_description_fields.get(planet_lower, planet_to_description_fields["default"])
-                
-                # Add only the relevant fields to sign_details
-                for key in fields_to_add:
-                    if key in sign_descriptions:
-                        planet_data["sign_details"][key] = sign_descriptions[key]
-                    else:
-                        self.logger.warning(f"Field {key} not found in descriptions for {sign.lower()}")
-                
-                # Make sure we have at least the basic description
-                if "sun_sign" in sign_descriptions and "description" not in planet_data["sign_details"]:
-                    planet_data["sign_details"]["description"] = sign_descriptions["sun_sign"]
-                
-                # Add element and modality for this sign to the planet data for easy access in templates
-                planet_data["sign_element"] = self._get_sign_element(sign)
-                planet_data["sign_modality"] = self._get_sign_modality(sign)
-                
-                self.logger.debug(f"Added specific sign details to {planet_name} in {sign}")
-            else:
-                self.logger.warning(f"Could not find sign details for {planet_name} in {sign}")
-        
-        # Also add sign details for the ascendant if available
-        if "angles" in birth_chart and "ascendant" in birth_chart["angles"]:
-            asc_data = birth_chart["angles"]["ascendant"]
-            asc_sign = asc_data.get("sign", "")
-            
-            if asc_sign and asc_sign.lower() in description_data:
-                # Create sign_details dictionary if it doesn't exist
-                if "sign_details" not in asc_data:
-                    asc_data["sign_details"] = {}
-                
-                # Get description fields for this sign
-                sign_descriptions = description_data[asc_sign.lower()]
-                
-                # Add rising sign specific fields
-                rising_fields = ["rising_sign", "rising_sign_long", "traits", "qualities", "keywords"]
-                for key in rising_fields:
-                    if key in sign_descriptions:
-                        asc_data["sign_details"][key] = sign_descriptions[key]
-                    else:
-                        self.logger.warning(f"Field {key} not found in descriptions for {asc_sign.lower()}")
-                
-                # Add element and modality for the ascendant sign
-                asc_data["sign_element"] = self._get_sign_element(asc_sign)
-                asc_data["sign_modality"] = self._get_sign_modality(asc_sign)
-                
-                self.logger.debug(f"Added rising sign details to Ascendant in {asc_sign}")
-            else:
-                self.logger.warning(f"Could not find sign details for Ascendant in {asc_sign}")
 
-        # Create interpretation object
-        interpretation = {
-            "status": "success",
-            "birth_chart": birth_chart,
-            "planets": [],
-            "houses": [],
-            "aspects": [],
-            "patterns": [],
-            "element_balance": {},
-            "modality_balance": {},
-            "overall": "",
-        }
+            # Check if birth chart has planets
+            if not birth_chart.get("planets"):
+                self.logger.error("Birth chart has no planets")
+                return {
+                    "error": "Birth chart has no planets",
+                    "success": False
+                }
 
-        # Add planet interpretations
-        self.logger.debug("Generating planet interpretations")
-        planet_interpretations = self._generate_planet_interpretations(
-            birth_chart, level)
-        interpretation["planets"] = planet_interpretations
-        self.logger.debug(
-            f"Generated interpretations for {len(planet_interpretations)} planets")
+            # Create interpretation object
+            interpretation = {
+                "success": True,
+                "timestamp": datetime.now().isoformat(),
+                "level": level,
+                "description": f"{level.capitalize()} interpretation of the birth chart",
+            }
 
-        # Add house interpretations
-        self.logger.debug("Generating house interpretations")
-        house_interpretations = self._generate_house_interpretations(
-            birth_chart, level)
-        interpretation["houses"] = house_interpretations
-        self.logger.debug(
-            f"Generated interpretations for {len(house_interpretations)} houses")
-
-        # Add aspect interpretations
-        self.logger.debug("Generating aspect interpretations")
-        aspect_interpretations = self._generate_aspect_interpretations(
-            birth_chart, level)
-        interpretation["aspects"] = aspect_interpretations
-        self.logger.debug(
-            f"Generated interpretations for {len(aspect_interpretations)} aspects")
-
-        # Add element and modality balance
-        self.logger.debug("Analyzing element balance")
-        element_balance = self._analyze_simple_element_balance(birth_chart)
-        interpretation["element_balance"] = element_balance
-        self.logger.debug(f"Element balance: {element_balance}")
-
-        self.logger.debug("Analyzing modality balance")
-        modality_balance = self._analyze_simple_modality_balance(birth_chart)
-        interpretation["modality_balance"] = modality_balance
-        self.logger.debug(f"Modality balance: {modality_balance}")
-
-        # Add simple patterns (like stelliums, element emphasis)
-        self.logger.debug("Analyzing simple patterns")
-        simple_patterns = self._analyze_simple_patterns(birth_chart)
-        interpretation["simple_patterns"] = simple_patterns
-        self.logger.debug(f"Found {len(simple_patterns)} simple patterns")
-
-        # Get pattern interpretations (complex)
-        self.logger.debug("Analyzing complex patterns")
-        pattern_interpretations = self._analyze_complex_patterns(
-            self.birth_chart)
-        interpretation["patterns"] = pattern_interpretations
-        self.logger.debug(
-            f"Analyzed {len(pattern_interpretations)} complex patterns")
-
-        # Add planetary combinations analysis
-        self.logger.debug("Analyzing planetary combinations")
-        combinations = self._analyze_combinations(birth_chart)
-        interpretation["combinations"] = combinations
-        self.logger.debug(
-            f"Found {len(combinations)} significant planetary combinations")
-
-        # Generate overall interpretation
-        self.logger.debug("Generating overall interpretation")
-        overall = self._generate_overall_interpretation(birth_chart, level)
-        interpretation["overall"] = overall
-        self.logger.debug("Overall interpretation generated")
-
-        # Include rising sign summary if ascendant is available
-        ascendant = birth_chart.get(
-            "angles", {}).get(
-            "Ascendant", {}).get("sign")
-        if ascendant:
+            # Add planet interpretations
+            self.logger.debug("Generating planet interpretations")
+            planet_interpretations = self._generate_planet_interpretations(
+                birth_chart, level)
+            interpretation["planets"] = planet_interpretations
             self.logger.debug(
-                f"Generating rising sign summary for {ascendant}")
-            rising_summary = self._get_rising_sign_summary(ascendant)
-            interpretation["rising_summary"] = rising_summary
-            self.logger.debug("Rising sign summary generated")
+                f"Generated interpretations for {len(planet_interpretations)} planets")
 
-        # --- Interpret Other Angles (MC, IC, DSC) ---
-        # MC (Midheaven) - Corresponds to 10th House Cusp
-        mc_sign = birth_chart.get(
-            "angles", {}).get(
-            "midheaven", {}).get(
-            "sign")
-        if mc_sign:
-            self.logger.debug(f"Generating MC interpretation for {mc_sign}")
-            mc_interp = self._get_house_interpretation(10, mc_sign)
-            interpretation["mc_summary"] = mc_interp
-            self.logger.debug("MC interpretation generated")
-        else:
-            self.logger.warning(
-                "Midheaven sign not found in birth chart angles.")
+            # Add house interpretations
+            self.logger.debug("Generating house interpretations")
+            house_interpretations = self._generate_house_interpretations(
+                birth_chart, level)
+            interpretation["houses"] = house_interpretations
+            self.logger.debug(
+                f"Generated interpretations for {len(house_interpretations)} houses")
 
-        # IC (Imum Coeli) - Corresponds to 4th House Cusp
-        ic_sign = birth_chart.get(
-            "angles", {}).get(
-            "imum_coeli", {}).get(
-            "sign")
-        if ic_sign:
-            self.logger.debug(f"Generating IC interpretation for {ic_sign}")
-            ic_interp = self._get_house_interpretation(4, ic_sign)
-            interpretation["ic_summary"] = ic_interp
-            self.logger.debug("IC interpretation generated")
-        else:
-            self.logger.warning(
-                "Imum Coeli sign not found in birth chart angles.")
+            # Add aspect interpretations
+            self.logger.debug("Generating aspect interpretations")
+            aspect_interpretations = self._generate_aspect_interpretations(
+                birth_chart, level)
+            interpretation["aspects"] = aspect_interpretations
+            self.logger.debug(
+                f"Generated interpretations for {len(aspect_interpretations)} aspects")
 
-        # DSC (Descendant) - Corresponds to 7th House Cusp
-        dsc_sign = birth_chart.get(
-            "angles", {}).get(
-            "descendant", {}).get(
-            "sign")
-        if dsc_sign:
-            self.logger.debug(f"Generating DSC interpretation for {dsc_sign}")
-            dsc_interp = self._get_house_interpretation(7, dsc_sign)
-            interpretation["dsc_summary"] = dsc_interp
-            self.logger.debug("DSC interpretation generated")
-        else:
-            self.logger.warning(
-                "Descendant sign not found in birth chart angles.")
-        # --- End Angle Interpretation ---
+            # Get element balance
+            element_balance = self._analyze_simple_element_balance(birth_chart)
+            interpretation["element_balance"] = element_balance
 
-        # Analyze Chart Shape
-        self.logger.debug("Analyzing chart shape")
-        chart_shape_analysis = self._analyze_chart_shape(birth_chart)
-        interpretation["chart_shape"] = chart_shape_analysis
-        # Fixed this line to avoid calling .get() when shape_name might not be accessible
-        self.logger.debug(f"Chart shape analysis complete: {chart_shape_analysis['shape_name'] if isinstance(chart_shape_analysis, dict) and 'shape_name' in chart_shape_analysis else 'N/A'}")
+            # Get modality balance
+            modality_balance = self._analyze_simple_modality_balance(birth_chart)
+            interpretation["modality_balance"] = modality_balance
 
-        self.logger.info("Interpretation generation completed successfully")
-        return interpretation
+            # Get simple patterns (stelliums, house emphasis)
+            simple_patterns = self._analyze_simple_patterns(birth_chart)
+            interpretation["simple_patterns"] = simple_patterns
+
+            # Get pattern interpretations (complex)
+            self.logger.debug("Analyzing complex patterns")
+            pattern_interpretations = self._analyze_complex_patterns(
+                birth_chart)
+            interpretation["patterns"] = pattern_interpretations
+            self.logger.debug(
+                f"Analyzed {len(pattern_interpretations)} complex patterns")
+
+            # Get planet combinations
+            combinations = self._analyze_combinations(birth_chart)
+            interpretation["combinations"] = combinations
+
+            # Generate overall interpretation
+            self.logger.debug("Generating overall interpretation")
+            overall = self._generate_overall_interpretation(birth_chart, level)
+            interpretation["overall"] = overall
+            self.logger.debug("Overall interpretation generated")
+
+            # Get rising sign interpretation
+            asc_sign = birth_chart.get("angles", {}).get("ascendant", {}).get("sign")
+            if asc_sign:
+                rising_summary = self._get_rising_sign_summary(asc_sign)
+                interpretation["rising_summary"] = rising_summary
+
+            # Get MC interpretation
+            mc_sign = birth_chart.get("angles", {}).get("midheaven", {}).get("sign")
+            if mc_sign:
+                self.logger.debug(f"Generating MC interpretation for {mc_sign}")
+                mc_interp = self._get_house_interpretation(10, mc_sign)
+                interpretation["mc_summary"] = mc_interp
+                self.logger.debug("MC interpretation generated")
+
+            # Get IC interpretation
+            ic_sign = birth_chart.get("angles", {}).get("imum_coeli", {}).get("sign")
+            if ic_sign:
+                self.logger.debug(f"Generating IC interpretation for {ic_sign}")
+                ic_interp = self._get_house_interpretation(4, ic_sign)
+                interpretation["ic_summary"] = ic_interp
+                self.logger.debug("IC interpretation generated")
+
+            # Get DSC interpretation
+            dsc_sign = birth_chart.get("angles", {}).get("descendant", {}).get("sign")
+            if dsc_sign:
+                self.logger.debug(f"Generating DSC interpretation for {dsc_sign}")
+                dsc_interp = self._get_house_interpretation(7, dsc_sign)
+                interpretation["dsc_summary"] = dsc_interp
+                self.logger.debug("DSC interpretation generated")
+
+            # --- End Angle Interpretation ---
+
+            # Get chart shape
+            chart_shape_analysis = self._analyze_chart_shape(birth_chart)
+            interpretation["chart_shape"] = chart_shape_analysis
+
+            # NEW: Generate structured sections and display order
+            structured_sections, display_order = self._generate_structured_sections(birth_chart, level, 
+                element_balance, modality_balance, simple_patterns, pattern_interpretations)
+            interpretation["structured_sections"] = structured_sections
+            interpretation["display_order"] = display_order
+
+            self.logger.info("Interpretation generation completed successfully")
+            return interpretation
+        except Exception as e:
+            self.logger.error(
+                f"Error generating interpretation: {str(e)}",
+                exc_info=True)
+            return {
+                "error": f"Error generating interpretation: {str(e)}",
+                "success": False
+            }
+
+    def _generate_structured_sections(
+            self,
+            birth_chart: Dict,
+            level: str,
+            element_balance: Dict,
+            modality_balance: Dict,
+            simple_patterns: List[Dict],
+            patterns: List[Dict]) -> Tuple[Dict, List[str]]:
+        """Generate structured sections for modular rendering.
+        
+        Args:
+            birth_chart: Birth chart data
+            level: Level of detail
+            element_balance: Element balance data
+            modality_balance: Modality balance data
+            simple_patterns: Simple patterns data
+            patterns: Complex patterns data
+            
+        Returns:
+            Tuple of (structured_sections, display_order)
+        """
+        # Create structured sections
+        structured_sections = {}
+        
+        # Define display order (can be adjusted as needed)
+        display_order = [
+            "overview", # Title only
+            "core_signs",
+            "stelliums", # Title then sign dist chart then content
+            "sign_distribution", # Chart only
+            "house_emphasis",
+            "angles",
+            "retrograde_planets" # Renamed to Planetary Movement
+        ]
+        
+        # --- Create sections ---
+        
+        # 1. Overview Section (Used for main title)
+        structured_sections["overview"] = {
+            "title": "Birth Chart Interpretation",
+            "content": "" # Content not displayed directly, only title
+        }
+        
+        # 2. Core Signs Section
+        core_signs_content = ""
+        # Sun
+        sun_data = birth_chart.get("planets", {}).get("Sun", {})
+        if sun_data.get("sign"):
+            sun_interp = self._get_planet_interpretation("Sun", sun_data["sign"], sun_data.get("house", 0))
+            core_signs_content += f"**Sun in {sun_data['sign']}**: {sun_interp}\n\n"
+        # Moon
+        moon_data = birth_chart.get("planets", {}).get("Moon", {})
+        if moon_data.get("sign"):
+            moon_interp = self._get_planet_interpretation("Moon", moon_data["sign"], moon_data.get("house", 0))
+            core_signs_content += f"**Moon in {moon_data['sign']}**: {moon_interp}\n\n"
+        # Ascendant
+        asc_sign = birth_chart.get("angles", {}).get("ascendant", {}).get("sign")
+        if asc_sign:
+            asc_interp = self._get_rising_sign_summary(asc_sign)
+            core_signs_content += f"**Ascendant in {asc_sign}**: {asc_interp}\n\n"
+        
+        if core_signs_content:
+            structured_sections["core_signs"] = {
+                "title": "Core Signs",
+                "content": core_signs_content.strip()
+            }
+        
+        # 3. & 5. Stelliums (Planetary Concentrations) Section
+        stellium_patterns = [p for p in simple_patterns if p.get("type") == "stellium"]
+        if stellium_patterns:
+            stellium_content = ""
+            for pattern in stellium_patterns:
+                sign_name = pattern.get('sign', 'Unknown Sign')
+                interpretation_text = pattern.get("interpretation", "")
+                # Format: Bold Sign Stellium: Interpretation...
+                stellium_content += f"**{sign_name.capitalize()} Stellium:** {interpretation_text}\n\n"
+            
+            structured_sections["stelliums"] = {
+                "title": "Planetary Concentrations",
+                "content": stellium_content.strip(),
+                "data": stellium_patterns
+            }
+        
+        # 4. Sign Distribution Section (Data for chart)
+        sign_distribution_data = {}
+        for planet_name, planet_data in birth_chart.get("planets", {}).items():
+            sign = planet_data.get("sign")
+            if sign:
+                if sign not in sign_distribution_data:
+                    sign_distribution_data[sign] = {"planets": 0, "houses": 0} # Simplified for frontend chart
+                sign_distribution_data[sign]["planets"] += 1
+        
+        for house_num, house_data in birth_chart.get("houses", {}).items():
+            sign = house_data.get("sign")
+            if sign:
+                if sign not in sign_distribution_data:
+                     sign_distribution_data[sign] = {"planets": 0, "houses": 0}
+                sign_distribution_data[sign]["houses"] += 1
+        
+        structured_sections["sign_distribution"] = {
+            "title": "Sign Distribution", # Title not typically shown if it's just the chart
+            "content": "", # No text content needed, just the chart
+            "data": sign_distribution_data # Data is handled by frontend `generateSignDistribution`
+        }
+        
+        # 6. House Emphasis Section
+        house_patterns = [p for p in simple_patterns if p.get("type") == "house_emphasis"]
+        if house_patterns:
+            house_content = ""
+            for pattern in house_patterns:
+                if pattern.get("interpretation"):
+                    house_content += f"**House {pattern['house']} Emphasis**: {pattern['interpretation']}\n\n"
+        
+            structured_sections["house_emphasis"] = {
+                "title": "House Emphasis",
+                "content": house_content.strip(),
+                "data": house_patterns
+            }
+
+        # 7. Angles Section
+        angles_content = ""
+        angles = birth_chart.get("angles", {})
+        # Re-fetch interpretations if not already generated
+        if angles.get("midheaven", {}).get("sign"):
+            mc_interp = self._get_house_interpretation(10, angles['midheaven']['sign'])
+            angles_content += f"**Midheaven (MC) in {angles['midheaven']['sign']}**: {mc_interp}\n\n"
+    
+        if angles.get("descendant", {}).get("sign"):
+            dsc_interp = self._get_house_interpretation(7, angles['descendant']['sign'])
+            angles_content += f"**Descendant (DSC) in {angles['descendant']['sign']}**: {dsc_interp}\n\n"
+    
+        if angles.get("imum_coeli", {}).get("sign"):
+            ic_interp = self._get_house_interpretation(4, angles['imum_coeli']['sign'])
+            angles_content += f"**Imum Coeli (IC) in {angles['imum_coeli']['sign']}**: {ic_interp}\n\n"
+        
+        # Add Ascendant interpretation if not included in Core Signs (or duplicate if needed)
+        # asc_sign = angles.get("ascendant", {}).get("sign")
+        # if asc_sign and "core_signs" not in structured_sections:
+        #     asc_interp = self._get_rising_sign_summary(asc_sign)
+        #     angles_content += f"**Ascendant (ASC) in {asc_sign}**: {asc_interp}\n\n"
+        
+        if angles_content:
+            structured_sections["angles"] = {
+                "title": "Important Angles",
+                "content": angles_content.strip(),
+                "data": angles
+            }
+        
+        # 8. Retrograde Planets Section (Renamed)
+        retrograde_planets_list = [
+            planet_name for planet_name, planet_data in birth_chart.get("planets", {}).items()
+            if planet_data.get("retrograde")
+        ]
+        
+        if retrograde_planets_list:
+            retrograde_content = f"You have {len(retrograde_planets_list)} retrograde planet{'s' if len(retrograde_planets_list) > 1 else ''}: {', '.join(retrograde_planets_list)}. "
+            retrograde_content += "Retrograde planets represent energies that are internalized and often require deeper reflection."
+            
+            # Add individual interpretations if needed/available
+            # for planet in retrograde_planets_list:
+            #    retrograde_content += f"\n**{planet} Retrograde**: Specific interpretation here..."
+            
+            structured_sections["retrograde_planets"] = {
+                "title": "Planetary Movement", # Renamed title
+                "content": retrograde_content,
+                "data": {"planets": retrograde_planets_list}
+            }
+        
+        # 9. Element Balance Section (Data for chart + Text)
+        if element_balance:
+            element_content = element_balance.get("interpretation", "") # Get content if available
+            structured_sections["element_balance"] = {
+                "title": "Element Balance", # Title used in combined section
+                "content": element_content, 
+                "data": element_balance
+            }
+        
+        # 10. Modality Balance Section (Data for chart + Text)
+        if modality_balance:
+            modality_content = modality_balance.get("interpretation", "") # Get content if available
+            structured_sections["modality_balance"] = {
+                "title": "Modality Balance", # Title used in combined section
+                "content": modality_content, 
+                "data": modality_balance
+            }
+            
+        # Add other sections if needed (e.g., chart_patterns)
+        # if patterns:
+        #     patterns_content = ""
+        #     for pattern in patterns:
+        #         if pattern.get("interpretation"):
+        #             patterns_content += f"**{pattern.get('type', 'Pattern')}**: {pattern['interpretation']}\n\n"
+        #     if patterns_content:
+        #         structured_sections["chart_patterns"] = {
+        #             "title": "Chart Patterns",
+        #             "content": patterns_content.strip(),
+        #             "data": patterns
+        #         }
+        #         if "chart_patterns" not in display_order:
+        #             display_order.append("chart_patterns") # Add if not already there
+
+        # Filter out any sections that weren't populated and maintain requested order
+        final_display_order = [section_key for section_key in display_order 
+                               if section_key in structured_sections and 
+                               (structured_sections[section_key].get("content") or structured_sections[section_key].get("data"))]
+        
+        # Special case for retrograde: only include if planets exist
+        if "retrograde_planets" in final_display_order and not retrograde_planets_list:
+            final_display_order.remove("retrograde_planets")
+            if "retrograde_planets" in structured_sections: del structured_sections["retrograde_planets"]
+
+        self.logger.debug(f"Final display order: {final_display_order}")
+        self.logger.debug(f"Structured sections generated: {list(structured_sections.keys())}")
+        return structured_sections, final_display_order
 
     def _generate_planet_interpretations(
             self,
@@ -893,15 +1001,15 @@ class InterpretationService:
 
         # --- Special handling for Sun/Moon descriptions ---
         if planet_lower == 'sun':
-            sun_desc = descriptions_data.get(sign_lower, {}).get('sun_sign')
+            sun_desc = descriptions_data.get(sign_lower, {}).get('sun_sign_medium') # Changed from sun_sign to sun_sign_long
             if sun_desc:
                 planet_sign_interp = sun_desc
                 self.logger.debug(
-                    f"Using dedicated sun_sign description for Sun in {sign}")
+                    f"Using dedicated sun_sign_medium description for Sun in {sign}")
             else:
                 # Fallback if specific sun description is missing
                 self.logger.warning(
-                    f"No dedicated sun_sign description found for {sign} in descriptions.json. Building generic.")
+                    f"No dedicated sun_sign_medium description found for {sign} in descriptions.json. Building generic.")
                 planet_core = planet_data.get(
                     "description", f"The core energy of {planet.capitalize()}")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
@@ -910,15 +1018,15 @@ class InterpretationService:
                 planet_sign_interp = f"{planet_core}. In the sign of {sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
 
         elif planet_lower == 'moon':
-            moon_desc = descriptions_data.get(sign_lower, {}).get('moon_sign')
+            moon_desc = descriptions_data.get(sign_lower, {}).get('moon_sign_medium')
             if moon_desc:
                 planet_sign_interp = moon_desc
                 self.logger.debug(
-                    f"Using dedicated moon_sign description for Moon in {sign}")
+                    f"Using dedicated moon_sign_medium description for Moon in {sign}")
             else:
                 # Fallback if specific moon description is missing
                 self.logger.warning(
-                    f"No dedicated moon_sign description found for {sign} in descriptions.json. Building generic.")
+                    f"No dedicated moon_sign_medium description found for {sign} in descriptions.json. Building generic.")
                 # Specific fallback for Moon
                 planet_core = planet_data.get(
                     "description", f"Your emotional nature")
@@ -1266,7 +1374,7 @@ class InterpretationService:
             level: Level of detail for the interpretation
 
         Returns:
-            Overall interpretation text
+            Overall interpretation as HTML
         """
         self.logger.debug(f"Generating {level} overall interpretation")
 
@@ -1354,9 +1462,21 @@ class InterpretationService:
         try:
             # Render the template
             template = self.jinja_env.get_template("overall_interpretation.txt.j2")
-            interpretation = template.render(**template_vars)
-            self.logger.debug(f"Generated overall interpretation: {interpretation[:50]}...")
-            return interpretation
+            markdown_interpretation = template.render(**template_vars)
+            
+            # Convert markdown to HTML with extras for better formatting
+            html_interpretation = markdown2.markdown(
+                markdown_interpretation,
+                extras=[
+                    'break-on-newline',
+                    'tables',
+                    'header-ids',
+                    'fenced-code-blocks'
+                ]
+            )
+            
+            self.logger.debug(f"Generated overall interpretation as HTML: {html_interpretation[:50]}...")
+            return html_interpretation
         except Exception as e:
             self.logger.error(f"Error rendering overall interpretation template: {str(e)}", exc_info=True)
             
@@ -1411,11 +1531,21 @@ class InterpretationService:
                 "This natal chart represents a unique combination of energies and potential that unfolds throughout your life."
             )
             
-            # Combine all parts
-            interpretation = " ".join(interpretation_parts)
+            # Combine all parts and convert to HTML
+            markdown_interpretation = " ".join(interpretation_parts)
+            html_interpretation = markdown2.markdown(
+                markdown_interpretation,
+                extras=[
+                    'break-on-newline',
+                    'tables',
+                    'header-ids',
+                    'fenced-code-blocks'
+                ]
+            )
+            
             self.logger.debug(
-                f"Generated fallback overall interpretation: {interpretation[:50]}...")
-            return interpretation
+                f"Generated fallback overall interpretation as HTML: {html_interpretation[:50]}...")
+            return html_interpretation
 
     def _calculate_planetary_positions(self, date: Datetime) -> dict:
         """Calculate positions of planets using flatlib."""
@@ -2115,7 +2245,7 @@ class InterpretationService:
                 {}).get(
                 rising_sign_lower,
                 {}).get(
-                "rising_sign",
+                "rising_sign_long",
                 "")
             if description:
                 self.logger.debug(
