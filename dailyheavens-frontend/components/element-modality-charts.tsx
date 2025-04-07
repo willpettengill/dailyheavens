@@ -79,6 +79,7 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
     <Card className="flex flex-col">
       <CardHeader className="pb-0">
         <CardTitle className="text-base">Element Balance</CardTitle>
+        {/* Comment out the element details to simplify chart display
         <div className="mt-2 space-y-1 text-sm">
           {elementBalance.dominant && (
             <div>
@@ -98,6 +99,7 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
             </div>
           )}
         </div>
+        */}
       </CardHeader>
       <CardContent className="flex-1 pt-4 pb-0">
         <ChartContainer
@@ -136,14 +138,6 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
             </Pie>
           </PieChart>
         </ChartContainer>
-      </CardContent>
-      <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
-        <div className="space-y-1">
-          <div><span className="font-medium">Fire:</span> Energy, passion, impulsivity, creativity</div>
-          <div><span className="font-medium">Earth:</span> Stability, practicality, groundedness</div>
-          <div><span className="font-medium">Air:</span> Intellect, communication, social connection</div>
-          <div><span className="font-medium">Water:</span> Emotion, intuition, sensitivity, empathy</div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -202,6 +196,7 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
     <Card className="flex flex-col">
       <CardHeader className="pb-0">
         <CardTitle className="text-base">Modality Balance</CardTitle>
+        {/* Comment out the modality details to simplify chart display
         <div className="mt-2 space-y-1 text-sm">
           {modalityBalance.dominant && (
             <div>
@@ -221,6 +216,7 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
             </div>
           )}
         </div>
+        */}
       </CardHeader>
       <CardContent className="flex-1 pt-4 pb-0">
         <ChartContainer
@@ -259,13 +255,6 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
             </Pie>
           </PieChart>
         </ChartContainer>
-      </CardContent>
-      <CardContent className="pt-3 pb-3 text-xs text-muted-foreground">
-        <div className="space-y-1">
-          <div><span className="font-medium">Cardinal:</span> Initiative, leadership, ambition</div>
-          <div><span className="font-medium">Fixed:</span> Stability, persistence, determination</div>
-          <div><span className="font-medium">Mutable:</span> Adaptability, flexibility, versatility</div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -368,7 +357,7 @@ export function SignDistributionChart({ signDistribution }: { signDistribution: 
               }}
             />
             <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <ChartLegend content={<ChartLegendContent />} />
+            <ChartLegend verticalAlign="top" content={<ChartLegendContent />} />
             {/* Updated fill properties to use --color-KEY pattern */}
             <Bar
               dataKey="planets"
@@ -457,7 +446,7 @@ export function BoilerplateStackedBarChart() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Trending up by 5.2% this month <TrendingUp className="w-4 h-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total visitors for the last 6 months
