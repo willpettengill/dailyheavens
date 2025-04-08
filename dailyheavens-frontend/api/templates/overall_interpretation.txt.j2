@@ -1,0 +1,278 @@
+# Birth Chart Interpretation
+
+## Core Identity
+
+{% if birth_chart.planets.Sun %}
+**Sun in {{ birth_chart.planets.Sun.sign }}**
+The Sun represents your core self, identity, and life purpose.
+{% for planet_data in planets %}
+{% if planet_data.planet == "Sun" %}
+{{ birth_chart.planets.Sun.sign_details.sun_sign_medium }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if birth_chart.planets.Moon %}
+**Moon in {{ birth_chart.planets.Moon.sign }} in the {{ birth_chart.planets.Moon.house }}th House**
+The Moon represents your emotional nature, instinctive reactions, and subconscious patterns.
+{% for planet_data in planets %}
+{% if planet_data.planet == "Moon" %}
+{{ planet_data.interpretation | replace("(House " ~ birth_chart.planets.Moon.house ~ ")", "") | replace("(House " ~ birth_chart.planets.Moon.house ~ "):", "") }} This influence manifests particularly in relation to your emotional foundations, home, and familial connections.
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if birth_chart.angles.ascendant %}
+**Ascendant in {{ birth_chart.angles.ascendant.sign }}**
+Your Ascendant represents how you approach the world and how others initially perceive you. {{ asc_interpretation }}
+{% endif %}
+
+## Element & Modality Balance
+
+{% set significant_element_imbalance = element_balance.percentages.values() | list | sort | reverse | first > 45 or element_balance.percentages.values() | list | sort | first < 10 %}
+{% set significant_modality_imbalance = modality_balance.percentages.values() | list | sort | reverse | first > 60 or modality_balance.percentages.values() | list | sort | first < 10 %}
+
+{% if significant_element_imbalance %}
+**Element Balance:**
+Elements represent fundamental energies: Fire (action, spirit), Earth (practicality, material), Air (intellect, social), and Water (emotion, intuition).
+
+{% if element_balance.percentages[element_balance.dominant] > 45 %}
+Your chart shows a strong emphasis on the {{ element_balance.dominant }} element ({{ "%.0f"|format(element_balance.percentages[element_balance.dominant]) }}% of planets).
+
+{% set dominant_planets = [] %}
+{% for planet_name, planet_data in birth_chart.planets.items() %}
+{% set planet_element = planet_data.sign_element %}
+{% if planet_element == element_balance.dominant %}
+{% if dominant_planets.append(planet_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{{ element_balance.interpretation }}
+{% endif %}
+
+{% if element_balance.lacking|length > 0 and element_balance.percentages[element_balance.lacking[0]] < 10 %}
+Your chart shows a notable lack of the {{ element_balance.lacking[0] }} element ({{ "%.0f"|format(element_balance.percentages[element_balance.lacking[0]]) }}% of planets).
+
+{% set lacking_planets = [] %}
+{% for planet_name, planet_data in birth_chart.planets.items() %}
+{% set planet_element = planet_data.sign_element %}
+{% if planet_element == element_balance.lacking[0] %}
+{% if lacking_planets.append(planet_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if lacking_planets|length > 0 %}
+The {{ element_balance.lacking[0] }} planets in your chart are: {{ lacking_planets|join(", ") }}.
+{% else %}
+Your chart has no planets in {{ element_balance.lacking[0] }} signs.
+{% endif %}
+
+This suggests {{ element_balance.interpretation }}
+{% endif %}
+{% else %}
+**Element Balance:**
+Your chart shows a relatively balanced distribution of elements (Fire, Earth, Air, and Water), suggesting you can access and express the full range of energies as needed.
+{% endif %}
+
+{% if significant_modality_imbalance %}
+**Modality Balance:**
+Modalities represent how you approach life: Cardinal (initiating, active), Fixed (stabilizing, determined), and Mutable (adaptable, flexible).
+
+{% if modality_balance.percentages[modality_balance.dominant] > 60 %}
+{% set modality_desc = modality_balance.interpretation.split('Your chart indicates')[0] %}
+Your chart shows a strong emphasis on the {{ modality_balance.dominant }} modality ({{ "%.0f"|format(modality_balance.percentages[modality_balance.dominant]) }}% of planets).
+
+{% set dominant_planets = [] %}
+{% for planet_name, planet_data in birth_chart.planets.items() %}
+{% set planet_modality = planet_data.sign_modality %}
+{% if planet_modality == modality_balance.dominant %}
+{% if dominant_planets.append(planet_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{{ modality_desc }}
+{% endif %}
+
+{% if modality_balance.lacking|length > 0 and modality_balance.percentages[modality_balance.lacking[0]] < 10 %}
+{% set lacking_desc = "" %}
+{% if "Your chart indicates a notable lack of the " + modality_balance.lacking[0] + " modality" in modality_balance.interpretation %}
+    {% set lacking_desc = modality_balance.interpretation.split("Your chart indicates a notable lack of the " + modality_balance.lacking[0] + " modality")[1] %}
+    {% if lacking_desc.startswith(". ") %}
+        {% set lacking_desc = lacking_desc[2:] %}
+    {% endif %}
+{% endif %}
+Your chart shows a notable lack of the {{ modality_balance.lacking[0] }} modality ({{ "%.0f"|format(modality_balance.percentages[modality_balance.lacking[0]]) }}% of planets).
+
+{% set lacking_planets = [] %}
+{% for planet_name, planet_data in birth_chart.planets.items() %}
+{% set planet_modality = planet_data.sign_modality %}
+{% if planet_modality == modality_balance.lacking[0] %}
+{% if lacking_planets.append(planet_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if lacking_planets|length > 0 %}
+The {{ modality_balance.lacking[0] }} planets in your chart are: {{ lacking_planets|join(", ") }}.
+{% else %}
+Your chart has no planets in {{ modality_balance.lacking[0] }} signs.
+{% endif %}
+
+{{ lacking_desc }}
+{% endif %}
+{% else %}
+**Modality Balance:**
+Your chart shows a relatively balanced distribution of modalities (Cardinal, Fixed, and Mutable), suggesting you can initiate, maintain, and adapt as needed in different life situations.
+{% endif %}
+
+## Planetary Concentrations
+
+{% if simple_patterns|length > 0 %}
+{% for pattern in simple_patterns %}
+{% if pattern.type == "stellium" %}
+**Stellium in {{ pattern.sign|capitalize }}**:
+A stellium represents a concentrated focus of energy in one sign or house.
+
+You have {{ pattern.count }} planets ({{ pattern.planets|join(", ") }}) in {{ pattern.sign|capitalize }}. This concentration amplifies {{ pattern.sign|capitalize }} qualities, focusing energy intensely on {{ pattern.interpretation.split("This concentration amplifies")[1] if "This concentration amplifies" in pattern.interpretation else pattern.interpretation }}
+{% endif %}
+
+{% if pattern.type == "house_emphasis" %}
+**House {{ pattern.house }} Emphasis**:
+House concentrations show areas of life that demand significant attention and energy.
+
+You have {{ pattern.count }} planets ({{ pattern.planets|join(", ") }}) in your {{ pattern.house }}{% if pattern.house == 1 %}st{% elif pattern.house == 2 %}nd{% elif pattern.house == 3 %}rd{% else %}th{% endif %} house. {{ pattern.interpretation }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+## Retrograde Planets
+
+{% set retrograde_planets = [] %}
+{% for planet_name, planet_data in birth_chart.planets.items() %}
+{% if planet_data.retrograde %}
+{% if retrograde_planets.append(planet_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if retrograde_planets|length > 0 %}
+**Retrograde Energy**:
+Retrograde planets represent energies that are internalized and often require deeper reflection.
+
+You have {{ retrograde_planets|length }} retrograde {% if retrograde_planets|length == 1 %}planet{% else %}planets{% endif %}: {{ retrograde_planets|join(", ") }}. This suggests a significant portion of your energy is directed inward for deeper processing and introspection. Retrograde planets often indicate areas where you may need to revisit past issues, rework your approach, or develop more internal awareness before expressing these energies outwardly.
+
+{% for planet in retrograde_planets %}
+{% if planet == "Mercury" %}
+With **Mercury retrograde**, you may process information differently than others, often needing more time to analyze and integrate knowledge. Your communication style may be more thoughtful and deliberate, with insights that come after careful reflection rather than immediate response.
+{% elif planet == "Venus" %}
+With **Venus retrograde**, you may have a complex relationship with love, beauty, and values. You might undergo periods of reassessing what you truly value and desire in relationships, potentially experiencing significant transformations in how you approach love and connection.
+{% elif planet == "Mars" %}
+With **Mars retrograde**, your energy and drive tend to be expressed in less direct ways. You may need to work through internal obstacles before taking action, potentially experiencing frustration at times but ultimately developing more sustainable approaches to achieving your goals.
+{% elif planet == "Jupiter" %}
+With **Jupiter retrograde**, your path to growth and expansion is more internal and philosophical. You may question conventional beliefs and develop your own personal truth and meaning, leading to authentic wisdom rather than merely adopting external philosophies.
+{% elif planet == "Saturn" %}
+With **Saturn retrograde**, you likely have a complex relationship with authority, discipline, and responsibility. You might develop your own internal standards rather than following external rules, creating structures that truly align with your deeper values.
+{% elif planet == "Uranus" %}
+With **Uranus retrograde**, your revolutionary and innovative tendencies may be less outwardly evident but deeply internalized. You might experience sudden internal revelations that gradually transform your perspective over time.
+{% elif planet == "Neptune" %}
+With **Neptune retrograde**, you may have a more discerning approach to spirituality and imagination. While others might be easily swept away by fantasies or spiritual trends, you tend to question illusions and seek authentic transcendent experiences.
+{% elif planet == "Pluto" %}
+With **Pluto retrograde**, your transformative process tends to be more introspective and profound. You may undergo deep internal changes before these manifest outwardly, developing powerful psychological insights through intense self-examination.
+{% endif %}
+{% endfor %}
+{% endif %}
+
+## Chart Patterns
+
+{% if patterns|length > 0 %}
+Your chart contains the following significant patterns:
+
+{% for pattern in patterns %}
+{% if pattern.type == "T-Square" %}
+**{{ pattern.type }}**: 
+A T-Square creates dynamic tension between three planets, with two planets in opposition and both square to a third planet (the apex). This configuration creates challenges that ultimately lead to growth and achievement.
+
+In your chart, the T-Square involves {{ pattern.planets|join(", ") }}. {{ pattern.interpretation }} This creates tension around adaptability, decision-making, and focused energy.
+{% elif pattern.type == "Grand Trine" %}
+**{{ pattern.type }}**: 
+A Grand Trine forms a perfect equilateral triangle in your chart, connecting three planets in the same element with harmonious 120° aspects. This creates a natural flow of energy that brings innate talents and abilities.
+
+In your chart, the Grand Trine involves {{ pattern.planets|join(", ") }} in {{ pattern.element }} signs. {{ pattern.interpretation }} This configuration particularly influences the houses these planets occupy ({{ pattern.houses|join(", ") }}), bringing ease and natural abilities to these areas of life.
+{% elif pattern.type == "Yod" %}
+**{{ pattern.type }}**: 
+A Yod (Finger of God) consists of two planets in sextile (60°) aspect, with both quincunx (150°) to a third planet (the apex). This creates a configuration pointing to a specific mission or destined purpose.
+
+In your chart, the Yod involves {{ pattern.planets|join(", ") }}. {{ pattern.interpretation }} The apex planet at {{ pattern.apex }} points to a specific area of life (House {{ pattern.apex_house }}) where you're called to develop and express your unique purpose.
+{% else %}
+**{{ pattern.type }}**: {{ pattern.interpretation }}
+{% endif %}
+{% endfor %}
+{% else %}
+Your chart doesn't contain any of the major traditional patterns such as Grand Trines, T-Squares, or Yods. This suggests a more balanced distribution of planetary energies.
+{% endif %}
+
+## Important Aspects
+
+{% set important_aspects = [] %}
+{% for aspect in aspects %}
+{% if aspect.orb < 2.0 and aspect.type in ["conjunction", "opposition", "square", "trine"] %}
+{% if important_aspects.append(aspect) %}{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if important_aspects|length > 0 %}
+The following tight aspects in your chart are particularly influential:
+
+{% for aspect in important_aspects %}
+**{{ aspect.planet1 }} {{ aspect.type|capitalize }} {{ aspect.planet2 }}** ({{ "%.1f"|format(aspect.orb) }}° orb): 
+{% set aspect_meaning = {
+    "conjunction": "unites",
+    "opposition": "creates tension between",
+    "square": "creates challenges between",
+    "trine": "harmonizes",
+    "sextile": "creates opportunities between"
+} %}
+This aspect {{ aspect_meaning.get(aspect.type, "connects") }} the themes of {% if aspect.planet1 == "Sun" %}your core identity{% elif aspect.planet1 == "Moon" %}your emotions{% elif aspect.planet1 == "Mercury" %}communication and thinking{% elif aspect.planet1 == "Venus" %}love and values{% elif aspect.planet1 == "Mars" %}action and drive{% elif aspect.planet1 == "Jupiter" %}growth and expansion{% elif aspect.planet1 == "Saturn" %}structure and limitation{% elif aspect.planet1 == "Uranus" %}originality and freedom{% elif aspect.planet1 == "Neptune" %}dreams and spirituality{% elif aspect.planet1 == "Pluto" %}transformation and power{% else %}{{ aspect.planet1 }}{% endif %} and {% if aspect.planet2 == "Sun" %}your core identity{% elif aspect.planet2 == "Moon" %}your emotions{% elif aspect.planet2 == "Mercury" %}communication and thinking{% elif aspect.planet2 == "Venus" %}love and values{% elif aspect.planet2 == "Mars" %}action and drive{% elif aspect.planet2 == "Jupiter" %}growth and expansion{% elif aspect.planet2 == "Saturn" %}structure and limitation{% elif aspect.planet2 == "Uranus" %}originality and freedom{% elif aspect.planet2 == "Neptune" %}dreams and spirituality{% elif aspect.planet2 == "Pluto" %}transformation and power{% else %}{{ aspect.planet2 }}{% endif %}.
+{% endfor %}
+{% endif %}
+
+## Important Angles
+
+{% if birth_chart.angles %}
+**Angular Positions:**
+The angles in your chart represent critical areas of life experience and self-expression.
+
+{% if birth_chart.angles.ascendant %}
+**Ascendant (ASC) in {{ birth_chart.angles.ascendant.sign }}**: 
+The Ascendant represents your outward personality and approach to life. {{ asc_interpretation }}
+{% endif %}
+
+{% if birth_chart.angles.midheaven %}
+**Midheaven (MC) in {{ birth_chart.angles.midheaven.sign }}**: 
+The Midheaven represents your public role, career path, and life direction. {{ mc_summary }}
+{% endif %}
+
+{% if birth_chart.angles.descendant and birth_chart.angles.descendant.sign %}
+**Descendant (DSC) in {{ birth_chart.angles.descendant.sign }}**: 
+The Descendant represents your approach to relationships and partnerships. {{ dsc_summary }}
+{% endif %}
+
+{% if birth_chart.angles.imum_coeli and birth_chart.angles.imum_coeli.sign %}
+**Imum Coeli (IC) in {{ birth_chart.angles.imum_coeli.sign }}**: 
+The Imum Coeli represents your foundations, home life, and private self. {{ ic_summary }}
+{% endif %}
+{% endif %}
+
+{% if combinations|length > 0 %}
+{% for combo in combinations %}
+{% if combo.type == "Sun-Moon Elemental Theme" %}
+**Sun-Moon Elemental Theme**: {{ combo.interpretation }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if chart_shape %}
+{% if chart_shape.shape_name != "Undetermined" %}
+## Chart Shape
+
+Your chart has a {{ chart_shape.shape_name }} shape. {{ chart_shape.interpretation }}
+{% endif %}
+{% endif %} 

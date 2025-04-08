@@ -1,0 +1,7 @@
+fastapi==0.95.0
+flatlib==0.2.1
+jinja2==3.1.2
+pydantic==1.10.7
+pytz==2023.3
+python-dateutil==2.8.2
+typing-extensions==4.5.0 

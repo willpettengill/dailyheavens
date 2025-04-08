@@ -16,9 +16,9 @@ async function processBirthChartRequest(
   userData: BirthChartRequest
 ): Promise<Record<string, unknown>> {
   try {
-    // Call birth chart API
+    // Call birth chart API (using relative path instead of environment variable)
     console.log("Calling birth chart API with:", { date, latitude, longitude, timezone });
-    const birthChartResponse = await fetch(`${process.env.NEXT_PUBLIC_BIRTH_CHART_API_URL}`, {
+    const birthChartResponse = await fetch(`/api/birth-chart`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,9 +37,9 @@ async function processBirthChartRequest(
 
     const birthChartData = await birthChartResponse.json();
 
-    // Call interpretation API
+    // Call interpretation API (using relative path instead of environment variable)
     console.log("Calling interpretation API");
-    const interpretationResponse = await fetch(`${process.env.NEXT_PUBLIC_INTERPRETATION_API_URL}`, {
+    const interpretationResponse = await fetch(`/api/interpretation`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

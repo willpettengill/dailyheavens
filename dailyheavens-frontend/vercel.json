@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "functions": {
+    "api/birth-chart/route.py": {
+      "runtime": "python3.9",
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/interpretation/route.py": {
+      "runtime": "python3.9",
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "routes": [
+    { "src": "/api/birth-chart", "dest": "/api/birth-chart/route.py" },
+    { "src": "/api/interpretation", "dest": "/api/interpretation/route.py" }
+  ],
+  "outputDirectory": ".next"
+} 
