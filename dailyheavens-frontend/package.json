@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev:next": "next dev --turbopack",
+    "dev:api": "uvicorn api.hello.index:app --reload --port 8000",
+    "dev": "next dev",
+    "dev:vercel": "vercel dev",
+    "build": "next build --no-lint",
     "start": "next start",
     "lint": "next lint"
   },
