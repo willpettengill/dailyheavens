@@ -1,30 +1,31 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { NextConfig } from 'next'
+
+const config: NextConfig = {
   rewrites: async () => {
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/py/hello',
+          destination: 'http://127.0.0.1:8000/hello'
+        },
+        {
+          source: '/api/py/birth-chart',
+          destination: 'http://127.0.0.1:8001/hello'  // Using port 8001 for birth-chart
+        }
+      ]
+    }
+    
     return [
       {
-        source: "/api/py/:path*",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/py/:path*"
-            : "/api/hello/index.py",
+        source: '/api/py/hello',
+        destination: '/api/hello/index.py'
       },
       {
-        source: "/docs",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/py/docs"
-            : "/api/hello/index.py",
-      },
-      {
-        source: "/openapi.json",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/py/openapi.json"
-            : "/api/hello/index.py",
-      },
-    ];
-  },
-};
+        source: '/api/py/birth-chart',
+        destination: '/api/birth-chart/index.py'
+      }
+    ]
+  }
+}
 
-export default nextConfig;
+export default config
