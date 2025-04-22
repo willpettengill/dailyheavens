@@ -11,6 +11,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/hello", "destination": "/api/hello" },
+    { "source": "/api/birth-chart", "destination": "/api/birth-chart" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 } 
