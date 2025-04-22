@@ -10,10 +10,19 @@
       "use": "@vercel/next"
     }
   ],
-  "rewrites": [
-    { "source": "/api/hello", "destination": "/api/hello" },
-    { "source": "/api/birth-chart", "destination": "/api/birth-chart" },
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+  "routes": [
+    {
+      "src": "/api/hello",
+      "dest": "/api/hello"
+    },
+    {
+      "src": "/api/birth-chart",
+      "dest": "/api/birth-chart"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
   ],
   "public": true
 } 
