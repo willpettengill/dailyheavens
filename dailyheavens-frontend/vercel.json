@@ -10,11 +10,7 @@
       "use": "@vercel/next"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/py/(.*)",
-      "dest": "/api/hello/index.py"
-    }
-  ],
-  "outputDirectory": ".next"
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
 } 

@@ -1,26 +1,43 @@
-from fastapi import FastAPI, Request
+from http.server import BaseHTTPRequestHandler
+import pandas as pd
+import json
 import logging
+import sys
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging to output to stdout
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
 logger = logging.getLogger(__name__)
 
-# Create FastAPI instance with custom docs and openapi url
-app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
+def create_sample_data():
+    return pd.DataFrame({
+        'planets': ['Mercury', 'Venus', 'Earth', 'Mars'],
+        'type': ['Terrestrial'] * 4
+    })
 
-@app.get("/api/py/hello")
-async def hello_fast_api():
-    logger.info("Hello endpoint called")
-    return {"message": "Hello from FastAPI"}
-
-@app.get("/")
-async def root():
-    logger.info("Root endpoint called")
-    return {"message": "FastAPI root endpoint"}
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    logger.info(f"Incoming request: {request.method} {request.url.path}")
-    response = await call_next(request)
-    logger.info(f"Response status: {response.status_code}")
-    return response
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        try:
+            df = create_sample_data()
+            response = {
+                "message": "Hello from Python!",
+                "total_planets": len(df),
+                "planet_types": df['type'].value_counts().to_dict()
+            }
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            logger.info(f"Returning response: {response}")
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            
+        except Exception as e:
+            logger.error(f"Error in handler: {str(e)}")
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
