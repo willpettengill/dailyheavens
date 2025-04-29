@@ -12,12 +12,12 @@
   ],
   "routes": [
     {
-      "src": "/api/hello",
-      "dest": "/api/hello"
+      "src": "/api/py/hello",
+      "dest": "/api/hello/index.py"
     },
     {
-      "src": "/api/birth-chart",
-      "dest": "/api/birth-chart"
+      "src": "/api/py/birth-chart",
+      "dest": "/api/birth-chart/index.py"
     },
     {
       "src": "/api/(.*)",

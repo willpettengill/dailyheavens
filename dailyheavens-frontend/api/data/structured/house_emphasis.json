@@ -1,0 +1,98 @@
+{
+    "first_house": {
+        "name": "First House Emphasis",
+        "keywords": ["self-expression", "identity", "appearance", "beginnings"],
+        "interpretation": "With multiple planets in your first house, you have a strong sense of self and naturally command attention. Your personality is well-defined and you tend to make strong first impressions. There's an emphasis on personal development and how you present yourself to the world.",
+        "career": "You excel in roles where you can take the lead and be in the spotlight. Personal branding and self-directed work suit you well.",
+        "relationships": "You bring strong individuality to relationships and need a partner who appreciates your independent nature.",
+        "challenges": "May need to work on seeing others' perspectives and avoiding excessive self-focus."
+    },
+    "second_house": {
+        "name": "Second House Emphasis",
+        "keywords": ["resources", "values", "security", "material world"],
+        "interpretation": "With multiple planets in your second house, material security and personal values are major themes in your life. You have a strong connection to the physical world and your possessions hold special meaning for you.",
+        "career": "You excel in financial planning, resource management, and building long-term security. Business and banking sectors naturally appeal to you.",
+        "relationships": "You seek stability in relationships and may express affection through practical means.",
+        "challenges": "May need to avoid overemphasis on material security at the expense of emotional needs."
+    },
+    "third_house": {
+        "name": "Third House Emphasis",
+        "keywords": ["communication", "learning", "siblings", "local environment"],
+        "interpretation": "With multiple planets in your third house, you have a naturally curious and communicative nature. Your mind is active and you thrive on gathering and sharing information. Local connections and daily interactions are significant in your life.",
+        "career": "You excel in writing, teaching, journalism, or any field requiring strong communication skills.",
+        "relationships": "You value mental connection and need partners who can engage in stimulating conversation.",
+        "challenges": "May need to avoid scattered energy and learn to focus on deeper subjects."
+    },
+    "fourth_house": {
+        "name": "Fourth House Emphasis",
+        "keywords": ["home", "family", "roots", "emotional security"],
+        "interpretation": "With multiple planets in your fourth house, home and family play central roles in your life. You have a strong connection to your roots and emotional security is particularly important to you.",
+        "career": "You excel in fields related to home, family, real estate, or nurturing others.",
+        "relationships": "You seek emotional depth in relationships and value creating a secure home environment.",
+        "challenges": "May need to avoid becoming too dependent on family or stuck in past patterns."
+    },
+    "fifth_house": {
+        "name": "Fifth House Emphasis",
+        "keywords": ["creativity", "pleasure", "self-expression", "romance"],
+        "interpretation": "With multiple planets in your fifth house, creativity and self-expression are major themes in your life. You have a natural flair for drama and entertainment, and find joy in creative pursuits.",
+        "career": "You excel in creative fields, entertainment, working with children, or any role allowing creative expression.",
+        "relationships": "You bring romance and playfulness to relationships and need space for creative expression.",
+        "challenges": "May need to balance pleasure-seeking with practical responsibilities."
+    },
+    "sixth_house": {
+        "name": "Sixth House Emphasis",
+        "keywords": ["service", "health", "work", "daily routine"],
+        "interpretation": "With multiple planets in your sixth house, service and self-improvement are major themes in your life. You have a strong focus on health, work, and being useful to others.",
+        "career": "You excel in healthcare, service industries, or roles requiring attention to detail and organization.",
+        "relationships": "You show love through practical help and value partners who appreciate your dedication to service.",
+        "challenges": "May need to avoid becoming too critical or work-obsessed."
+    },
+    "seventh_house": {
+        "name": "Seventh House Emphasis",
+        "keywords": ["partnerships", "relationships", "cooperation", "balance"],
+        "interpretation": "With multiple planets in your seventh house, relationships and partnerships are major themes in your life. You find fulfillment through connecting with others and working cooperatively.",
+        "career": "You excel in counseling, mediation, public relations, or partnership-based businesses.",
+        "relationships": "You seek harmony and balance in relationships and naturally attract significant partnerships.",
+        "challenges": "May need to develop stronger sense of self separate from relationships."
+    },
+    "eighth_house": {
+        "name": "Eighth House Emphasis",
+        "keywords": ["transformation", "shared resources", "psychology", "intimacy"],
+        "interpretation": "With multiple planets in your eighth house, transformation and depth are major themes in your life. You have a natural understanding of psychology and the hidden aspects of life.",
+        "career": "You excel in psychology, research, investigation, or managing others' resources.",
+        "relationships": "You seek deep, transformative connections and value emotional intensity.",
+        "challenges": "May need to avoid becoming too focused on life's darker aspects."
+    },
+    "ninth_house": {
+        "name": "Ninth House Emphasis",
+        "keywords": ["expansion", "philosophy", "travel", "higher learning"],
+        "interpretation": "With multiple planets in your ninth house, expansion and higher learning are major themes in your life. You have a natural philosophical outlook and seek to broaden your horizons.",
+        "career": "You excel in teaching, publishing, international business, or religious/spiritual work.",
+        "relationships": "You seek partners who share your love of learning and adventure.",
+        "challenges": "May need to ground abstract ideas in practical reality."
+    },
+    "tenth_house": {
+        "name": "Tenth House Emphasis",
+        "keywords": ["career", "public image", "authority", "achievement"],
+        "interpretation": "With multiple planets in your tenth house, career and public achievement are major themes in your life. You have a strong drive for success and recognition in the world.",
+        "career": "You excel in leadership positions, public roles, or careers requiring ambition and authority.",
+        "relationships": "You value partners who support your ambitions and understand your career focus.",
+        "challenges": "May need to balance career demands with personal life."
+    },
+    "eleventh_house": {
+        "name": "Eleventh House Emphasis",
+        "keywords": ["groups", "friendships", "goals", "innovation"],
+        "interpretation": "With multiple planets in your eleventh house, social connections and future vision are major themes in your life. You have a strong humanitarian streak and value group endeavors.",
+        "career": "You excel in team projects, social organizations, or innovative technologies.",
+        "relationships": "You seek intellectual friendship in relationships and value shared ideals.",
+        "challenges": "May need to develop more personal, intimate connections."
+    },
+    "twelfth_house": {
+        "name": "Twelfth House Emphasis",
+        "keywords": ["spirituality", "unconscious", "service", "solitude"],
+        "interpretation": "With multiple planets in your twelfth house, spirituality and inner work are major themes in your life. You have a strong connection to the unconscious and may feel called to service.",
+        "career": "You excel in healing professions, spiritual work, or behind-the-scenes roles.",
+        "relationships": "You seek spiritual connection in relationships and need time for solitude.",
+        "challenges": "May need to avoid escapism and learn to function in practical world."
+    }
+} 

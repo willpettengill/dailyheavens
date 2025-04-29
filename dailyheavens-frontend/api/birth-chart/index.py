@@ -1,11 +1,9 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import logging
-import pandas as pd
-import numpy as np
-from datetime import datetime
 import sys
-from urllib.parse import parse_qs, urlparse
+from pathlib import Path
+from .birth_chart import BirthChartService
 
 # Configure logging to output to stdout
 logging.basicConfig(
@@ -15,50 +13,77 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def parse_json_body(handler):
-    content_length = int(handler.headers.get('Content-Length', 0))
-    if content_length > 0:
-        body = handler.rfile.read(content_length)
-        return json.loads(body.decode('utf-8'))
-    return None
+def create_test_data():
+    """Create test data for birth chart calculation."""
+    return {
+        "date": "2024-03-19T12:00:00Z",  # Noon UTC on March 19, 2024
+        "latitude": 40.7128,              # New York City latitude
+        "longitude": -74.0060,            # New York City longitude
+        "timezone": "America/New_York"    # NYC timezone
+    }
 
 class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
+    def initialize_service(self):
+        """Initialize BirthChartService with proper error handling."""
         try:
-            # Parse request body
-            request_data = parse_json_body(self)
-            if not request_data:
-                raise ValueError("Request body is required")
-
-            logger.info(f"Birth chart calculation requested for date: {request_data.get('date')}")
+            # Log data directory location
+            data_dir = Path(__file__).parent.parent / "data"
+            logger.info(f"Data directory path: {data_dir}")
+            logger.info(f"Data directory exists: {data_dir.exists()}")
             
-            # Validate required fields
-            required_fields = ['date', 'latitude', 'longitude']
-            for field in required_fields:
-                if field not in request_data:
-                    raise ValueError(f"Missing required field: {field}")
-
-            # Create test data
-            test_data = pd.DataFrame({
-                'planet': ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'],
-                'sign': ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo'],
-                'degree': np.random.randint(0, 30, 5),
-                'timestamp': datetime.now().isoformat()
-            })
+            if data_dir.exists():
+                structured_dir = data_dir / "structured"
+                logger.info(f"Structured data directory exists: {structured_dir.exists()}")
+                if structured_dir.exists():
+                    files = list(structured_dir.glob("*.json"))
+                    logger.info(f"Found JSON files in structured directory: {[f.name for f in files]}")
             
+            logger.info("Initializing BirthChartService...")
+            service = BirthChartService()
+            logger.info("Successfully initialized BirthChartService")
+            return service
+        except Exception as e:
+            logger.error(f"Failed to initialize BirthChartService: {str(e)}")
+            raise
+
+    def do_GET(self):
+        try:
+            # Initialize service with detailed logging
+            service = self.initialize_service()
+            
+            # Use test data
+            test_data = create_test_data()
+            logger.info(f"Using test data: {test_data}")
+            
+            # Calculate birth chart
+            try:
+                birth_chart = service.calculate_birth_chart(
+                    date_of_birth=test_data["date"],
+                    latitude=test_data["latitude"],
+                    longitude=test_data["longitude"],
+                    timezone=test_data["timezone"]
+                )
+                logger.info("Successfully calculated birth chart")
+            except Exception as calc_error:
+                logger.error(f"Error calculating birth chart: {str(calc_error)}")
+                raise
+            
+            # Prepare response
             response = {
-                "message": "Birth chart endpoint is working",
-                "request": request_data,
-                "test_data": test_data.to_dict(orient='records')
+                "message": "Birth chart calculation successful",
+                "test_data": test_data,
+                "birth_chart": birth_chart
             }
-
+            
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
+            
+            logger.info("Sending successful response")
             self.wfile.write(json.dumps(response).encode('utf-8'))
             
         except Exception as e:
-            logger.error(f"Error in birth-chart handler: {str(e)}")
+            logger.error(f"Error in birth chart handler: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -66,26 +91,54 @@ class handler(BaseHTTPRequestHandler):
                 "error": str(e),
                 "message": "Failed to calculate birth chart"
             }).encode('utf-8'))
-
-    def do_GET(self):
+    
+    def do_POST(self):
         try:
+            # Initialize service with detailed logging
+            service = self.initialize_service()
+            
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                body = self.rfile.read(content_length)
+                request_data = json.loads(body.decode('utf-8'))
+            else:
+                # If no body provided, use test data
+                request_data = create_test_data()
+            
+            # Calculate birth chart
+            try:
+                birth_chart = service.calculate_birth_chart(
+                    date_of_birth=request_data.get("date", create_test_data()["date"]),
+                    latitude=request_data.get("latitude", create_test_data()["latitude"]),
+                    longitude=request_data.get("longitude", create_test_data()["longitude"]),
+                    timezone=request_data.get("timezone", create_test_data()["timezone"])
+                )
+                logger.info("Successfully calculated birth chart")
+            except Exception as calc_error:
+                logger.error(f"Error calculating birth chart: {str(calc_error)}")
+                raise
+            
+            # Prepare response
             response = {
-                "message": "Birth chart API is running",
-                "endpoints": {
-                    "POST /api/birth-chart": "Calculate birth chart"
-                }
+                "message": "Birth chart calculation successful",
+                "request_data": request_data,
+                "birth_chart": birth_chart
             }
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
+            
+            logger.info("Sending successful response")
             self.wfile.write(json.dumps(response).encode('utf-8'))
             
         except Exception as e:
-            logger.error(f"Error in birth-chart handler: {str(e)}")
+            logger.error(f"Error in birth chart handler: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({
-                "error": str(e)
+                "error": str(e),
+                "message": "Failed to calculate birth chart"
             }).encode('utf-8'))

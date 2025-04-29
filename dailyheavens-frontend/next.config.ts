@@ -10,7 +10,7 @@ const config: NextConfig = {
         },
         {
           source: '/api/py/birth-chart',
-          destination: 'http://127.0.0.1:8001/hello'  // Using port 8001 for birth-chart
+          destination: 'http://127.0.0.1:8001/birth-chart'  // Fixed: now points to /birth-chart
         }
       ]
     }

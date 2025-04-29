@@ -1,0 +1,662 @@
+{
+  "aries": {
+    "element": "fire",
+    "modality": "cardinal",
+    "ruling_planet": "mars",
+    "keywords": ["pioneering", "courageous", "direct", "energetic", "independent", "competitive"],
+    "focus": "Self-initiation, leadership, and bold action",
+    "qualities": {
+      "general": "pioneering and assertive",
+      "career": "leadership and initiative",
+      "relationships": "passion and independence",
+      "health": "vitality and energy",
+      "spirituality": "spiritual courage",
+      "personal_growth": "self-assertion"
+    },
+    "compatible_signs": ["leo", "sagittarius", "gemini", "libra", "aquarius"],
+    "description": "Aries embodies the archetype of the Warrior and Pioneer—the raw, primal energy of new beginnings and self-discovery. As the first sign of the zodiac, Aries represents the initial spark of creation, bringing courage, enthusiasm, and a trailblazing spirit. Ruled by Mars, Aries possesses a dynamic, assertive approach to life, tackling challenges head-on with confidence and determination. While sometimes impatient or impulsive, Aries' greatest gifts lie in their ability to initiate action, lead with conviction, and inspire others through their authentic self-expression and fearless approach to life.",
+    "duality": "Masculine",
+    "symbol": "Ram",
+    "polarity": "Libra",
+    "lucky_day": "Tuesday",
+    "lucky_numbers": ["1", "9"],
+    "birthstone": "Diamond",
+    "special_color": "Red",
+    "cities": ["Florence", "Naples", "Verona", "Mareilles"],
+    "countries": ["England", "Germany", "Poland"],
+    "flowers": ["Geranium", "Honeysuckle", "Sweet Pea"],
+    "trees": "All thorn-bearing trees",
+    "metal": "Iron",
+    "animals": "Sheep",
+    "best_trait": "Courage",
+    "decanates": {
+      "first": {
+        "date_range": "March 21 - March 31",
+        "constellation": "Andromeda",
+        "keyword": "Inspiration",
+        "planet_subruler": "Mars"
+      },
+      "second": {
+        "date_range": "April 1 - April 10",
+        "constellation": "Cetus",
+        "keyword": "Innovation",
+        "planet_subruler": "Sun"
+      },
+      "third": {
+        "date_range": "April 11 - April 19",
+        "constellation": "Cassiopeia",
+        "keyword": "Foresight",
+        "planet_subruler": "Jupiter"
+      }
+    },
+    "cusps": {
+      "beginning": "March 21 - March 25",
+      "ending": "April 15 - April 19"
+    }
+  },
+  "taurus": {
+    "element": "earth",
+    "modality": "fixed",
+    "ruling_planet": "venus",
+    "keywords": ["steadfast", "sensual", "resourceful", "patient", "reliable", "appreciative"],
+    "focus": "Security, values, and earthly pleasures",
+    "qualities": {
+      "general": "stable and sensual",
+      "career": "practical and determined",
+      "relationships": "loyalty and comfort",
+      "health": "physical endurance",
+      "spirituality": "earthly wisdom",
+      "personal_growth": "self-worth"
+    },
+    "compatible_signs": ["virgo", "capricorn", "cancer", "pisces", "scorpio"],
+    "description": "Taurus embodies the archetype of the Builder and Cultivator—the steady, grounding force that creates lasting value and beauty in the material world. As an earth sign ruled by Venus, Taurus combines practicality with sensuality, finding spiritual connection through physical experience. Taurus possesses exceptional patience, determination, and reliability, approaching life with a methodical, thoughtful stance that values quality over speed. While sometimes resistant to change or overly possessive, Taurus' greatest gifts lie in their ability to create security, appreciate life's pleasures, and build structures of enduring worth through their unwavering persistence and deep connection to the natural world.",
+    "duality": "Feminine",
+    "symbol": "Bull",
+    "polarity": "Scorpio",
+    "lucky_day": "Friday",
+    "lucky_numbers": ["6", "4"],
+    "birthstone": "Emerald",
+    "special_color": "Pale Blue and Mauve",
+    "cities": ["Dublin", "Lucerne", "Leipzig", "St. Louis"],
+    "countries": ["Ireland", "Switzerland", "Cyprus", "Greece"],
+    "flowers": ["Violet", "Poppy"],
+    "trees": "Cypress & Apple",
+    "metal": "Copper",
+    "animals": "Cattle",
+    "best_trait": "Dependability",
+    "decanates": {
+      "first": {
+        "date_range": "April 20 - April 30",
+        "constellation": "Triangulum",
+        "keyword": "Acquisition",
+        "planet_subruler": "Venus"
+      },
+      "second": {
+        "date_range": "May 1 - May 10",
+        "constellation": "Eridanus",
+        "keyword": "Evaluation",
+        "planet_subruler": "Mercury"
+      },
+      "third": {
+        "date_range": "May 11 - May 20",
+        "constellation": "Perseus",
+        "keyword": "Determination",
+        "planet_subruler": "Saturn"
+      }
+    },
+    "cusps": {
+      "beginning": "April 20 - April 24",
+      "ending": "May 16 - May 20"
+    }
+  },
+  "gemini": {
+    "element": "air",
+    "modality": "mutable",
+    "ruling_planet": "mercury",
+    "keywords": ["curious", "versatile", "communicative", "quick-witted", "adaptable", "intellectual"],
+    "focus": "Information exchange, connection, and mental exploration",
+    "qualities": {
+      "general": "versatile and communicative",
+      "career": "adaptability and learning",
+      "relationships": "intellectual connection",
+      "health": "nervous energy",
+      "spirituality": "mental exploration",
+      "personal_growth": "self-expression"
+    },
+    "compatible_signs": ["libra", "aquarius", "aries", "leo", "sagittarius"],
+    "description": "Gemini embodies the archetype of the Messenger and Trickster—the agile, curious force that connects different realms through communication and exchange. As an air sign ruled by Mercury, Gemini represents the principle of duality and the dance between opposing perspectives. Gemini possesses a quick, adaptable intelligence, social versatility, and a perpetual youthfulness that finds wonder in everyday experiences. While sometimes scattered or inconsistent, Gemini's greatest gifts lie in their ability to facilitate communication, synthesize diverse ideas, and bring playful curiosity to life through their intellectual adaptability and skill with language and information.",
+    "duality": "Masculine",
+    "symbol": "The Twins",
+    "polarity": "Sagittarius",
+    "lucky_day": "Wednesday",
+    "lucky_numbers": ["5", "9"],
+    "birthstone": "Agate",
+    "special_color": "Yellow",
+    "cities": ["London", "San Francisco", "Versailles", "Melbourne"],
+    "countries": ["United States", "Wales", "Belgium"],
+    "flowers": ["Lily of the Valley", "Lavender"],
+    "trees": "Nut-bearing trees",
+    "metal": "Mercury",
+    "animals": "Brightly colored birds & butterflies",
+    "best_trait": "Responsiveness",
+    "decanates": {
+      "first": {
+        "date_range": "May 21 - May 31",
+        "constellation": "Lepus",
+        "keyword": "Ingenuity",
+        "planet_subruler": "Mercury"
+      },
+      "second": {
+        "date_range": "June 1 - June 10",
+        "constellation": "Orion",
+        "keyword": "Union",
+        "planet_subruler": "Venus"
+      },
+      "third": {
+        "date_range": "June 11 - June 20",
+        "constellation": "Auriga",
+        "keyword": "Reason",
+        "planet_subruler": "Uranus"
+      }
+    },
+    "cusps": {
+      "beginning": "May 21 - May 25",
+      "ending": "June 16 - June 20"
+    }
+  },
+  "cancer": {
+    "element": "water",
+    "modality": "cardinal",
+    "ruling_planet": "moon",
+    "keywords": ["nurturing", "intuitive", "protective", "empathetic", "tenacious", "receptive"],
+    "focus": "Emotional security, nurturing, and creating safe spaces",
+    "qualities": {
+      "general": "nurturing and protective",
+      "career": "emotional intelligence",
+      "relationships": "deep bonding",
+      "health": "emotional well-being",
+      "spirituality": "intuitive wisdom",
+      "personal_growth": "emotional security"
+    },
+    "compatible_signs": ["scorpio", "pisces", "taurus", "virgo", "capricorn"],
+    "description": "Cancer embodies the archetype of the Mother and Nurturer—the protective, intuitive force that creates emotional safety and honors ancestral connections. As a water sign ruled by the Moon, Cancer represents the ebb and flow of feelings and the sacred vessel that contains emotional life. Cancer possesses profound empathy, tenacious memory, and a nurturing spirit that instinctively responds to vulnerability. While sometimes moody or overprotective, Cancer's greatest gifts lie in their ability to create belonging, preserve heritage, and offer emotional sustenance through their intuitive understanding of human needs and their deep capacity for care.",
+    "duality": "Feminine",
+    "symbol": "The Crab",
+    "polarity": "Capricorn",
+    "lucky_day": "Monday",
+    "lucky_numbers": ["3", "7"],
+    "birthstone": "Pearl",
+    "special_color": "Sea green & Silver",
+    "cities": ["Venice", "Amsterdam", "New York", "Algiers"],
+    "countries": ["Scotland", "Holland", "New Zealand"],
+    "flowers": ["Larkspur", "Acanthus"],
+    "trees": "Trees rich in sap",
+    "metal": "Silver",
+    "animals": "Those with shell coverings",
+    "best_trait": "Loyalty",
+    "decanates": {
+      "first": {
+        "date_range": "June 21 - June 30",
+        "constellation": "Canus Minor",
+        "keyword": "Receptiveness",
+        "planet_subruler": "Moon"
+      },
+      "second": {
+        "date_range": "July 1 - July 11",
+        "constellation": "Canus Major",
+        "keyword": "Intensity",
+        "planet_subruler": "Pluto"
+      },
+      "third": {
+        "date_range": "July 12 - July 22",
+        "constellation": "Argo Navis",
+        "keyword": "Empathy",
+        "planet_subruler": "Neptune"
+      }
+    },
+    "cusps": {
+      "beginning": "June 21 - June 25",
+      "ending": "July 18 - July 22"
+    }
+  },
+  "leo": {
+    "element": "fire",
+    "modality": "fixed",
+    "ruling_planet": "sun",
+    "keywords": ["radiant", "generous", "expressive", "dignified", "charismatic", "playful"],
+    "focus": "Creative self-expression, recognition, and heart-centered leadership",
+    "qualities": {
+      "general": "creative and confident",
+      "career": "leadership and performance",
+      "relationships": "romance and drama",
+      "health": "vitality and heart",
+      "spirituality": "divine creativity",
+      "personal_growth": "self-expression"
+    },
+    "compatible_signs": ["aries", "sagittarius", "gemini", "libra", "aquarius"],
+    "description": "Leo embodies the archetype of the Sovereign and Creator—the radiant, noble force that inspires through authentic self-expression and warm-hearted leadership. As a fire sign ruled by the Sun, Leo represents the principle of vitality, generosity, and the creative spark that brings joy and meaning to life. Leo possesses natural charisma, dramatic flair, and a childlike enthusiasm that naturally draws others into their sphere of influence. While sometimes prideful or attention-seeking, Leo's greatest gifts lie in their ability to inspire loyalty, celebrate life's grand moments, and awaken creative potential through their genuine warmth, courage, and magnanimous spirit.",
+    "duality": "Masculine",
+    "symbol": "The Lion",
+    "polarity": "Aquarius",
+    "lucky_day": "Sunday",
+    "lucky_numbers": ["8", "9"],
+    "birthstone": "Ruby",
+    "special_color": "Gold & Orange",
+    "cities": ["Rome", "Prague", "Damascus", "Hollywood"],
+    "countries": ["France", "Italy", "Romania"],
+    "flowers": ["Sunflower", "Marigold"],
+    "trees": "Orange & citrus trees",
+    "metal": "Gold",
+    "animals": "All felines",
+    "best_trait": "Exuberance",
+    "decanates": {
+      "first": {
+        "date_range": "July 23 - August 1",
+        "constellation": "Ursa Minor",
+        "keyword": "Self-Expression",
+        "planet_subruler": "Sun"
+      },
+      "second": {
+        "date_range": "August 2 - August 12",
+        "constellation": "Ursa Major",
+        "keyword": "Expansion",
+        "planet_subruler": "Jupiter"
+      },
+      "third": {
+        "date_range": "August 13 - August 22",
+        "constellation": "Hydra",
+        "keyword": "Creativity",
+        "planet_subruler": "Mars"
+      }
+    },
+    "cusps": {
+      "beginning": "July 23 - July 27",
+      "ending": "August 18 - August 22"
+    }
+  },
+  "virgo": {
+    "element": "earth",
+    "modality": "mutable",
+    "ruling_planet": "mercury",
+    "keywords": ["analytical", "precise", "practical", "diligent", "discerning", "improvement-oriented"],
+    "focus": "Refinement, service, and practical mastery",
+    "qualities": {
+      "general": "analytical and practical",
+      "career": "attention to detail",
+      "relationships": "service and improvement",
+      "health": "health consciousness",
+      "spirituality": "practical spirituality",
+      "personal_growth": "self-improvement"
+    },
+    "compatible_signs": ["taurus", "capricorn", "cancer", "scorpio", "pisces"],
+    "description": "Virgo embodies the archetype of the Craftsman and Healer—the discerning, methodical force that refines, purifies, and improves through humble service and attention to detail. As an earth sign ruled by Mercury, Virgo represents the principle of analysis, discrimination, and the sacred work of bringing order to chaos. Virgo possesses exceptional precision, practical intelligence, and a natural inclination toward wellness that seeks to integrate mind, body, and environment. While sometimes critical or perfectionistic, Virgo's greatest gifts lie in their ability to identify solutions, improve systems, and offer practical help through their analytical skills, dedication to excellence, and devotion to service.",
+    "duality": "Feminine",
+    "symbol": "Symbol of human reproduction - for virgin",
+    "polarity": "Pisces",
+    "lucky_day": "Wednesday",
+    "lucky_numbers": ["5", "3"],
+    "birthstone": "Sapphire",
+    "special_color": "Navy, Blue and Gray",
+    "cities": ["Paris", "Boston", "Heidelberg", "Strasbourg"],
+    "countries": ["Turkey", "Greece", "Crete", "West Indies"],
+    "flowers": ["Morning glory", "Pansy"],
+    "trees": "Nut-bearing trees",
+    "metal": "Mercury",
+    "animals": "Small domestic pets",
+    "best_trait": "Conscientousness",
+    "decanates": {
+      "first": {
+        "date_range": "August 23 - September 1",
+        "constellation": "Crater, The Cup, The Goblet of Apollo",
+        "keyword": "Analysis",
+        "planet_subruler": "Mercury"
+      },
+      "second": {
+        "date_range": "September 2 - September 12",
+        "constellation": "Hercules",
+        "keyword": "Efficiency",
+        "planet_subruler": "Saturn"
+      },
+      "third": {
+        "date_range": "September 13 - September 22",
+        "constellation": "Bootes",
+        "keyword": "Discrimination",
+        "planet_subruler": "Venus"
+      }
+    },
+    "cusps": {
+      "beginning": "August 23 - August 27",
+      "ending": "September 18 - September 22"
+    }
+  },
+  "libra": {
+    "element": "air",
+    "modality": "cardinal",
+    "ruling_planet": "venus",
+    "keywords": ["harmonizing", "diplomatic", "fair-minded", "refined", "partnership-oriented", "aesthetic"],
+    "focus": "Balance, relationships, and aesthetic harmony",
+    "qualities": {
+      "general": "harmonious and diplomatic",
+      "career": "partnerships and balance",
+      "relationships": "harmony and fairness",
+      "health": "balance and beauty",
+      "spirituality": "spiritual harmony",
+      "personal_growth": "self-balance"
+    },
+    "compatible_signs": ["gemini", "aquarius", "leo", "sagittarius", "aries"],
+    "description": "Libra embodies the archetype of the Diplomat and Artist—the harmonizing, relational force that seeks balance, beauty, and justice in all exchanges. As an air sign ruled by Venus, Libra represents the principle of reciprocity, aesthetics, and the dance of relationship that mirrors the self through others. Libra possesses natural charm, diplomatic skill, and an innate sense of fairness that carefully weighs different perspectives before making decisions. While sometimes indecisive or conflict-avoidant, Libra's greatest gifts lie in their ability to create harmony, appreciate beauty, and establish justice through their refined social intelligence, artistic sensibility, and commitment to balanced exchange.",
+    "duality": "Masculine",
+    "symbol": "Scales",
+    "polarity": "Aries",
+    "lucky_day": "Friday",
+    "lucky_numbers": ["6", "9"],
+    "birthstone": "Opal",
+    "special_color": "Blue & Lavender",
+    "cities": ["Vienna", "Copenhagen", "Charleston", "Lisbon"],
+    "countries": ["Burma", "China", "Tibet", "Argentina", "Japan"],
+    "flowers": ["Rose", "Cosmos", "Hydrangea"],
+    "trees": ["Almond", "Cypress", "Ash"],
+    "metal": "Copper",
+    "animals": "Snakes & Lizards",
+    "best_trait": "Charm",
+    "decanates": {
+      "first": {
+        "date_range": "September 23 - October 2",
+        "constellation": "Corvus",
+        "keyword": "Magnetism",
+        "planet_subruler": "Venus"
+      },
+      "second": {
+        "date_range": "October 3 - October 13",
+        "constellation": "Centaurus",
+        "keyword": "Endurance",
+        "planet_subruler": "Uranus"
+      },
+      "third": {
+        "date_range": "October 14 - October 22",
+        "constellation": "Corona",
+        "keyword": "Order",
+        "planet_subruler": "Mercury"
+      }
+    },
+    "cusps": {
+      "beginning": "September 23 - September 27",
+      "ending": "October 18 - October 22"
+    }
+  },
+  "scorpio": {
+    "element": "water",
+    "modality": "fixed",
+    "ruling_planet": "pluto",
+    "keywords": ["intense", "magnetic", "penetrating", "transformative", "private", "resourceful"],
+    "focus": "Transformation, psychological depth, and shared resources",
+    "qualities": {
+      "general": "intense and transformative",
+      "career": "investigation and power",
+      "relationships": "depth and passion",
+      "health": "regeneration",
+      "spirituality": "occult wisdom",
+      "personal_growth": "self-transformation"
+    },
+    "compatible_signs": ["cancer", "pisces", "virgo", "capricorn", "taurus"],
+    "description": "Scorpio embodies the archetype of the Shaman and Detective—the penetrating, transformative force that explores hidden realms, confronts shadows, and catalyzes profound rebirth. As a water sign traditionally ruled by Mars and modernly by Pluto, Scorpio represents the principle of depth, power, and the evolutionary cycle of death and regeneration. Scorpio possesses exceptional emotional intensity, psychological insight, and magnetic presence that can sense the underlying truth beneath surface appearances. While sometimes secretive or controlling, Scorpio's greatest gifts lie in their ability to facilitate healing, access hidden resources, and navigate transformative passages through their emotional courage, unflinching honesty, and capacity for profound intimacy.",
+    "duality": "Feminine",
+    "symbol": "Secretive deadlly creature that can poison its enemies",
+    "polarity": "Taurus",
+    "lucky_day": "Tuesday",
+    "lucky_numbers": ["2", "4"],
+    "birthstone": "Topaz",
+    "special_color": "Crimson, Burgundy, Maroon",
+    "cities": ["Liverpool", "New Orleans", "Washington DC", "Newcastle"],
+    "countries": ["Norway", "Algeria", "Morocco", "Tahiti"],
+    "flowers": ["Chrysanthemum", "rhododendron"],
+    "trees": "Blackthron & bushy trees",
+    "metal": "Plutonium",
+    "animals": "Insects & crustaceans",
+    "best_trait": "Idealism",
+    "decanates": {
+      "first": {
+        "date_range": "October 23 - November 1",
+        "constellation": "Serpens",
+        "keyword": "Integrity",
+        "planet_subruler": "Pluto"
+      },
+      "second": {
+        "date_range": "November 2 - November 11",
+        "constellation": "Lupus",
+        "keyword": "Regeneration",
+        "planet_subruler": "Neptune"
+      },
+      "third": {
+        "date_range": "November 12 - November 21",
+        "constellation": "Aquila",
+        "keyword": "Clarification",
+        "planet_subruler": "Moon"
+      }
+    },
+    "cusps": {
+      "beginning": "October 23 - October 27",
+      "ending": "November 17 - November 21"
+    }
+  },
+  "sagittarius": {
+    "element": "fire",
+    "modality": "mutable",
+    "ruling_planet": "jupiter",
+    "keywords": ["visionary", "expansive", "adventurous", "philosophical", "optimistic", "freedom-loving"],
+    "focus": "Expansion, wisdom, and exploration of life's greater meaning",
+    "qualities": {
+      "general": "adventurous and philosophical",
+      "career": "expansion and learning",
+      "relationships": "freedom and growth",
+      "health": "optimism and activity",
+      "spirituality": "higher learning",
+      "personal_growth": "self-discovery"
+    },
+    "compatible_signs": ["aries", "leo", "libra", "aquarius", "gemini"],
+    "description": "Sagittarius embodies the archetype of the Explorer and Philosopher—the expansive, visionary force that seeks truth, meaning, and adventure beyond conventional boundaries. As a fire sign ruled by Jupiter, Sagittarius represents the principle of growth, wisdom, and the quest for understanding that connects individual experience to universal truth. Sagittarius possesses natural optimism, intellectual curiosity, and a far-reaching vision that inspires others to broaden their horizons. While sometimes blunt or restless, Sagittarius' greatest gifts lie in their ability to inspire hope, synthesize diverse perspectives, and expand consciousness through their genuine enthusiasm, philosophical insight, and courageous pursuit of truth.",
+    "duality": "Masculine",
+    "symbol": "The Archer",
+    "polarity": "Gemini",
+    "lucky_day": "Thursday",
+    "lucky_numbers": ["5", "7"],
+    "birthstone": "Turquoise",
+    "special_color": "Purple",
+    "cities": ["Budapest", "Cologne", "Toledo", "Acapulco"],
+    "countries": ["Spain", "Hungary", "Australia"],
+    "flowers": ["Narcissus", "Holly", "Dandelion"],
+    "trees": ["Mulberry", "Oak", "Birch"],
+    "metal": "Tin",
+    "animals": "Horse",
+    "best_trait": "Optimism",
+    "decanates": {
+      "first": {
+        "date_range": "November 22 - December 1",
+        "constellation": "Ophiuchuus",
+        "keyword": "Honesty",
+        "planet_subruler": "Jupiter"
+      },
+      "second": {
+        "date_range": "December 2 - December 11",
+        "constellation": "Sagitta",
+        "keyword": "Drive",
+        "planet_subruler": "Mars"
+      },
+      "third": {
+        "date_range": "December 12 - December 21",
+        "constellation": "Ara",
+        "keyword": "Intuition",
+        "planet_subruler": "Sun"
+      }
+    },
+    "cusps": {
+      "beginning": "November 22 - November 26",
+      "ending": "December 17 - December 21"
+    }
+  },
+  "capricorn": {
+    "element": "earth",
+    "modality": "cardinal",
+    "ruling_planet": "saturn",
+    "keywords": ["ambitious", "disciplined", "responsible", "strategic", "persistent", "dignified"],
+    "focus": "Achievement, structure, and mastery through time",
+    "qualities": {
+      "general": "ambitious and disciplined",
+      "career": "achievement and structure",
+      "relationships": "commitment and tradition",
+      "health": "endurance and bones",
+      "spirituality": "practical wisdom",
+      "personal_growth": "self-mastery"
+    },
+    "compatible_signs": ["taurus", "virgo", "scorpio", "pisces", "cancer"],
+    "description": "Capricorn embodies the archetype of the Builder and Elder—the disciplined, enduring force that creates lasting structures and transmits wisdom through lineage and tradition. As an earth sign ruled by Saturn, Capricorn represents the principle of maturation, responsibility, and the patient climb toward mastery that requires facing limitations and overcoming obstacles. Capricorn possesses exceptional ambition, strategic intelligence, and quiet dignity that approaches life as a long-term investment. While sometimes overly serious or status-conscious, Capricorn's greatest gifts lie in their ability to build enduring legacies, establish solid foundations, and model integrity through their disciplined approach, practical wisdom, and commitment to excellence.",
+    "duality": "Feminine",
+    "symbol": "The Goat",
+    "polarity": "Cancer",
+    "lucky_day": "Saturday",
+    "lucky_numbers": ["2", "8"],
+    "birthstone": "Garnet",
+    "special_color": "Dark Green & Brown",
+    "cities": ["Oxford", "Boston", "Brussels", "Chicago", "Montreal"],
+    "countries": ["Mexico", "Afghanistan", "Bulgaria", "India"],
+    "flowers": ["Carnation", "Ivy"],
+    "trees": ["Pine", "Elm", "Poplar"],
+    "metal": "Lead",
+    "animals": "Goats",
+    "best_trait": "Steadiness",
+    "decanates": {
+      "first": {
+        "date_range": "December 22 - December 31",
+        "constellation": "Corona",
+        "keyword": "Responsibility",
+        "planet_subruler": "Saturn"
+      },
+      "second": {
+        "date_range": "January 1 - January 10",
+        "constellation": "Lyra",
+        "keyword": "Fairness",
+        "planet_subruler": "Venus"
+      },
+      "third": {
+        "date_range": "January 11 - January 19",
+        "constellation": "Draco",
+        "keyword": "Honor",
+        "planet_subruler": "Mercury"
+      }
+    },
+    "cusps": {
+      "beginning": "December 22 - December 26",
+      "ending": "January 15 - January 19"
+    }
+  },
+  "aquarius": {
+    "element": "air",
+    "modality": "fixed",
+    "ruling_planet": "uranus",
+    "keywords": ["progressive", "humanitarian", "inventive", "independent", "original", "community-minded"],
+    "focus": "Innovation, social vision, and liberation from conditioning",
+    "qualities": {
+      "general": "innovative and humanitarian",
+      "career": "originality and technology",
+      "relationships": "friendship and independence",
+      "health": "circulation and innovation",
+      "spirituality": "universal consciousness",
+      "personal_growth": "self-liberation"
+    },
+    "compatible_signs": ["gemini", "libra", "sagittarius", "aries", "leo"],
+    "description": "Aquarius embodies the archetype of the Revolutionary and Visionary—the progressive, innovative force that perceives future possibilities and catalyzes collective evolution. As an air sign traditionally ruled by Saturn and modernly by Uranus, Aquarius represents the principle of liberation, originality, and the higher mind that accesses universal patterns beyond conventional thinking. Aquarius possesses natural objectivity, inventive genius, and humanitarian values that seek to improve life for the collective. While sometimes detached or eccentric, Aquarius' greatest gifts lie in their ability to catalyze progress, envision future paradigms, and create social innovation through their independent thinking, technological aptitude, and commitment to principles of equality and freedom.",
+    "duality": "Masculine",
+    "symbol": "The Water Bearer",
+    "polarity": "Leo",
+    "lucky_day": "Wednesday",
+    "lucky_numbers": ["1", "7"],
+    "birthstone": "Amethyst",
+    "special_color": "Electric Blue",
+    "cities": ["Stockholm", "Moscow", "Buenos Aires", "Salzburg"],
+    "countries": ["Russia", "Sweden", "Ethiopia"],
+    "flowers": ["Orchid"],
+    "trees": "Fruit Trees",
+    "metal": "Uranium",
+    "animals": "Large Birds",
+    "best_trait": "Friendliness",
+    "decanates": {
+      "first": {
+        "date_range": "January 20 - January 29",
+        "constellation": "Delphinus",
+        "keyword": "Knowledge",
+        "planet_subruler": "Uranus"
+      },
+      "second": {
+        "date_range": "January 30 - February 8",
+        "constellation": "Piscis",
+        "keyword": "Frankness",
+        "planet_subruler": "Mercury"
+      },
+      "third": {
+        "date_range": "February 9 - February 18",
+        "constellation": "Equuleus",
+        "keyword": "Association",
+        "planet_subruler": "Venus"
+      }
+    },
+    "cusps": {
+      "beginning": "January 20 - January 24",
+      "ending": "February 14 - February 18"
+    }
+  },
+  "pisces": {
+    "element": "water",
+    "modality": "mutable",
+    "ruling_planet": "neptune",
+    "keywords": ["empathic", "imaginative", "spiritual", "compassionate", "artistic", "boundary-dissolving"],
+    "focus": "Transcendence, mystical connection, and dissolving separation",
+    "qualities": {
+      "general": "intuitive and compassionate",
+      "career": "creativity and service",
+      "relationships": "empathy and romance",
+      "health": "immune system and feet",
+      "spirituality": "mystical connection",
+      "personal_growth": "self-transcendence"
+    },
+    "compatible_signs": ["cancer", "scorpio", "taurus", "capricorn", "virgo"],
+    "description": "Pisces embodies the archetype of the Mystic and Artist—the transcendent, empathic force that dissolves boundaries between worlds and accesses the collective unconscious. As a water sign traditionally ruled by Jupiter and modernly by Neptune, Pisces represents the principle of unity, spiritual connection, and the merging of individual consciousness with the universal ocean of being. Pisces possesses exceptional compassion, creative imagination, and intuitive sensitivity that perceives subtle energies and unspoken feelings. While sometimes escapist or boundary-challenged, Pisces' greatest gifts lie in their ability to heal through compassion, inspire through artistic vision, and access mystical dimensions through their emotional receptivity, creative imagination, and unconditional love.",
+    "duality": "Feminine",
+    "symbol": "Two Fishes tied to one another",
+    "polarity": "Virgo",
+    "lucky_day": "Friday",
+    "lucky_numbers": ["2", "6"],
+    "birthstone": "Aquamarine",
+    "special_color": "Pale green & Turquoise",
+    "cities": ["Casablanca", "Alexandria", "Lisbon", "Seville", "Dublin"],
+    "countries": ["Portugal", "the Sahara Desert"],
+    "flowers": ["Water Lily", "White Poppy", "Jonquil"],
+    "trees": ["Fig", "Willow"],
+    "metal": "Platinum",
+    "animals": "Fish",
+    "best_trait": "Compassion",
+    "decanates": {
+      "first": {
+        "date_range": "February 19 - February 29",
+        "constellation": "Pegasus",
+        "keyword": "Imagination",
+        "planet_subruler": "Neptune"
+      },
+      "second": {
+        "date_range": "March 1 - March 10",
+        "constellation": "The Swan",
+        "keyword": "Compassion",
+        "planet_subruler": "Moon"
+      },
+      "third": {
+        "date_range": "March 11 - March 20",
+        "constellation": "Cepheus",
+        "keyword": "Action",
+        "planet_subruler": "Pluto"
+      }
+    },
+    "cusps": {
+      "beginning": "February 19 - February 23",
+      "ending": "March 16 - March 20"
+    }
+  }
+} 

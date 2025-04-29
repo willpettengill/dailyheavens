@@ -1,0 +1,286 @@
+{
+  "1": {
+    "name": "First House",
+    "type": "angular",
+    "natural_sign": "aries",
+    "keywords": ["self", "identity", "appearance", "beginnings", "initiation", "physical body", "personal energy"],
+    "ruler": "mars",
+    "focus": "Self-expression, identity, and personal presence",
+    "qualities": {
+      "general": "identity and self-projection",
+      "career": "personal branding",
+      "relationships": "self in relation to others",
+      "health": "vitality and constitution",
+      "spirituality": "spiritual identity",
+      "personal_growth": "self-awareness"
+    },
+    "description": "The First House embodies the realm of identity, self-expression, and personal presence—the essential 'I am' of the chart. As the house of beginnings and personal initiative, it governs how we project ourselves into the world, our appearance, and our approach to new experiences. Planets here strongly color the personality, physical vitality, and overall life approach. The First House represents our most authentic expression and the lens through which we view life. It reveals how we initiate action, present ourselves to others, and navigate our individual path. The sign on the cusp (Ascendant) acts as a mask or filter through which our inner nature is expressed, while planets in this house become prominently integrated into our identity and self-concept.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "aries": "Direct and energetic approach to life",
+        "taurus": "Steady and reliable self-presentation",
+        "gemini": "Adaptable and communicative personality",
+        "cancer": "Sensitive and protective demeanor",
+        "leo": "Confident and dramatic self-expression",
+        "virgo": "Practical and analytical approach",
+        "libra": "Diplomatic and balanced presentation",
+        "scorpio": "Intense and magnetic presence",
+        "sagittarius": "Optimistic and adventurous outlook",
+        "capricorn": "Serious and ambitious demeanor",
+        "aquarius": "Unique and progressive approach",
+        "pisces": "Intuitive and compassionate presence"
+      }
+    }
+  },
+  "2": {
+    "name": "Second House",
+    "type": "succedent",
+    "natural_sign": "taurus",
+    "keywords": ["resources", "values", "possessions", "security", "talents", "self-worth", "stability"],
+    "ruler": "venus",
+    "focus": "Material security, personal values, and resources",
+    "qualities": {
+      "general": "resources and values",
+      "career": "earning capacity",
+      "relationships": "shared resources",
+      "health": "physical sustenance",
+      "spirituality": "spiritual values",
+      "personal_growth": "self-worth"
+    },
+    "description": "The Second House embodies the realm of values, resources, and material security—the essential 'I have' of the chart. It governs not only tangible possessions and finances but also our internal value system, talents, and sense of self-worth. This house reveals our relationship with the material world, including how we acquire, manage, and utilize resources. Planets here influence our approach to security, comfort, and the building of stable foundations. The Second House represents our capacity for sustainable growth, showing how we nurture and develop what we value. The sign on the cusp colors our attitude toward material concerns, while planets in this house become integral to our experience of sufficiency, worth, and the tangible expression of our values in the world."
+  },
+  "3": {
+    "name": "Third House",
+    "type": "cadent",
+    "natural_sign": "gemini",
+    "keywords": ["communication", "learning", "siblings", "local environment", "curiosity", "perception", "early education"],
+    "ruler": "mercury",
+    "focus": "Communication, learning, and immediate environment",
+    "qualities": {
+      "general": "communication and learning",
+      "career": "skills and training",
+      "relationships": "communication patterns",
+      "health": "nervous system",
+      "spirituality": "everyday spirituality",
+      "personal_growth": "mental development"
+    },
+    "description": "The Third House embodies the realm of communication, cognition, and immediate connections—the essential 'I think' and 'I communicate' of the chart. It governs how we process information, express ideas, and interact with our local environment. This house relates to early education, siblings, neighbors, short journeys, and the daily exchange of ideas. Planets here influence our communication style, learning approach, and ability to make connections between concepts. The Third House represents the curious, adaptable mind that gathers information before deeper processing. The sign on the cusp colors our communication style and learning preferences, while planets in this house shape our everyday mental activity, verbal expression, and the ways we navigate our immediate surroundings and relationships."
+  },
+  "4": {
+    "name": "Fourth House",
+    "type": "angular",
+    "natural_sign": "cancer",
+    "keywords": ["home", "family", "roots", "foundations", "emotional security", "ancestry", "private life"],
+    "ruler": "moon",
+    "focus": "Emotional foundations, home, and familial connections",
+    "qualities": {
+      "general": "emotional foundations",
+      "career": "work-life balance",
+      "relationships": "family dynamics",
+      "health": "emotional wellbeing",
+      "spirituality": "inner sanctuary",
+      "personal_growth": "emotional security"
+    },
+    "description": "The Fourth House embodies the realm of home, roots, and emotional foundations—the essential 'I feel' and 'I belong' of the chart. As the house of personal foundations, it governs our connection to family (both of origin and chosen), home environment, and ancestral patterns. This house represents our most private self, the inner emotional landscape that forms the foundation for all other life experiences. Planets here influence our sense of belonging, emotional security, and relationship to the past. The Fourth House represents the internalized parent, our capacity for nurturing, and our deepest emotional needs. The sign on the cusp (IC) colors our approach to home and family matters, while planets in this house shape our emotional patterns, sense of roots, and the nature of our innermost private life.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "leo": "Warm and expressive home environment. You seek to create a space that feels regal, generous, and reflects your personal vitality.",
+        "cancer": "Deeply nurturing and protective home life",
+        "aries": "Active and energetic approach to home and family",
+        "taurus": "Stable and comfort-focused home environment",
+        "gemini": "Mentally stimulating and versatile home life",
+        "virgo": "Well-organized and health-conscious home",
+        "libra": "Harmonious and aesthetically pleasing home environment",
+        "scorpio": "Private and emotionally intense home life",
+        "sagittarius": "Expansive and freedom-loving home environment",
+        "capricorn": "Traditional and structured approach to home and family",
+        "aquarius": "Unconventional and community-oriented home life",
+        "pisces": "Spiritually nurturing and boundaryless home environment"
+      }
+    }
+  },
+  "5": {
+    "name": "Fifth House",
+    "type": "succedent",
+    "natural_sign": "leo",
+    "keywords": ["creativity", "self-expression", "romance", "pleasure", "children", "play", "performance"],
+    "ruler": "sun",
+    "focus": "Creative expression, pleasure, and authentic joy",
+    "qualities": {
+      "general": "creative expression",
+      "career": "creative talents",
+      "relationships": "romance and passion",
+      "health": "vitality through joy",
+      "spirituality": "divine play",
+      "personal_growth": "authentic expression"
+    },
+    "description": "The Fifth House embodies the realm of creative expression, pleasure, and authentic joy—the essential 'I create' and 'I play' of the chart. It governs all forms of self-expression, including artistic endeavors, romantic affairs, children, and recreational activities. This house represents the spontaneous, playful aspect of self that seeks joy and recognition for its unique qualities. Planets here influence our creative approach, capacity for pleasure, and relationship to children (both literal and metaphorical). The Fifth House represents our heart's authentic expression and the courage to shine as our true self. The sign on the cusp colors our creative style and approach to romance, while planets in this house shape our relationship to joy, self-expression, and the creative manifestation of our inner child in the world."
+  },
+  "6": {
+    "name": "Sixth House",
+    "type": "cadent",
+    "natural_sign": "virgo",
+    "keywords": ["service", "health", "work", "routine", "skill", "refinement", "daily habits"],
+    "ruler": "mercury",
+    "focus": "Service, wellness, and daily practices",
+    "qualities": {
+      "general": "daily routines and service",
+      "career": "work ethic",
+      "relationships": "practical support",
+      "health": "wellness practices",
+      "spirituality": "spiritual practice",
+      "personal_growth": "self-improvement"
+    },
+    "description": "The Sixth House embodies the realm of service, practical skills, and holistic well-being—the essential 'I analyze' and 'I serve' of the chart. It governs daily routines, work environment, health practices, and the refinement of skills through dedicated effort. This house represents our capacity for discrimination, improvement, and humble service that contributes to a greater whole. Planets here influence our approach to health, organization, and practical problem-solving. The Sixth House represents the integration of mind and body, showing how our daily habits either support or undermine our wellbeing. The sign on the cusp colors our approach to service and health matters, while planets in this house shape our work ethic, analytical abilities, and the ways we care for ourselves and others through practical action and refinement."
+  },
+  "7": {
+    "name": "Seventh House",
+    "type": "angular",
+    "natural_sign": "libra",
+    "keywords": ["partnership", "marriage", "contracts", "cooperation", "balance", "projection", "open enemies"],
+    "ruler": "venus",
+    "focus": "One-to-one relationships, partnerships, and balance",
+    "qualities": {
+      "general": "partnerships and cooperation",
+      "career": "business relationships",
+      "relationships": "significant others",
+      "health": "relationship harmony",
+      "spirituality": "spiritual partnerships",
+      "personal_growth": "self-through-other"
+    },
+    "description": "The Seventh House embodies the realm of partnership, collaboration, and relational balance—the essential 'We are' of the chart. As the house of significant one-to-one relationships, it governs marriage, business partnerships, contracts, and open negotiations. This house represents our approach to cooperation, compromise, and the integration of opposing viewpoints. Planets here influence our partnership patterns, expectations in relationships, and how we manage conflict. The Seventh House represents the 'not-self'—qualities we often project onto others or access through relationship. The sign on the cusp (Descendant) indicates qualities we seek in partners or develop through relationships, while planets in this house shape our relationship dynamics, contractual agreements, and the ways we navigate the delicate dance of independence and interdependence.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "sagittarius": "Adventurous and philosophical partnerships. You seek relationships that expand your horizons and offer freedom to explore and grow together.",
+        "aries": "Dynamic and initiative-taking partnerships",
+        "taurus": "Stable and sensual relationship approach",
+        "gemini": "Intellectually stimulating partnerships",
+        "cancer": "Emotionally nurturing relationship approach",
+        "leo": "Passionate and loyal partnerships",
+        "virgo": "Practical and service-oriented relationship approach",
+        "libra": "Harmonious and balanced partnerships",
+        "scorpio": "Intense and transformative relationship approach",
+        "capricorn": "Committed and responsibility-oriented partnerships",
+        "aquarius": "Independent and friendship-based relationship approach",
+        "pisces": "Compassionate and spiritually connected partnerships"
+      }
+    }
+  },
+  "8": {
+    "name": "Eighth House",
+    "type": "succedent",
+    "natural_sign": "scorpio",
+    "keywords": ["transformation", "shared resources", "intimacy", "power", "psychology", "death", "regeneration"],
+    "ruler": "pluto",
+    "focus": "Transformation, intimacy, and shared resources",
+    "qualities": {
+      "general": "transformation and intimacy",
+      "career": "financial partnerships",
+      "relationships": "deep bonding",
+      "health": "healing crises",
+      "spirituality": "occult knowledge",
+      "personal_growth": "psychological depth"
+    },
+    "description": "The Eighth House embodies the realm of transformation, shared resources, and profound intimacy—the essential 'We transform' of the chart. It governs the mysteries of life, death, and rebirth on all levels: physical, emotional, psychological, and spiritual. This house represents areas where we experience surrender, merging, and powerful transformation through releasing control. Planets here influence our approach to intimacy, shared resources, and psychological depth work. The Eighth House represents our relationship with power, sexuality, and the hidden forces that drive regeneration. The sign on the cusp colors our approach to transformative experiences and intimate exchanges, while planets in this house shape our capacity for vulnerability, psychological insight, and the ability to navigate profound cycles of ending and renewal in ourselves and our relationships."
+  },
+  "9": {
+    "name": "Ninth House",
+    "type": "cadent",
+    "natural_sign": "sagittarius",
+    "keywords": ["exploration", "higher learning", "philosophy", "travel", "belief systems", "expansion", "meaning"],
+    "ruler": "jupiter",
+    "focus": "Expansion of consciousness, belief systems, and higher learning",
+    "qualities": {
+      "general": "beliefs and exploration",
+      "career": "advanced education",
+      "relationships": "shared worldviews",
+      "health": "holistic approaches",
+      "spirituality": "philosophy and faith",
+      "personal_growth": "expanded horizons"
+    },
+    "description": "The Ninth House embodies the realm of expansion, higher learning, and quest for meaning—the essential 'I understand' and 'I believe' of the chart. It governs philosophy, higher education, long-distance travel, foreign cultures, and the exploration of truth beyond conventional boundaries. This house represents our worldview, ethical framework, and capacity for envisioning possibilities beyond immediate circumstances. Planets here influence our approach to faith, wisdom, and cultural exploration. The Ninth House represents the higher mind that synthesizes diverse experiences into a coherent philosophy or belief system. The sign on the cusp colors our approach to spiritual and philosophical matters, while planets in this house shape our relationship to truth-seeking, adventure, and the expansion of consciousness through meaningful exploration and integration of diverse perspectives."
+  },
+  "10": {
+    "name": "Tenth House",
+    "type": "angular",
+    "natural_sign": "capricorn",
+    "keywords": ["career", "public image", "authority", "achievement", "responsibility", "legacy", "social contribution"],
+    "ruler": "saturn",
+    "focus": "Public role, vocation, and life direction",
+    "qualities": {
+      "general": "achievement and authority",
+      "career": "profession and ambition",
+      "relationships": "public partnerships",
+      "health": "structural integrity",
+      "spirituality": "spiritual authority",
+      "personal_growth": "maturation"
+    },
+    "description": "The Tenth House embodies the realm of vocation, public identity, and contribution to society—the essential 'I achieve' and 'I contribute' of the chart. As the house of career and reputation, it governs our relationship to authority, professional ambitions, and the legacy we create through our life's work. This house represents our most visible self, the role we play in the broader social structure. Planets here influence our approach to achievement, responsibility, and the development of personal authority. The Tenth House represents the internalized parent figure that guides our sense of duty and discipline. The sign on the cusp (MC) indicates qualities we manifest in our public role, while planets in this house shape our professional path, relationship to social structures, and the ways we establish credibility and make meaningful contributions through sustained effort and commitment.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "aquarius": "Innovative and humanitarian career path. You seek to make your mark through progressive ideas, technological advancement, or social reform.",
+        "aries": "Pioneering and leadership-oriented professional approach",
+        "taurus": "Steady and resource-building career path",
+        "gemini": "Versatile and communication-focused professional life",
+        "cancer": "Nurturing and emotionally attuned career path",
+        "leo": "Creative and recognition-seeking professional approach",
+        "virgo": "Detail-oriented and service-focused career path",
+        "libra": "Diplomatic and relationship-oriented professional approach",
+        "scorpio": "Transformative and deeply impactful career path",
+        "sagittarius": "Expansive and meaning-oriented professional approach",
+        "capricorn": "Ambitious and structured career path",
+        "pisces": "Compassionate and visionary professional approach"
+      }
+    }
+  },
+  "11": {
+    "name": "Eleventh House",
+    "type": "succedent",
+    "natural_sign": "aquarius",
+    "keywords": ["groups", "friendships", "social ideals", "hopes", "humanitarian efforts", "innovation", "networks"],
+    "ruler": "uranus",
+    "focus": "Social vision, community, and collective progress",
+    "qualities": {
+      "general": "friendships and social vision",
+      "career": "networking and teamwork",
+      "relationships": "platonic connections",
+      "health": "collective wellbeing",
+      "spirituality": "humanitarian ideals",
+      "personal_growth": "social contribution"
+    },
+    "description": "The Eleventh House embodies the realm of collective vision, social networks, and humanitarian ideals—the essential 'We innovate' of the chart. It governs friendships, group associations, and our contribution to social progress beyond personal achievement. This house represents our capacity for objectivity, innovation, and collaboration toward shared ideals. Planets here influence our approach to friendship, social reform, and the manifestation of hopes and wishes. The Eleventh House represents the higher mind applied to social systems, showing how we envision improvements for collective benefit. The sign on the cusp colors our approach to group dynamics and social ideals, while planets in this house shape our relationship to community, technological innovation, and the ways we connect with others who share our values and vision for a better future."
+  },
+  "12": {
+    "name": "Twelfth House",
+    "type": "cadent",
+    "natural_sign": "pisces",
+    "keywords": ["unconscious", "spiritual connection", "hidden influences", "surrender", "compassion", "isolation", "transcendence"],
+    "ruler": "neptune",
+    "focus": "Transcendence, dissolution, and spiritual connection",
+    "qualities": {
+      "general": "unconscious patterns and spiritual connection",
+      "career": "behind-the-scenes work",
+      "relationships": "soulful connection",
+      "health": "psychosomatic patterns",
+      "spirituality": "mystical experience",
+      "personal_growth": "dissolution of ego"
+    },
+    "description": "The Twelfth House embodies the realm of the collective unconscious, spiritual transcendence, and hidden aspects of self—the essential 'I dissolve' and 'I connect beyond bounds' of the chart. As the final house before the cycle begins anew, it governs our relationship to that which is beyond ordinary consciousness: dreams, spiritual experiences, and unconscious patterns inherited from the collective. This house represents where we surrender individual identity to connect with all-that-is. Planets here influence our spiritual sensitivity, relationship to suffering, and the ways we face our deepest fears and transcendent longings. The Twelfth House represents both our greatest spiritual potential and our most challenging blind spots. The sign on the cusp colors our approach to surrender and spiritual connection, while planets in this house shape our experience of isolation, compassion, and the spiritual dimensions that lie beyond the material world.",
+    "cusp_sign_interpretations": {
+      "basic": {
+        "aries": "Pioneering and courageous approach to the spiritual realm. You may unconsciously initiate spiritual pathways or face hidden challenges requiring independent action.",
+        "taurus": "Grounded and sensual approach to spiritual connection",
+        "gemini": "Mentally curious and communicative spiritual approach",
+        "cancer": "Emotionally receptive and nurturing spiritual approach",
+        "leo": "Creative and self-expressive spiritual approach",
+        "virgo": "Analytical and service-oriented spiritual approach",
+        "libra": "Harmonious and relationship-focused spiritual approach",
+        "scorpio": "Transformative and deeply probing spiritual approach",
+        "sagittarius": "Expansive and philosophically seeking spiritual approach",
+        "capricorn": "Disciplined and structured spiritual approach",
+        "aquarius": "Innovative and humanitarian spiritual approach",
+        "pisces": "Compassionate and boundary-dissolving spiritual approach"
+      }
+    }
+  }
+} 

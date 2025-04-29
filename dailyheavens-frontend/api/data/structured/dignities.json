@@ -1,0 +1,86 @@
+{
+    "domicile": {
+        "description": "Domicile (also called rulership) represents a planet's home sign, where its essential nature is most purely and powerfully expressed. When a planet is in its domicile, it operates with maximum effectiveness, confidence, and natural authority. The energy flows without impediment, allowing the planet's core qualities to manifest with clarity and strength. Planets in domicile typically indicate areas of life where the native experiences natural mastery, inherent understanding, and the ability to express the associated qualities with minimal internal conflict or external obstruction. The planet's energy is neither excessive nor deficient, but rather perfectly calibrated to achieve its aims with grace and authenticity. Traditional astrology places special emphasis on planets in domicile, considering them to be 'dignified' and particularly beneficial in a chart, providing resources and strengths the native can readily access."
+    },
+    "exaltation": {
+        "description": "Exaltation represents a sign where a planet expresses its qualities in an elevated, refined, or idealized manner. When a planet is in its exaltation, it operates with exceptional effectiveness, often expressing its highest potential and most admirable qualities. Unlike domicile, where a planet operates in its most natural state, exaltation brings an element of enhancement, elevation, and sometimes even transcendence to the planetary energy. Planets in exaltation typically indicate areas of life where the native may experience moments of brilliance, elevation above ordinary circumstances, and the capacity to express the associated qualities with particular grace or spiritual refinement. The planet's energy is amplified in a harmonious way, allowing its positive attributes to shine while minimizing its challenging ones. Traditional astrology considers exalted planets to be strongly dignified, providing special gifts and notable talents that often manifest in distinctive or remarkable ways."
+    },
+    "detriment": {
+        "description": "Detriment represents a sign opposite to a planet's domicile, where its essential nature faces significant challenges in expression. When a planet is in detriment, it operates in an environment whose qualities naturally conflict with its core needs and function. This creates an inherent tension that requires conscious integration and adaptation to navigate effectively. Planets in detriment typically indicate areas of life where the native may experience initial difficulty, the need to develop compensatory skills, or situations that demand greater conscious effort to master. The planet's energy may manifest in compensatory ways—either through overexpression (trying too hard) or underexpression (giving up too easily). However, planets in detriment can ultimately become sources of significant strength and unique perspective, as the native develops sophisticated adaptations and deeper understanding through working with these challenging placements. The growth potential is substantial, though it generally comes through conscious effort rather than natural facility."
+    },
+    "fall": {
+        "description": "Fall represents a sign opposite to a planet's exaltation, where its refined qualities face particular challenges in manifestation. When a planet is in its fall, the environment's qualities tend to undermine or complicate the planet's ability to express its higher potential, creating a situation where its energies may become diminished, distorted, or require significant refinement to express effectively. Planets in fall typically indicate areas of life where the native may experience self-doubt, feelings of inadequacy, or situations that require substantial inner work to master. The planet's energy often manifests in ways that initially feel depleted or compromised, requiring conscious restoration and reintegration. However, planets in fall can ultimately become sources of profound wisdom and compassion, as the native develops humility, empathy, and deep understanding through working with these challenging placements. The spiritual and psychological growth potential is significant, though it generally emerges through confronting and transforming feelings of insufficiency or limitation."
+    },
+    "planets": {
+        "sun": {
+            "domicile": "leo",
+            "exaltation": "aries",
+            "detriment": "aquarius",
+            "fall": "libra",
+            "description": "The Sun in Leo shines with majestic authenticity, ruling its domain with generous warmth and creative vitality. In Aries, it is exalted, expressing its life-giving power through pioneering initiative and courageous self-assertion. In Aquarius, the Sun finds itself in detriment, as its centralizing individual radiance encounters the sign's distributed collective awareness, creating tension between personal identity and group consciousness. In Libra, the Sun falls into a position where its self-defining purpose meets the sign's relational orientation, challenging its capacity to maintain autonomous identity within the context of partnership and accommodation of others' needs. These dignities and debilities color how the Sun's qualities of vitality, purpose, and authentic self-expression manifest in the chart."
+        },
+        "moon": {
+            "domicile": "cancer",
+            "exaltation": "taurus",
+            "detriment": "capricorn",
+            "fall": "scorpio",
+            "description": "The Moon in Cancer flows with perfect emotional attunement, ruling its domain with nurturing sensitivity and protective care. In Taurus, it is exalted, expressing its receptive qualities through sensory appreciation and steadfast emotional security. In Capricorn, the Moon finds itself in detriment, as its fluid emotional nature encounters the sign's structured disciplined approach, creating tension between emotional needs and practical responsibilities. In Scorpio, the Moon falls into a position where its desire for comfort meets the sign's transformative intensity, challenging its capacity to maintain emotional equilibrium amid psychological depths and powerful feelings. These dignities and debilities color how the Moon's qualities of emotional response, nurturing, and intuitive connection manifest in the chart."
+        },
+        "mercury": {
+            "domicile": ["gemini", "virgo"],
+            "exaltation": "virgo",
+            "detriment": ["sagittarius", "pisces"],
+            "fall": "pisces",
+            "description": "Mercury in Gemini and Virgo expresses its communicative and analytical functions with masterful precision, ruling these domains with intellectual versatility and discriminating perception. In Virgo, it is particularly exalted, refining its mental capabilities through methodical analysis and practical problem-solving. In Sagittarius and Pisces, Mercury finds itself in detriment, as its detailed, logical approach encounters these signs' expansive, intuitive natures, creating tension between specific facts and broader meaning or between rational analysis and non-linear understanding. In Pisces, Mercury falls into a position where its categorical thinking meets boundless, non-rational awareness, challenging its capacity to maintain clear distinctions and logical structures amid fluid, interconnected consciousness. These dignities and debilities color how Mercury's qualities of communication, analysis, and information processing manifest in the chart."
+        },
+        "venus": {
+            "domicile": ["taurus", "libra"],
+            "exaltation": "pisces",
+            "detriment": ["scorpio", "aries"],
+            "fall": "virgo",
+            "description": "Venus in Taurus and Libra expresses its harmonizing and pleasure-seeking functions with natural grace, ruling these domains with sensual appreciation and relational elegance. In Pisces, it is exalted, elevating its loving qualities through transcendent compassion and spiritual beauty. In Aries and Scorpio, Venus finds itself in detriment, as its harmonizing nature encounters these signs' assertive or transformative intensities, creating tension between accommodation and desire or between surface harmony and deep emotional currents. In Virgo, Venus falls into a position where its unconditional appreciation meets the sign's discriminating perfectionism, challenging its capacity to fully embrace and enjoy without analysis or improvement. These dignities and debilities color how Venus's qualities of attraction, relationship, and value-creation manifest in the chart."
+        },
+        "mars": {
+            "domicile": ["aries", "scorpio"],
+            "exaltation": "capricorn",
+            "detriment": ["libra", "taurus"],
+            "fall": "cancer",
+            "description": "Mars in Aries and Scorpio expresses its assertive and desire-oriented functions with powerful effectiveness, ruling these domains with dynamic initiative and penetrating intensity. In Capricorn, it is exalted, channeling its driving energy through disciplined ambition and strategic mastery. In Libra and Taurus, Mars finds itself in detriment, as its direct, activating nature encounters these signs' harmonizing or stabilizing qualities, creating tension between assertion and accommodation or between immediate action and patient cultivation. In Cancer, Mars falls into a position where its external thrust meets the sign's protective, receptive orientation, challenging its capacity to maintain focused direction amid emotional currents and nurturing concerns. These dignities and debilities color how Mars's qualities of action, desire, and courage manifest in the chart."
+        },
+        "jupiter": {
+            "domicile": ["sagittarius", "pisces"],
+            "exaltation": "cancer",
+            "detriment": ["gemini", "virgo"],
+            "fall": "capricorn",
+            "description": "Jupiter in Sagittarius and Pisces expresses its expansive and meaning-seeking functions with natural abundance, ruling these domains with philosophical wisdom and spiritual faith. In Cancer, it is exalted, channeling its growth-oriented energy through emotional generosity and protective nurturance. In Gemini and Virgo, Jupiter finds itself in detriment, as its synthesizing, broad-perspective nature encounters these signs' detailed, analytical qualities, creating tension between comprehensive meaning and specific information or between faith and critical discernment. In Capricorn, Jupiter falls into a position where its abundant optimism meets the sign's conservative realism, challenging its capacity to maintain expansive vision amid practical limitations and structural necessities. These dignities and debilities color how Jupiter's qualities of growth, opportunity, and meaning-making manifest in the chart."
+        },
+        "saturn": {
+            "domicile": ["capricorn", "aquarius"],
+            "exaltation": "libra",
+            "detriment": ["cancer", "leo"],
+            "fall": "aries",
+            "description": "Saturn in Capricorn and Aquarius expresses its structuring and boundary-defining functions with natural authority, ruling these domains with disciplined mastery and principled organization. In Libra, it is exalted, channeling its ordering energy through balanced judgment and relationship structures that create fairness and harmony. In Cancer and Leo, Saturn finds itself in detriment, as its containing, limiting nature encounters these signs' emotionally nurturing or creatively expressive qualities, creating tension between structure and sensitivity or between discipline and spontaneous self-expression. In Aries, Saturn falls into a position where its patient maturation meets the sign's immediate initiative, challenging its capacity to maintain measured development amid impulses for rapid action and independent assertion. These dignities and debilities color how Saturn's qualities of responsibility, maturity, and enduring achievement manifest in the chart."
+        },
+        "uranus": {
+            "domicile": "aquarius",
+            "exaltation": "scorpio",
+            "detriment": "leo",
+            "fall": "taurus",
+            "description": "Uranus in Aquarius expresses its revolutionary and innovative functions with natural brilliance, ruling this domain with progressive vision and intellectual liberation. In Scorpio, it is exalted in modern attributions, channeling its awakening energy through profound psychological transformation and sudden revelatory insights into hidden dimensions. In Leo, Uranus finds itself in detriment, as its collective, future-oriented nature encounters the sign's individual creative focus, creating tension between group innovation and personal self-expression. In Taurus, Uranus falls into a position where its disruptive change meets the sign's stability and security needs, challenging its capacity to catalyze evolution amid resistance to altering established patterns and material foundations. These dignities and debilities color how Uranus's qualities of awakening, liberation, and sudden change manifest in the chart."
+        },
+        "neptune": {
+            "domicile": "pisces",
+            "exaltation": "cancer",
+            "detriment": "virgo",
+            "fall": "capricorn",
+            "description": "Neptune in Pisces expresses its dissolving and unifying functions with natural transcendence, ruling this domain with boundless compassion and mystical awareness. In Leo (or sometimes Cancer in some modern attributions), it is exalted, channeling its inspirational energy through magnificent creative vision and heart-centered spiritual expression. In Virgo, Neptune finds itself in detriment, as its boundary-dissolving nature encounters the sign's discriminating clarity, creating tension between unified perception and analytical distinction. In Aquarius, Neptune falls in some attributions into a position where its non-rational mysticism meets the sign's rational idealism, challenging its capacity to maintain transcendent connection amid detached conceptual frameworks and social ideologies. These dignities and debilities color how Neptune's qualities of inspiration, compassion, and spiritual connection manifest in the chart."
+        },
+        "pluto": {
+            "domicile": "scorpio",
+            "exaltation": "leo",
+            "detriment": "taurus",
+            "fall": "aquarius",
+            "description": "Pluto in Scorpio expresses its transformative and power-oriented functions with natural intensity, ruling this domain with psychological depth and regenerative capacity. In Aries in some modern attributions, it is exalted, channeling its transformative energy through courageous initiation and primal self-assertion that catalyzes rebirth. In Taurus, Pluto finds itself in detriment, as its eliminative, transforming nature encounters the sign's accumulative stability, creating tension between profound change and material security. In Libra, Pluto falls in some attributions into a position where its raw power dynamics meet the sign's harmony-seeking balance, challenging its capacity to engage with necessary destruction amid desires for peace and relational equilibrium. These dignities and debilities color how Pluto's qualities of transformation, empowerment, and psychological depth manifest in the chart."
+        }
+    }
+} 

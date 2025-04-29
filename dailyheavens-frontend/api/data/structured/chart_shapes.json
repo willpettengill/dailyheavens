@@ -1,0 +1,42 @@
+{
+    "definitions": {
+      "planets_to_use": ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"],
+      "bowl": {
+        "max_span_degrees": 180,
+        "min_gap_degrees": 180,
+        "description": "All planets are contained within approximately 180 degrees (half the zodiac)."
+      },
+      "bundle": {
+        "max_span_degrees": 120,
+        "description": "All planets are tightly clustered within a 120-degree span (one trine)."
+      },
+      "locomotive": {
+        "min_gap_degrees": 120,
+        "max_gap_degrees": 240,
+        "description": "Planets occupy roughly two-thirds of the zodiac (about 240 degrees), leaving a large empty space of at least 120 degrees (a trine)."
+      },
+      "seesaw": {
+        "clusters": 2,
+        "min_cluster_gap_degrees": 60,
+        "description": "Planets fall into two distinct groups, roughly opposite each other, with significant gaps (at least two signs wide) separating them."
+      },
+      "splash": {
+        "min_occupied_signs": 7,
+        "max_gap_degrees": 90,
+        "description": "Planets are distributed widely around the zodiac, occupying at least 7 signs with no major gaps larger than a square."
+      },
+      "splay": {
+        "clusters": 3,
+        "description": "Planets form at least three distinct groupings, often resembling a tripod structure. Intermediate between Splash and Bundle."
+      }
+    },
+    "interpretations": {
+      "bowl": "Indicates a self-contained nature. Focus tends to be on the houses and signs occupied, potentially feeling a lack or needing to reach out across the empty space. The 'rim' planets (start and end of the bowl) are significant.",
+      "bundle": "Suggests a highly focused, perhaps specialized, life orientation. Energy is concentrated, leading to depth but potentially a narrow perspective. Can indicate self-reliance.",
+      "locomotive": "Often signifies a driving force and self-motivation. The 'leading planet' (the first one clockwise after the empty gap) is key, indicating how the individual drives forward.",
+      "seesaw": "Suggests a life focused on balancing opposing forces, perspectives, or groups of people. Awareness of duality is strong, often navigating relationships or contrasting viewpoints.",
+      "splash": "Indicates diverse interests and a versatile nature. There's potential involvement in many areas, but energy can be scattered, requiring conscious effort to find focus.",
+      "splay": "Represents a life with several distinct areas of strong focus or talent that may not easily integrate. Indicates individualism and a refusal to be pigeonholed.",
+      "undetermined": "The planetary distribution doesn't fit a standard recognized shape, suggesting a unique or less defined pattern of energy expression."
+    }
+  }
