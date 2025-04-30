@@ -144,24 +144,24 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": error_msg}).encode('utf-8'))
                 return
 
-            # Combine date and time for the service (assuming service needs a specific format)
+            # Combine date and time for the service
             # For now, use placeholder/test values for lat/lon/tz while using the actual birth date/time
             test_geo = create_test_data() 
             
-            # IMPORTANT: The Z suffix means UTC time, but we're specifying a different timezone parameter
-            # Let's remove the Z to avoid timezone conflicts
-            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}:00"
+            # IMPORTANT: The time is in the timezone of the location, so we need to specify it's EST/EDT
+            # Add the offset explicitly instead of relying on the timezone parameter to avoid confusion
+            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}:00-04:00"  # -04:00 for EDT
             
             logger.info(f"Calculating chart for: Date={birth_date_str}, Time={birth_time_str}, Zip={zip_code}")
-            logger.info(f"Using actual birth date/time: {date_of_birth_combined} with geo data: Lat={test_geo['latitude']}, Lon={test_geo['longitude']}, TZ={test_geo['timezone']}")
+            logger.info(f"Using birth datetime with explicit offset: {date_of_birth_combined}")
 
             # Calculate birth chart using correct argument names and user's actual birth date/time
             try:
                 birth_chart = service.calculate_birth_chart(
-                    date_of_birth=date_of_birth_combined,  # Use actual birth date/time without Z suffix
+                    date_of_birth=date_of_birth_combined,  # Use date/time with explicit timezone offset
                     latitude=test_geo['latitude'],        # Placeholder geo
                     longitude=test_geo['longitude'],      # Placeholder geo
-                    timezone=test_geo['timezone']        # Placeholder geo
+                    timezone="UTC"                        # Use UTC since we've already specified the offset in the date
                 )
                 logger.info("Successfully calculated birth chart using user's birth date/time")
                 
@@ -184,8 +184,8 @@ class handler(BaseHTTPRequestHandler):
                 "birth_chart": birth_chart
             }
             
-            # Log the full response
-            logger.info(f"POST - RESPONSE STRUCTURE: {json.dumps(response.keys())}")
+            # Log the full response structure (using list to make it JSON serializable)
+            logger.info(f"POST - RESPONSE STRUCTURE: {list(response.keys())}")
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
