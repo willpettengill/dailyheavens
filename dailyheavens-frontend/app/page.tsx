@@ -31,7 +31,7 @@ export default function Home() {
 
     try {
       // Call the endpoint using POST with form data
-      const response = await fetch("/api/birth-chart", {
+      const response = await fetch("/api/py/birth-chart", {
         method: "POST", // Use POST to send form data
         headers: {
           "Content-Type": "application/json",
