@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 // Default test user data
 const defaultUser = {
   email: "wwpettengill@gmail.com",
-  birthDate: "1988-06-20",
+  birthDate: "1988-06-20", // Default to June 20th
   birthTime: "04:15",
   zipCode: "01776"
 }
@@ -30,9 +30,9 @@ export default function Home() {
     setIsLoading(true)
 
     try {
-      // Format the request according to the birth chart API
+      // Call the endpoint using POST with form data
       const response = await fetch("/api/birth-chart", {
-        method: "POST",
+        method: "POST", // Use POST to send form data
         headers: {
           "Content-Type": "application/json",
         },
@@ -40,24 +40,46 @@ export default function Home() {
           birth_date: formData.birthDate,
           birth_time: formData.birthTime,
           birth_place_zip: formData.zipCode,
-          email: formData.email
+          email: formData.email // Include email if your backend uses it
         }),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to generate birth chart")
+        const errorText = await response.text()
+        throw new Error(`Failed to generate birth chart: ${response.status} ${errorText}`)
       }
 
       const data = await response.json()
-      
-      // Store data in localStorage to access in dashboard
-      localStorage.setItem("birthChartData", JSON.stringify(data))
-      localStorage.setItem("userEmail", formData.email)
-      
-      // Redirect to dashboard
-      router.push("/dashboard")
+      console.log("Response from birth chart API:", data)
+
+      // Check if the chart calculation was successful in the backend
+      if (data.birth_chart && data.birth_chart.status === 'success') {
+        // Create the properly structured data object that the dashboard expects
+        const chartData = {
+          user: {
+            email: formData.email
+          },
+          birth_chart: data.birth_chart.data,
+          interpretation: {} // Add an empty interpretation object since dashboard expects it
+        }
+        
+        // Store the properly structured data in localStorage
+        localStorage.setItem("birthChartData", JSON.stringify(chartData))
+        localStorage.setItem("userEmail", formData.email)
+        
+        console.log("Storing chart data in localStorage:", chartData)
+        
+        // Redirect to dashboard
+        router.push("/dashboard")
+      } else {
+        // Handle cases where the backend reported an error
+        throw new Error(data.birth_chart?.error || data.message || "Birth chart calculation failed on the server.")
+      }
+
     } catch (error) {
       console.error("Error:", error)
+      // Basic user feedback for error
+      alert(`An error occurred: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setIsLoading(false)
     }
@@ -65,8 +87,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <header className="flex justify-between items-center mb-10">
+      <div className="container px-4 py-8 mx-auto sm:px-6 lg:px-8">
+        <header className="flex items-center justify-between mb-10">
           <h1 className="text-4xl font-bold">Daily Heavens</h1>
           <Button variant="outline" asChild>
             <a href="/dashboard">View Dashboard</a>
