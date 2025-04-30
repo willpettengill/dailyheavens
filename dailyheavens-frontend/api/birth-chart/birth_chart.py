@@ -152,27 +152,33 @@ class BirthChartService:
     def calculate_birth_chart(self, date_of_birth: str, latitude: float, longitude: float, timezone: str = "UTC") -> Dict[str, Any]:
         """Calculate a birth chart for the given date and location."""
         try:
-            # Parse the input date as UTC
-            dt = datetime.fromisoformat(date_of_birth.replace('Z', '+00:00'))
+            # Parse the naive input date string (no timezone info)
+            naive_dt = datetime.fromisoformat(date_of_birth)
             
-            # Convert to the specified timezone
-            if timezone != "UTC":
-                tz = pytz.timezone(timezone)
-                dt = dt.astimezone(tz)
+            # Get the timezone object
+            tz = pytz.timezone(timezone) 
+            
+            # Localize the naive datetime to the specified timezone
+            dt = tz.localize(naive_dt)
+            
+            logger.info(f"Localized datetime for calculation: {dt.isoformat()}")
             
             # Format date and time for flatlib
             date_str = dt.strftime("%Y/%m/%d")
             time_str = dt.strftime("%H:%M")
             
-            # Convert timezone to offset for flatlib
+            # Convert timezone to offset for flatlib using the localized datetime
             tz_offset = dt.utcoffset()
             if tz_offset:
                 hours = int(tz_offset.total_seconds() / 3600)
                 minutes = int((tz_offset.total_seconds() % 3600) / 60)
                 tz_str = f"{hours:+03d}{minutes:02d}"
             else:
-                tz_str = "+0000"
+                tz_str = "+0000" # Should not happen if timezone is valid
+                logger.warning(f"Could not determine timezone offset for {timezone}. Using +0000.")
             
+            logger.info(f"Using flatlib datetime: Date={date_str}, Time={time_str}, TZ={tz_str}")
+
             # Create flatlib objects
             pos = GeoPos(float(latitude), float(longitude))
             date = Datetime(date_str, time_str, tz_str)

@@ -148,20 +148,20 @@ class handler(BaseHTTPRequestHandler):
             # For now, use placeholder/test values for lat/lon/tz while using the actual birth date/time
             test_geo = create_test_data() 
             
-            # IMPORTANT: The time is in the timezone of the location, so we need to specify it's EST/EDT
-            # Add the offset explicitly instead of relying on the timezone parameter to avoid confusion
-            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}:00-04:00"  # -04:00 for EDT
+            # Pass the naive datetime string and the actual timezone name to the service
+            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}" # No offset or Z
+            actual_timezone = test_geo['timezone'] # Use the placeholder timezone for now
             
             logger.info(f"Calculating chart for: Date={birth_date_str}, Time={birth_time_str}, Zip={zip_code}")
-            logger.info(f"Using birth datetime with explicit offset: {date_of_birth_combined}")
+            logger.info(f"Passing naive datetime: {date_of_birth_combined} and timezone: {actual_timezone} to service")
 
             # Calculate birth chart using correct argument names and user's actual birth date/time
             try:
                 birth_chart = service.calculate_birth_chart(
-                    date_of_birth=date_of_birth_combined,  # Use date/time with explicit timezone offset
+                    date_of_birth=date_of_birth_combined,  # Pass naive date/time string
                     latitude=test_geo['latitude'],        # Placeholder geo
                     longitude=test_geo['longitude'],      # Placeholder geo
-                    timezone="UTC"                        # Use UTC since we've already specified the offset in the date
+                    timezone=actual_timezone             # Pass actual timezone name
                 )
                 logger.info("Successfully calculated birth chart using user's birth date/time")
                 
