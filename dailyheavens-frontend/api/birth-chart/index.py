@@ -64,6 +64,14 @@ class handler(BaseHTTPRequestHandler):
                     timezone=test_data["timezone"]
                 )
                 logger.info("Successfully calculated birth chart")
+                
+                # Log key details about the calculated chart
+                if birth_chart and birth_chart.get("status") == "success" and birth_chart.get("data"):
+                    data = birth_chart["data"]
+                    if "planets" in data and "Sun" in data["planets"]:
+                        logger.info(f"GET - SUN SIGN: {data['planets']['Sun'].get('sign', 'Unknown')}")
+                    if "calculation_date" in data:
+                        logger.info(f"GET - CALCULATION DATE: {data['calculation_date']}")
             except Exception as calc_error:
                 logger.error(f"Error calculating birth chart: {str(calc_error)}")
                 raise
@@ -139,20 +147,32 @@ class handler(BaseHTTPRequestHandler):
             # Combine date and time for the service (assuming service needs a specific format)
             # For now, use placeholder/test values for lat/lon/tz while using the actual birth date/time
             test_geo = create_test_data() 
-            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}:00Z"
-
+            
+            # IMPORTANT: The Z suffix means UTC time, but we're specifying a different timezone parameter
+            # Let's remove the Z to avoid timezone conflicts
+            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}:00"
+            
             logger.info(f"Calculating chart for: Date={birth_date_str}, Time={birth_time_str}, Zip={zip_code}")
             logger.info(f"Using actual birth date/time: {date_of_birth_combined} with geo data: Lat={test_geo['latitude']}, Lon={test_geo['longitude']}, TZ={test_geo['timezone']}")
 
             # Calculate birth chart using correct argument names and user's actual birth date/time
             try:
                 birth_chart = service.calculate_birth_chart(
-                    date_of_birth=date_of_birth_combined,  # Use actual birth date/time
+                    date_of_birth=date_of_birth_combined,  # Use actual birth date/time without Z suffix
                     latitude=test_geo['latitude'],        # Placeholder geo
                     longitude=test_geo['longitude'],      # Placeholder geo
                     timezone=test_geo['timezone']        # Placeholder geo
                 )
                 logger.info("Successfully calculated birth chart using user's birth date/time")
+                
+                # Log key details about the calculated chart
+                if birth_chart and birth_chart.get("status") == "success" and birth_chart.get("data"):
+                    data = birth_chart["data"]
+                    logger.info(f"POST - FULL CHART RESULT: {json.dumps(data['planets'])}")
+                    if "planets" in data and "Sun" in data["planets"]:
+                        logger.info(f"POST - SUN SIGN: {data['planets']['Sun'].get('sign', 'Unknown')}")
+                    if "calculation_date" in data:
+                        logger.info(f"POST - CALCULATION DATE: {data['calculation_date']}")
             except Exception as calc_error:
                 logger.error(f"Error calculating birth chart: {str(calc_error)}", exc_info=True)
                 raise # Re-raise to trigger 500 error response
@@ -163,6 +183,9 @@ class handler(BaseHTTPRequestHandler):
                 "received_data": request_data,
                 "birth_chart": birth_chart
             }
+            
+            # Log the full response
+            logger.info(f"POST - RESPONSE STRUCTURE: {json.dumps(response.keys())}")
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
