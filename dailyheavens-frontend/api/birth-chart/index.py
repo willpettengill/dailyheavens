@@ -99,30 +99,68 @@ class handler(BaseHTTPRequestHandler):
             
             # Read request body
             content_length = int(self.headers.get('Content-Length', 0))
+            request_data = {}
             if content_length > 0:
                 body = self.rfile.read(content_length)
-                request_data = json.loads(body.decode('utf-8'))
+                try:
+                    request_data = json.loads(body.decode('utf-8'))
+                    logger.info(f"Received POST data: {request_data}")
+                except json.JSONDecodeError as json_err:
+                    logger.error(f"Error decoding JSON body: {json_err}")
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Invalid JSON format"}).encode('utf-8'))
+                    return
             else:
-                # If no body provided, use test data
-                request_data = create_test_data()
-            
-            # Calculate birth chart
+                 logger.warning("Received POST request with no body or Content-Length=0")
+                 # Fallback or error? For now, let's return an error as we expect data.
+                 self.send_response(400)
+                 self.send_header('Content-type', 'application/json')
+                 self.end_headers()
+                 self.wfile.write(json.dumps({"error": "Missing request body"}).encode('utf-8'))
+                 return
+
+            # Extract data using frontend keys, add checks
+            birth_date_str = request_data.get("birth_date")
+            birth_time_str = request_data.get("birth_time")
+            zip_code = request_data.get("birth_place_zip")
+
+            if not all([birth_date_str, birth_time_str, zip_code]):
+                missing = [k for k, v in {"birth_date": birth_date_str, "birth_time": birth_time_str, "birth_place_zip": zip_code}.items() if not v]
+                error_msg = f"Missing required fields: {', '.join(missing)}"
+                logger.error(error_msg)
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": error_msg}).encode('utf-8'))
+                return
+
+            # Combine date and time for the service (assuming service needs a specific format)
+            # For now, use placeholder/test values for lat/lon/tz while using the actual birth date/time
+            test_geo = create_test_data() 
+            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}:00Z"
+
+            logger.info(f"Calculating chart for: Date={birth_date_str}, Time={birth_time_str}, Zip={zip_code}")
+            logger.info(f"Using actual birth date/time: {date_of_birth_combined} with geo data: Lat={test_geo['latitude']}, Lon={test_geo['longitude']}, TZ={test_geo['timezone']}")
+
+            # Calculate birth chart using correct argument names and user's actual birth date/time
             try:
                 birth_chart = service.calculate_birth_chart(
-                    date_of_birth=request_data.get("date", create_test_data()["date"]),
-                    latitude=request_data.get("latitude", create_test_data()["latitude"]),
-                    longitude=request_data.get("longitude", create_test_data()["longitude"]),
-                    timezone=request_data.get("timezone", create_test_data()["timezone"])
+                    date_of_birth=date_of_birth_combined,  # Use actual birth date/time
+                    latitude=test_geo['latitude'],        # Placeholder geo
+                    longitude=test_geo['longitude'],      # Placeholder geo
+                    timezone=test_geo['timezone']        # Placeholder geo
                 )
-                logger.info("Successfully calculated birth chart")
+                logger.info("Successfully calculated birth chart using user's birth date/time")
             except Exception as calc_error:
-                logger.error(f"Error calculating birth chart: {str(calc_error)}")
-                raise
+                logger.error(f"Error calculating birth chart: {str(calc_error)}", exc_info=True)
+                raise # Re-raise to trigger 500 error response
             
             # Prepare response
             response = {
                 "message": "Birth chart calculation successful",
-                "request_data": request_data,
+                "received_data": request_data,
                 "birth_chart": birth_chart
             }
             
@@ -134,11 +172,18 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
             
         except Exception as e:
-            logger.error(f"Error in birth chart handler: {str(e)}")
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "error": str(e),
-                "message": "Failed to calculate birth chart"
-            }).encode('utf-8'))
+            logger.error(f"Error in POST handler: {str(e)}", exc_info=True)
+            # Avoid sending response if headers already sent (e.g., in JSON decode error block)
+            if not self.wfile.closed:
+              try:
+                  self.send_response(500)
+                  self.send_header('Content-type', 'application/json')
+                  self.end_headers()
+                  self.wfile.write(json.dumps({
+                      "error": str(e),
+                      "message": "Failed to process birth chart request"
+                  }).encode('utf-8'))
+              except BrokenPipeError:
+                  logger.warning("Client closed connection before error response could be sent.")
+              except Exception as send_err:
+                  logger.error(f"Failed to send error response: {send_err}")
