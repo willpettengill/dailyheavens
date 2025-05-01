@@ -165,81 +165,18 @@ class BirthChartService:
             if tz_offset:
                 hours = int(tz_offset.total_seconds() / 3600)
                 minutes = int((tz_offset.total_seconds() % 3600) / 60)
-                tz_str = f"{hours:+03d}{minutes:02d}"
+                # Ensure the format includes the colon, e.g., -04:00
+                tz_str = f"{hours:+03d}:{minutes:02d}" 
             else:
                 # This case might occur if the input string was unexpectedly naive, or UTC with no offset info
-                tz_str = "+0000"
-                logger.warning(f"Could not determine timezone offset from input string '{date_of_birth}'. Using +0000.")
+                tz_str = "+00:00"
+                logger.warning(f"Could not determine timezone offset from input string '{date_of_birth}'. Using +00:00.")
             
             logger.info(f"Using flatlib datetime: Date={date_str}, Time={time_str}, TZ={tz_str}")
 
-            # Create the GeoPos object *before* the test loop
+            # Create flatlib objects using the corrected timezone string format
             pos = GeoPos(float(latitude), float(longitude))
-            
-            # --- Start Flatlib Datetime Format Testing ---
-            logger.info("--- Testing Flatlib Datetime Formats ---")
-            test_formats_results = {}
-            
-            # Extract components from the aware datetime object (dt)
-            t_year = dt.year
-            t_month = dt.month
-            t_day = dt.day
-            t_hour = dt.hour
-            t_minute = dt.minute
-            t_second = dt.second
-            t_offset_sign = '+' if tz_offset.total_seconds() >= 0 else '-'
-            t_offset_hours = abs(int(tz_offset.total_seconds() / 3600))
-            t_offset_minutes = abs(int((tz_offset.total_seconds() % 3600) / 60))
-            
-            # Derived strings/lists for testing
-            t_date_str = f"{t_year}/{t_month:02d}/{t_day:02d}"
-            t_time_str = f"{t_hour:02d}:{t_minute:02d}" # Flatlib expects HH:MM
-            t_tz_str_no_colon = f"{t_offset_sign}{t_offset_hours:02d}{t_offset_minutes:02d}" # e.g., -0400
-            t_tz_str_colon = f"{t_offset_sign}{t_offset_hours:02d}:{t_offset_minutes:02d}" # e.g., -04:00
-            t_date_list = [t_year, t_month, t_day]
-            # Time list format based on docs example ['+', 17, 0, 0] - sign seems to relate to time itself? Unclear. Let's try offset sign.
-            t_time_list_signed = [t_offset_sign, t_hour, t_minute, t_second]
-            t_time_list_unsigned = [t_hour, t_minute, t_second] # Maybe it ignores sign?
-
-            # Convert dt to UTC for UTC test
-            dt_utc = dt.astimezone(pytz.utc)
-            t_utc_date_str = dt_utc.strftime("%Y/%m/%d")
-            t_utc_time_str = dt_utc.strftime("%H:%M")
-            t_utc_tz_str = "+0000"
-
-            # Test Cases Definition
-            test_cases = {
-                "1_Current": lambda: Datetime(t_date_str, t_time_str, t_tz_str_no_colon), # Current method tz=-0400
-                "2_TZ_Colon": lambda: Datetime(t_date_str, t_time_str, t_tz_str_colon),   # tz=-04:00
-                "3_No_TZ": lambda: Datetime(t_date_str, t_time_str),                    # No tz string
-                "4_List_DateOnly": lambda: Datetime(t_date_list),                       # List [Y,M,D]
-                # "5_List_DateTime": lambda: Datetime(t_date_list, t_time_list_unsigned), # List [Y,M,D], [H,M,S] - Seems less likely based on docs
-                "6_List_DateTimeSigned": lambda: Datetime(t_date_list, t_time_list_signed), # List [Y,M,D], ['-',H,M,S]
-                "7_UTC_Components": lambda: Datetime(t_utc_date_str, t_utc_time_str, t_utc_tz_str) # Pass UTC components
-            }
-
-            # Run Test Cases
-            for name, constructor in test_cases.items():
-                try:
-                    logger.info(f"Testing format '{name}'")
-                    test_date = constructor()
-                    test_chart = Chart(test_date, pos) # Use the same GeoPos
-                    test_sun = test_chart.get(const.SUN)
-                    if test_sun:
-                        test_formats_results[name] = {"status": "success", "sun_sign": test_sun.sign, "sun_lon": test_sun.lon}
-                        logger.info(f"Result format '{name}': Sun={test_sun.sign} ({test_sun.lon:.2f})")
-                    else:
-                        test_formats_results[name] = {"status": "error", "message": "Could not get Sun object"}
-                        logger.warning(f"Result format '{name}': Could not get Sun object")
-                except Exception as test_err:
-                    test_formats_results[name] = {"status": "error", "message": str(test_err)}
-                    logger.error(f"Error format '{name}': {test_err}")
-            
-            logger.info("--- Finished Testing Flatlib Datetime Formats ---")
-            # --- End Flatlib Datetime Format Testing ---
-            
-            # Create flatlib objects using the *original* intended method for the actual result
-            date = Datetime(date_str, time_str, tz_str)
+            date = Datetime(date_str, time_str, tz_str) # Use tz_str with colon
             # Log Flatlib Datetime internal representation (Julian Day Universal Time)
             try:
                 logger.info(f"Flatlib Datetime Object: date.jd={date.jd}, date.ut={date.ut}")
