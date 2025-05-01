@@ -15,11 +15,15 @@ logger = logging.getLogger(__name__)
 
 def create_test_data():
     """Create test data for birth chart calculation."""
+    # Use June 20, 1988 04:15 EDT for testing the GET endpoint
+    # Note: Location is still NYC for simplicity
     return {
-        "date": "2024-03-19T12:00:00Z",  # Noon UTC on March 19, 2024
-        "latitude": 40.7128,              # New York City latitude
-        "longitude": -74.0060,            # New York City longitude
-        "timezone": "America/New_York"    # NYC timezone
+        "date": "1988-06-20T04:15:00-04:00",  # Aware ISO string for the target date
+        "latitude": 40.7128,                 # New York City latitude
+        "longitude": -74.0060,               # New York City longitude
+        # Timezone parameter is not strictly needed by the service now, 
+        # but kept here for potential future use or clarity
+        "timezone": "America/New_York"       
     }
 
 class handler(BaseHTTPRequestHandler):
@@ -57,11 +61,12 @@ class handler(BaseHTTPRequestHandler):
             
             # Calculate birth chart
             try:
+                # Pass the aware ISO string from test_data, remove timezone kwarg
                 birth_chart = service.calculate_birth_chart(
                     date_of_birth=test_data["date"],
                     latitude=test_data["latitude"],
-                    longitude=test_data["longitude"],
-                    timezone=test_data["timezone"]
+                    longitude=test_data["longitude"]
+                    # timezone=test_data["timezone"] # Removed
                 )
                 logger.info("Successfully calculated birth chart")
                 
@@ -148,20 +153,22 @@ class handler(BaseHTTPRequestHandler):
             # For now, use placeholder/test values for lat/lon/tz while using the actual birth date/time
             test_geo = create_test_data() 
             
-            # Pass the naive datetime string and the actual timezone name to the service
-            date_of_birth_combined = f"{birth_date_str}T{birth_time_str}" # No offset or Z
-            actual_timezone = test_geo['timezone'] # Use the placeholder timezone for now
+            # Create a timezone-aware ISO string including the offset (-04:00 for EDT)
+            # TODO: Replace hardcoded offset with dynamic lookup based on date/zip
+            offset_str = "-04:00" 
+            date_of_birth_iso = f"{birth_date_str}T{birth_time_str}:00{offset_str}"
             
             logger.info(f"Calculating chart for: Date={birth_date_str}, Time={birth_time_str}, Zip={zip_code}")
-            logger.info(f"Passing naive datetime: {date_of_birth_combined} and timezone: {actual_timezone} to service")
+            logger.info(f"Passing timezone-aware ISO string to service: {date_of_birth_iso}")
 
             # Calculate birth chart using correct argument names and user's actual birth date/time
             try:
+                # Pass the ISO string; the service will parse it. Remove the timezone parameter.
                 birth_chart = service.calculate_birth_chart(
-                    date_of_birth=date_of_birth_combined,  # Pass naive date/time string
-                    latitude=test_geo['latitude'],        # Placeholder geo
-                    longitude=test_geo['longitude'],      # Placeholder geo
-                    timezone=actual_timezone             # Pass actual timezone name
+                    date_of_birth=date_of_birth_iso,  
+                    latitude=test_geo['latitude'],        
+                    longitude=test_geo['longitude']
+                    # timezone parameter removed
                 )
                 logger.info("Successfully calculated birth chart using user's birth date/time")
                 
