@@ -1,0 +1,12 @@
+{% set interp = aspect.interpretation_components %}
+{{ aspect.planet1 }} {{ aspect.name }} {{ aspect.planet2 }} ({{ aspect.orb }}° Orb):
+
+{# Core Interpretation #}
+{% if interp.core %}
+- {{ interp.core }}
+{% endif %}
+
+{# Orb Significance #}
+{% if interp.orb_significance %}
+- {{ interp.orb_significance }}
+{% endif %} 

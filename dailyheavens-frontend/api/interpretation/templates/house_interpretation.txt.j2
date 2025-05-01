@@ -1,0 +1,7 @@
+{% set interp = house.interpretation_components %}
+House {{ house.house }} ({{ house.sign }} cusp):
+
+{# Cusp Interpretation #}
+{% if interp.cusp_interpretation %}
+- {{ interp.cusp_interpretation }}
+{% endif %} 

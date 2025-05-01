@@ -54,26 +54,50 @@ export default function Home() {
 
       // Check if the chart calculation was successful in the backend
       if (data.birth_chart && data.birth_chart.status === 'success') {
+        // Successfully got birth chart data, now fetch interpretation
+        const birthChartJson = data.birth_chart.data;
+        console.log("Birth chart data fetched successfully, now fetching interpretation...");
+
+        const interpretationResponse = await fetch("/api/interpretation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(birthChartJson), // Send the calculated birth chart data
+        });
+
+        if (!interpretationResponse.ok) {
+          const errorText = await interpretationResponse.text();
+          throw new Error(`Failed to fetch interpretation: ${interpretationResponse.status} ${errorText}`);
+        }
+
+        const interpretationData = await interpretationResponse.json();
+        console.log("Response from interpretation API:", interpretationData);
+
+        if (!interpretationData.success) {
+          throw new Error(`Interpretation generation failed: ${interpretationData.error || 'Unknown error'}`);
+        }
+
         // Create the properly structured data object that the dashboard expects
-        const chartData = {
+        const fullChartData = {
           user: {
             email: formData.email
           },
-          birth_chart: data.birth_chart.data,
-          interpretation: {} // Add an empty interpretation object since dashboard expects it
-        }
+          birth_chart: birthChartJson, // Use the data directly
+          interpretation: interpretationData // Use the fetched interpretation data
+        };
         
         // Store the properly structured data in localStorage
-        localStorage.setItem("birthChartData", JSON.stringify(chartData))
-        localStorage.setItem("userEmail", formData.email)
+        localStorage.setItem("birthChartData", JSON.stringify(fullChartData));
+        localStorage.setItem("userEmail", formData.email);
         
-        console.log("Storing chart data in localStorage:", chartData)
+        console.log("Storing full chart and interpretation data in localStorage:", fullChartData);
         
         // Redirect to dashboard
-        router.push("/dashboard")
+        router.push("/dashboard");
       } else {
-        // Handle cases where the backend reported an error
-        throw new Error(data.birth_chart?.error || data.message || "Birth chart calculation failed on the server.")
+        // Handle cases where the backend reported an error during birth chart calculation
+        throw new Error(data.birth_chart?.error || data.message || "Birth chart calculation failed on the server.");
       }
 
     } catch (error) {

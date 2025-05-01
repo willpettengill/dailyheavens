@@ -390,22 +390,33 @@ export default function Dashboard() {
                 {interpretation?.structured_sections && interpretation?.display_order ? (
                   interpretation.display_order.map((sectionKey) => {
                     const section = interpretation.structured_sections?.[sectionKey];
-                    if (!section) return null;
+                    if (!section) {
+                      console.warn(`Dashboard: Section data not found for key: ${sectionKey}`);
+                      return null;
+                    }
+
+                    // Log section processing
+                    console.log(`Dashboard: Processing section '${sectionKey}'. Title: '${section.title}'. Has content: ${!!section.content}, Has data: ${!!section.data}`);
+                    if (section.content) {
+                      console.log(`  Content for '${sectionKey}' (start):`, section.content.substring(0, 100) + "...");
+                    }
                     
                     if (sectionKey === 'element_balance') {
                       const modalitySection = interpretation.structured_sections?.['modality_balance'];
                       const elementContent = section?.content;
                       const modalityContent = modalitySection?.content;
+                      const elementData = section?.data as ElementBalanceData | undefined;
+                      const modalityData = modalitySection?.data as ModalityBalanceData | undefined;
                       
                       return (
                         <section key="element-modality-balance">
                           <h2 className="mb-4 text-xl font-semibold">Element and Modality Balance</h2>
                           <div className="grid gap-6 mb-6 md:grid-cols-2">
-                            {elementBalance && (
-                              <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
+                            {elementData && (
+                              <ElementBalanceChart elementBalance={elementData} />
                             )}
-                            {modalityBalance && modalitySection && (
-                              <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
+                            {modalityData && (
+                              <ModalityBalanceChart modalityBalance={modalityData} />
                             )}
                           </div>
                           {elementContent && renderMarkdownSection(elementContent)}
@@ -415,44 +426,11 @@ export default function Dashboard() {
                       );
                     }
                     
-                    else if (sectionKey === 'modality_balance') return null;
+                    else if (sectionKey === 'modality_balance') {
+                      return null;
+                    }
                     
                     else if (sectionKey === 'house_emphasis') {
-                      if (!interpretation.display_order?.includes('element_balance')) {
-                        const elemSection = interpretation.structured_sections?.['element_balance'];
-                        const modalSection = interpretation.structured_sections?.['modality_balance'];
-                        
-                        if (elemSection || modalSection) {
-                          const elemContent = elemSection?.content;
-                          const modalContent = modalSection?.content;
-                          
-                          return (
-                            <React.Fragment key={sectionKey}>
-                              <section key="element-modality-balance">
-                                <h2 className="mb-4 text-xl font-semibold">Element and Modality Balance</h2>
-                                <div className="grid gap-6 mb-6 md:grid-cols-2">
-                                  {elementBalance && (
-                                    <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
-                                  )}
-                                  {modalityBalance && modalSection && (
-                                    <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
-                                  )}
-                                </div>
-                                {elemContent && renderMarkdownSection(elemContent)}
-                                {modalContent && renderMarkdownSection(modalContent)}
-                                <Separator className="my-6" />
-                              </section>
-                              
-                              <section key={sectionKey}>
-                                <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
-                                {renderMarkdownSection(section.content)}
-                                <Separator className="my-6" />
-                              </section>
-                            </React.Fragment>
-                          );
-                        }
-                      }
-                      
                       return (
                         <section key={sectionKey}>
                           <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
