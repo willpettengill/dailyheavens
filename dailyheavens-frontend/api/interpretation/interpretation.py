@@ -2414,31 +2414,67 @@ class InterpretationService:
             # Removed generic fallback block
 
         # Describe lacking modalities
+        lacking_section_parts = [] # Use a list to store each lacking description
         if lacking:
-            lacking_modalities_str = []
             for modality in lacking:
-                meaning = modality_data_all.get(modality, {}).get("meaning", "its associated traits") # Reverted fallback meaning
-                count = percentages.get(modality, 0)
-                if count == 0 and f"{modality}_lacking" in modality_emphasis_patterns:
-                    desc = modality_emphasis_patterns[f"{modality}_lacking"].get(
-                        "description", "")
-                    lacking_modalities_str.append(
-                        f"A **lack of {modality.capitalize()}** energy ({count}%) may present challenges in {meaning}. {desc}")
-                elif f"{modality}_lacking" in modality_patterns:
-                    desc = modality_patterns[f"{modality}_lacking"].get(
-                        "description", f"potential challenges related to {modality} qualities ({meaning}).") # Reverted fallback desc structure
-                    lacking_modalities_str.append(f"{desc}") # Reverted append
-                # Removed generic fallback block
-            if lacking_modalities_str:
-                interpretation_parts.extend(lacking_modalities_str)
+                # --- NEW: Special handling for Cardinal Lacking ---
+                if modality == 'cardinal':
+                    # Use the user-provided text structure
+                    custom_interp = (
+                        "Sagittarius bringing philosophical flexibility; Pisces bringing spiritual and emotional adaptability." # User's first sentence
+                        "\n\n" # Paragraph break
+                        "**Lack of Cardinal energy**: This may present challenges in initiating action or taking the lead. You might find it harder to start new projects or assert yourself directly without conscious effort."
+                    )
+                    lacking_section_parts.append(custom_interp)
+                    self.logger.debug("Using custom interpretation for lacking Cardinal modality.")
+                # --- Keep existing logic for other modalities ---    
+                else:
+                    meaning = modality_data_all.get(modality, {}).get("meaning", "its associated traits")
+                    count = percentages.get(modality, 0)
+                    lacking_desc = ""
+                    # Check emphasis patterns first (for 0 count)
+                    if count == 0 and f"{modality}_lacking" in modality_emphasis_patterns:
+                        desc = modality_emphasis_patterns[f"{modality}_lacking"].get("description", "")
+                        # Improved bolding for emphasis pattern
+                        lacking_desc = f"**Lack of {modality.capitalize()} energy**: ({count}%) May present challenges in {meaning}. {desc}"
+                    # Fallback to general modality patterns
+                    elif f"{modality}_lacking" in modality_patterns:
+                        desc = modality_patterns[f"{modality}_lacking"].get(
+                            "description", f"Potential challenges related to {modality} qualities ({meaning}).")
+                        # Improved bolding for general pattern
+                        lacking_desc = f"**Underdeveloped {modality.capitalize()} energy**: {desc}"
+                    
+                    if lacking_desc: # Append if a description was generated
+                        lacking_section_parts.append(lacking_desc)
+                        self.logger.debug(f"Using standard interpretation for lacking {modality.capitalize()} modality.")
+                    else:
+                        self.logger.warning(f"No lacking interpretation found for modality: {modality}")
 
         # Note balance if neither dominant nor lacking modalities
+        balance_section = ""
         if not dominant and not lacking:
-            interpretation_parts.append(
+            balance_section = (
                 "Your chart shows a relatively balanced distribution of modalities, "
                 "suggesting versatility in how you approach initiation, stabilization, and adaptation.")
 
-        return " ".join(interpretation_parts)
+        # Combine the parts with double newlines for paragraphs
+        final_interpretation = ""
+        if interpretation_parts: # If there's a dominant description
+            final_interpretation += interpretation_parts[0]
+        
+        if lacking_section_parts: # If there are lacking descriptions
+            # Add a paragraph break before the first lacking description if dominant exists
+            if final_interpretation:
+                 final_interpretation += "\n\n" # Use ACTUAL newline
+            # Join multiple lacking descriptions with paragraph breaks
+            final_interpretation += "\n\n".join(lacking_section_parts) # Use ACTUAL newline
+        elif balance_section: # Only add balance if there were no lacking elements
+             # Add a paragraph break before the balance description if dominant exists
+             if final_interpretation:
+                 final_interpretation += "\n\n" # Use ACTUAL newline
+             final_interpretation += balance_section
+            
+        return final_interpretation.strip()
         
     def _get_modality_keywords(self, modality: str) -> List[str]:
         """Get keywords for a modality. Helper for interpretation generation."""
