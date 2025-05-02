@@ -395,10 +395,6 @@ export default function Dashboard() {
                     // Core Signs Rendering (3-column layout)
                     if (sectionKey === "core_signs") {
                       const coreSignsData = section?.data;
-                      // Find the corresponding sun_sign_details section
-                      const sunSignDetailsSection = interpretation.structured_sections?.["sun_sign_details"];
-                      // Check if the data exists before trying to use it
-                      const sunSignData = sunSignDetailsSection?.data; 
                       
                       return (
                         <React.Fragment key={sectionKey}>
@@ -409,87 +405,103 @@ export default function Dashboard() {
                             <CardContent>
                               {coreSignsData ? (
                                 <div className="space-y-6">
-                                  {/* Sun, Moon, Ascendant paragraphs */}
                                   {coreSignsData.sun && (
                                     <div className="space-y-2">
-                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none" 
-                                           dangerouslySetInnerHTML={{ __html: parseMarkdown(coreSignsData.sun.interpretation) }} />
+                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
+                                          {renderMarkdown(coreSignsData.sun.interpretation)}
+                                      </div>
                                     </div>
                                   )}
                                   {coreSignsData.moon && (
                                     <div className="space-y-2">
-                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none" 
-                                           dangerouslySetInnerHTML={{ __html: parseMarkdown(coreSignsData.moon.interpretation) }} />
+                                       <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
+                                          {renderMarkdown(coreSignsData.moon.interpretation)}
+                                      </div>
                                     </div>
                                   )}
                                   {coreSignsData.ascendant && (
                                     <div className="space-y-2">
-                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none" 
-                                           dangerouslySetInnerHTML={{ __html: parseMarkdown(coreSignsData.ascendant.interpretation) }} />
+                                       <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
+                                          {renderMarkdown(coreSignsData.ascendant.interpretation)}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
-                              ) : <p>Loading core signs...</p>}
+                              ) : (
+                                <p>Core signs data not available.</p>
+                              )}
                             </CardContent>
                           </Card>
-
-                          {/* NEW: Cosmic Details (Sun Sign Facts) - Conditionally Render based on data */} 
-                          {sunSignData && (
-                             <Card className="mt-6"> {/* Add margin top */} 
-                                <CardHeader>
-                                  <CardTitle>{sunSignDetailsSection?.title || "Sun Sign Details"}</CardTitle>
-                                  <CardDescription>Quick facts about your Sun sign</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="flex flex-wrap gap-2">
-                                    {/* Ruling Planet */}
-                                    {sunSignData.ruling_planet && (
-                                      <Badge variant="outline" className="px-3 py-1 border-blue-500/30 bg-blue-500/5 text-sm">
-                                        <span className="font-semibold mr-1">Ruling Planet:</span> 
-                                        {sunSignData.ruling_planet}
-                                      </Badge>
-                                    )}
-                                    {/* Lucky Day */}
-                                    {sunSignData.lucky_day && (
-                                      <Badge variant="outline" className="px-3 py-1 border-yellow-500/30 bg-yellow-500/5 text-sm">
-                                        <span className="font-semibold mr-1">Lucky Day:</span> 
-                                        {sunSignData.lucky_day}
-                                      </Badge>
-                                    )}
-                                    {/* Birthstone */}
-                                    {sunSignData.birthstone && (
-                                      <Badge variant="outline" className="px-3 py-1 border-green-500/30 bg-green-500/5 text-sm">
-                                        <span className="font-semibold mr-1">Birthstone:</span> 
-                                        {sunSignData.birthstone}
-                                      </Badge>
-                                    )}
-                                    {/* Lucky Numbers */}
-                                    {sunSignData.lucky_numbers && Array.isArray(sunSignData.lucky_numbers) && sunSignData.lucky_numbers.length > 0 && (
-                                      <Badge variant="outline" className="px-3 py-1 border-purple-500/30 bg-purple-500/5 text-sm">
-                                        <span className="font-semibold mr-1">Lucky Numbers:</span> 
-                                        {sunSignData.lucky_numbers.join(', ')}
-                                      </Badge>
-                                    )}
-                                    {/* Best Trait */}
-                                    {sunSignData.best_trait && (
-                                      <Badge variant="outline" className="px-3 py-1 border-indigo-500/30 bg-indigo-500/5 text-sm">
-                                        <span className="font-semibold mr-1">Best Trait:</span> 
-                                        {sunSignData.best_trait}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                          )}
-                          
-                          <Separator className="my-6" />
+                          {/* Keep separator after Core Signs */}
+                          <Separator className="my-6" /> 
                         </React.Fragment>
                       );
                     }
                     
-                    // NEW: Sun Sign Details Rendering (Only data, no visible component needed here)
+                    // NEW: Sun Sign Details Rendering (Badges)
                     if (sectionKey === "sun_sign_details") {
-                      return null; // Data is accessed by the core_signs rendering block
+                      // Access data directly from this section
+                      const sunSignData = section?.data;
+                      
+                      // Check if sunSignData exists and is an object before rendering
+                      if (!sunSignData || typeof sunSignData !== 'object' || Object.keys(sunSignData).length === 0) {
+                        return null; // Don't render if no data
+                      }
+
+                      // Define which badges to show
+                      const badgeKeysToShow: (keyof typeof sunSignData)[] = [
+                        'ruling_planet', 
+                        'lucky_day',
+                        'lucky_numbers', 
+                        'birthstone', 
+                        'best_trait'
+                      ];
+                      
+                      // Helper to format badge label from key
+                      const formatBadgeLabel = (key: string): string => {
+                        return key
+                          .replace(/_/g, ' ') // Replace underscores with spaces
+                          .split(' ')
+                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ');
+                      };
+                      
+                      // Helper to format array values
+                      const formatArrayValue = (value: any): string => {
+                        return Array.isArray(value) ? value.join(', ') : String(value);
+                      }
+
+                      return (
+                         <React.Fragment key={sectionKey}>
+                            {/* MOVE Badge Card rendering here */}
+                           <Card>
+                                <CardHeader>
+                                  {/* Use title from section data */}
+                                  <CardTitle>{section?.title || 'Cosmic Details'}</CardTitle> 
+                                  <CardDescription>Fun facts and associations for your Sun sign.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex flex-wrap gap-2">
+                                    {badgeKeysToShow.map(key => (
+                                      // Render badge only if the key exists in the data
+                                      sunSignData[key] && (
+                                        <Badge 
+                                          key={key} 
+                                          variant="outline" 
+                                          className="px-3 py-1 border-indigo-500/30 bg-indigo-500/5 text-sm"
+                                        >
+                                          <span className="font-semibold mr-1">{formatBadgeLabel(key)}:</span> 
+                                          {formatArrayValue(sunSignData[key])} {/* Format array values */}
+                                        </Badge>
+                                      )
+                                    ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              {/* Add separator after Sun Sign Details */}
+                              <Separator className="my-6" />
+                         </React.Fragment>
+                      );
                     }
                     
                     // Stelliums & Sign Distribution Chart Rendering
