@@ -60,7 +60,8 @@ class InterpretationService:
         self.logger.info("Initializing InterpretationService for serverless context")
 
         # Set base directory for file paths relative to this file's location
-        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        # Change path to go up one level (to api directory instead of api/interpretation)
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.logger.debug(f"Base directory for InterpretationService: {self.base_dir}")
 
         # Initialize data structures
@@ -74,7 +75,8 @@ class InterpretationService:
         self._sign_cache = {}
 
         # Set up Jinja2 for template rendering relative to this file
-        templates_dir = os.path.join(self.base_dir, "templates")
+        # Update the templates path to point to interpretation/templates
+        templates_dir = os.path.join(self.base_dir, "interpretation", "templates")
         self.logger.debug(f"Templates directory: {templates_dir}")
         if not os.path.isdir(templates_dir):
              self.logger.error(f"Templates directory not found at: {templates_dir}")
@@ -137,7 +139,7 @@ class InterpretationService:
             # Add the new aspect types separately
             # Ensure this block is correctly indented if it belongs to the 'if "aspects" in ...' block
             # Assuming it belongs, based on context:
-            if "aspects" in self.structured_data:  # Re-check needed if logic differs
+            if "aspects" in self.structured_data:
                 for angle, data in aspect_types_to_add.items():
                     if angle not in aspect_data:
                         aspect_data[angle] = data
@@ -151,6 +153,13 @@ class InterpretationService:
                     )
             else:
                 self.logger.warning("Descriptions data not loaded!")
+
+            # Check if elements_modalities is loaded
+            if "elements_modalities" in self.structured_data:
+                self.logger.info("Elements & Modalities data loaded successfully")
+                # You can add more detailed checks here if needed
+            else:
+                self.logger.warning("Elements & Modalities data not loaded!")
 
         except Exception as e:
             self.logger.error(
@@ -561,6 +570,16 @@ class InterpretationService:
             Dictionary containing interpretation data, primarily structured_sections and display_order.
         """
         self.logger.info(f"Generating {level} interpretation for birth chart")
+        # Log the received birth chart structure at the beginning
+        if isinstance(birth_chart, dict):
+             self.logger.debug(f"generate_interpretation received birth_chart with keys: {list(birth_chart.keys())}")
+             # Optionally log nested keys if needed
+             # self.logger.debug(f"  Planets keys: {list(birth_chart.get('planets', {}).keys())}")
+             # self.logger.debug(f"  Houses keys: {list(birth_chart.get('houses', {}).keys())}")
+             # self.logger.debug(f"  Angles keys: {list(birth_chart.get('angles', {}).keys())}")
+        else:
+             self.logger.warning(f"generate_interpretation received birth_chart of unexpected type: {type(birth_chart)}")
+        
         self.birth_chart = birth_chart # Store birth chart for internal use
 
         try:
@@ -684,11 +703,17 @@ class InterpretationService:
             interpretation["chart_shape"] = chart_shape_analysis
             self.logger.debug(f"Chart shape analyzed: {chart_shape_analysis.get('shape_name')}")
 
+            # Get planet combinations
+            combinations = self._analyze_combinations(birth_chart) # Added this line back
+            interpretation["combinations"] = combinations # Added this line back
+            self.logger.debug(f"Analyzed {len(combinations)} combinations") # Added this log
+
             # Generate structured sections and display order (Primary Output)
             self.logger.debug("Generating structured sections for final output")
             structured_sections, display_order = self._generate_structured_sections(
                 birth_chart, level,
-                element_balance, modality_balance, simple_patterns, pattern_interpretations
+                element_balance, modality_balance, simple_patterns, pattern_interpretations,
+                combinations # Pass combinations data
             )
             interpretation["structured_sections"] = structured_sections
             interpretation["display_order"] = display_order
@@ -720,7 +745,8 @@ class InterpretationService:
             element_balance: Dict,
             modality_balance: Dict,
             simple_patterns: List[Dict],
-            patterns: List[Dict]) -> Tuple[Dict, List[str]]:
+            patterns: List[Dict], # patterns is complex patterns
+            combinations: List[Dict]) -> Tuple[Dict, List[str]]: # Added combinations parameter
         """Generate structured sections for modular rendering.
         
         Args:
@@ -729,7 +755,8 @@ class InterpretationService:
             element_balance: Element balance data
             modality_balance: Modality balance data
             simple_patterns: Simple patterns data
-            patterns: Complex patterns data
+            patterns: Complex patterns data (T-Squares, Yods, etc.)
+            combinations: Planet combinations data
             
         Returns:
             Tuple of (structured_sections, display_order)
@@ -739,63 +766,159 @@ class InterpretationService:
         
         # Define display order (can be adjusted as needed)
         display_order = [
-            "overview", # Title only
+            "overview",           # Title only
+            "chart_shape",        # NEW: Add chart shape high up
             "core_signs",
-            "stelliums", # Title then sign dist chart then content
-            "sign_distribution", # Chart only
-            "element_balance", # Render element/modality together
-            "modality_balance", # Key needed, but rendering handled by element_balance
+            "combinations",       # NEW: Add combinations section
+            "stelliums",          # Includes sign dist chart
+            "sign_distribution",  # Data only, handled by stelliums render
+            "chart_patterns",     # NEW: Major aspect patterns (T-square, Yod, etc.)
+            "element_balance",    # Render element/modality together
+            "modality_balance",   # Key needed, but rendering handled by element_balance
             "house_emphasis",
             "angles",
-            "retrograde_planets" # Renamed to Planetary Movement
+            "retrograde_planets"  # Renamed to Planetary Movement
         ]
         
-        # --- Create sections ---
+        # --- Create sections --- #
         
         # 1. Overview Section (Used for main title)
         structured_sections["overview"] = {
             "title": "Birth Chart Interpretation",
             "content": "" # Content not displayed directly, only title
         }
+
+        # NEW: Chart Shape Section
+        chart_shape_analysis = self._analyze_chart_shape(birth_chart)
+        if chart_shape_analysis and chart_shape_analysis.get("shape_name") != "Undetermined":
+            structured_sections["chart_shape"] = {
+                "title": f"Chart Shape: {chart_shape_analysis.get('shape_name', 'N/A')}",
+                "content": chart_shape_analysis.get("interpretation", "No interpretation available."),
+                "data": chart_shape_analysis
+        }
         
         # 2. Core Signs Section
-        core_signs_content = ""
+        core_signs_data = {}
+        core_signs_content = "" # Keep content for potential fallback or combined text
+        
         # Sun
         sun_data = birth_chart.get("planets", {}).get("Sun", {})
         if sun_data.get("sign"):
-            sun_interp = self._get_planet_interpretation("Sun", sun_data["sign"], sun_data.get("house", 0))
-            core_signs_content += f"**Sun in {sun_data['sign']}**: {sun_interp}\n\n"
+            sun_sign = sun_data["sign"]
+            # --- ADD LOGGING HERE ---
+            self.logger.debug(f"Attempting to fetch sun_sign_medium for sign: '{sun_sign.lower()}'")
+            descriptions_available = "descriptions" in self.structured_data
+            self.logger.debug(f"Is 'descriptions' key available in structured_data? {descriptions_available}")
+            if descriptions_available:
+                sign_data_available = sun_sign.lower() in self.structured_data["descriptions"]
+                self.logger.debug(f"Is sign key '{sun_sign.lower()}' available in descriptions? {sign_data_available}")
+                if sign_data_available:
+                    medium_key_available = "sun_sign_medium" in self.structured_data["descriptions"][sun_sign.lower()]
+                    self.logger.debug(f"Is 'sun_sign_medium' key available for sign '{sun_sign.lower()}'? {medium_key_available}")
+                    fetched_value = self.structured_data["descriptions"][sun_sign.lower()].get("sun_sign_medium")
+                    self.logger.debug(f"Direct fetch result for sun_sign_medium: {'{...' if fetched_value else fetched_value}") # Log snippet or None/empty
+            # --- END LOGGING ---
+            # Fetch medium description
+            sun_interp = self.structured_data.get("descriptions", {}).get(sun_sign.lower(), {}).get('sun_sign_medium', '')
+            if not sun_interp: # Fallback logic modified here
+                self.logger.warning(f"sun_sign_medium lookup FAILED for {sun_sign}. Building simpler fallback for Core Signs.")
+                # Construct fallback directly, similar to _get_planet_interpretation but without house
+                planet_data = self._planet_cache.get("sun", {})
+                sign_data = self._sign_cache.get(sun_sign.lower(), {})
+                planet_core = planet_data.get("description", "The core energy of Sun")
+                sign_keywords = sign_data.get("keywords", [sun_sign.lower()])
+                sign_keyword1 = sign_keywords[0] if sign_keywords else ""
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                sun_interp = f"{planet_core}. In the sign of {sun_sign.capitalize()}, these energies are expressed through qualities like {sign_keyword1} and {sign_keyword2}."
+            core_signs_data["sun"] = {"sign": sun_sign, "interpretation": sun_interp}
+            # Add to content string (optional)
+            # core_signs_content += f"**Sun in {sun_sign}**: {sun_interp}\n\n"
+        
         # Moon
         moon_data = birth_chart.get("planets", {}).get("Moon", {})
         if moon_data.get("sign"):
-            moon_interp = self._get_planet_interpretation("Moon", moon_data["sign"], moon_data.get("house", 0))
-            core_signs_content += f"**Moon in {moon_data['sign']}**: {moon_interp}\n\n"
+            moon_sign = moon_data["sign"]
+            self.logger.debug(f"Attempting to fetch moon_sign_medium for sign: '{moon_sign.lower()}'")
+            # ... (Add detailed availability checks like for Sun if needed) ...
+            moon_interp = self.structured_data.get("descriptions", {}).get(moon_sign.lower(), {}).get('moon_sign_medium', '')
+            if not moon_interp: # Fallback logic modified here
+                self.logger.warning(f"moon_sign_medium lookup FAILED for {moon_sign}. Building simpler fallback for Core Signs.")
+                 # Construct fallback directly, similar to _get_planet_interpretation but without house
+                planet_data = self._planet_cache.get("moon", {})
+                sign_data = self._sign_cache.get(moon_sign.lower(), {})
+                planet_core = planet_data.get("description", "Your emotional nature")
+                sign_keywords = sign_data.get("keywords", [moon_sign.lower()])
+                sign_keyword1 = sign_keywords[0] if sign_keywords else ""
+                sign_keyword2 = sign_keywords[1] if len(sign_keywords) > 1 else sign_keyword1
+                # Use the more specific Virgo fallback if Moon is Virgo, otherwise generic
+                if moon_sign.lower() == 'virgo':
+                     moon_interp = f"{planet_core} is analytical and practical. You process feelings through service and problem-solving. While you can be critical, your helpfulness and attention to detail are valuable. You need order and purpose in your emotional life."
+                else:
+                    moon_interp = f"{planet_core}. In the sign of {moon_sign.capitalize()}, these feelings manifest through qualities like {sign_keyword1} and {sign_keyword2}."
+            core_signs_data["moon"] = {"sign": moon_sign, "interpretation": moon_interp}
+            # core_signs_content += f"**Moon in {moon_sign}**: {moon_interp}\n\n"
+
         # Ascendant
-        asc_sign = birth_chart.get("angles", {}).get("ascendant", {}).get("sign")
-        if asc_sign:
+        asc_data = birth_chart.get("angles", {}).get("ascendant", {})
+        if asc_data.get("sign"):
+            asc_sign = asc_data["sign"]
+            # Fetch long rising sign description
             asc_interp = self._get_rising_sign_summary(asc_sign)
-            core_signs_content += f"**Ascendant in {asc_sign}**: {asc_interp}\n\n"
+            # No need to strip title here as _get_rising_sign_summary returns only the description
+            core_signs_data["ascendant"] = {"sign": asc_sign, "interpretation": asc_interp}
+            # core_signs_content += f"**Ascendant in {asc_sign}**: {asc_interp}\n\n"
         
-        if core_signs_content:
+        if core_signs_data: # Check if data was populated
             structured_sections["core_signs"] = {
                 "title": "Core Signs",
-                "content": core_signs_content.strip()
+                "content": "", # Primary content will be rendered from data field
+                "data": core_signs_data 
+            }
+        
+        # NEW: Combinations Section
+        if combinations:
+            combinations_content = ""
+            for combo in combinations:
+                combo_type = combo.get('type', 'Combination')
+                points = combo.get('planets', []) or combo.get('points', []) # Handle both keys
+                interpretation = combo.get('interpretation', 'No specific interpretation available.')
+                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\n{interpretation}\n\n"
+
+            structured_sections["combinations"] = {
+                "title": "Key Planetary Blends",
+                "content": combinations_content.strip(),
+                "data": combinations # Pass the raw list of combination objects
             }
         
         # 3. & 5. Stelliums (Planetary Concentrations) Section
         stellium_patterns = [p for p in simple_patterns if p.get("type") == "stellium"]
         if stellium_patterns:
-            stellium_content = ""
+            stellium_data_for_section = [] # Initialize list to hold structured data
+            
             for pattern in stellium_patterns:
-                sign_name = pattern.get('sign', 'Unknown Sign')
-                interpretation_text = pattern.get("interpretation", "")
-                # Format: Bold Sign Stellium: Interpretation...
-                stellium_content += f"**{sign_name.capitalize()} Stellium:** {interpretation_text}\n\n"
+                sign_name = pattern.get('sign', 'Unknown Sign').capitalize()
+                planets_involved = pattern.get('planets', [])
+                count = pattern.get('count', 0)
+                
+                # Fetch sign keywords for a richer interpretation hint
+                sign_keywords = self._get_sign_keywords(sign_name.lower())
+                keywords_str = ", ".join(sign_keywords[:2]) if sign_keywords else sign_name # Use first 2 keywords
+                
+                # Create a simple interpretation focusing on amplification + keywords
+                simple_interpretation = f"This concentration strongly amplifies {sign_name} qualities ({keywords_str})."
+                
+                stellium_data_for_section.append({
+                    "type": "stellium",
+                    "location": sign_name, # Location is the Sign name
+                    "planets": planets_involved,
+                    "count": count,
+                    "interpretation_hint": simple_interpretation # Pass hint to frontend
+                })
             
             structured_sections["stelliums"] = {
-                "title": "Planetary Concentrations",
-                "content": stellium_content.strip(),
-                "data": stellium_patterns
+                "title": "Stelliums", # Changed title
+                "content": "", # Let frontend render from data
+                "data": stellium_data_for_section # Use the newly structured data
             }
         
         # 4. Sign Distribution Section (Data for chart)
@@ -817,7 +940,23 @@ class InterpretationService:
         structured_sections["sign_distribution"] = {
             "title": "Sign Distribution", # Title not typically shown if it's just the chart
             "content": "", # No text content needed, just the chart
-            "data": sign_distribution_data # Data is handled by frontend `generateSignDistribution`
+            "data": sign_distribution_data # Data is handled by frontend `generateSignDistribution` -> NOW by passing this data
+        }
+
+        # NEW: Chart Patterns Section (Complex Patterns)
+        if patterns: # patterns is the list of complex patterns
+            # Build content summarizing the patterns found
+            pattern_summary_content = "Key astrological patterns found in your chart:\n\n"
+            for pattern in patterns:
+                pattern_type = pattern.get('type', 'Unknown Pattern')
+                planets_involved = ", ".join(pattern.get('planets', []))
+                pattern_interpretation = pattern.get("interpretation", "")
+                pattern_summary_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\n\n"
+
+            structured_sections["chart_patterns"] = {
+                "title": "Key Chart Patterns",
+                "content": pattern_summary_content.strip(),
+                "data": patterns # Pass the raw list of pattern objects
         }
         
         # 6. House Emphasis Section
@@ -864,23 +1003,38 @@ class InterpretationService:
             }
         
         # 8. Retrograde Planets Section (Renamed)
+        # Fetch planet data for descriptions
+        planets_structured_data = self.structured_data.get("planets", {})
+        
         retrograde_planets_list = [
             planet_name for planet_name, planet_data in birth_chart.get("planets", {}).items()
             if planet_data.get("retrograde")
         ]
         
         if retrograde_planets_list:
-            retrograde_content = f"You have {len(retrograde_planets_list)} retrograde planet{'s' if len(retrograde_planets_list) > 1 else ''}: {', '.join(retrograde_planets_list)}. "
-            retrograde_content += "Retrograde planets represent energies that are internalized and often require deeper reflection."
+            # Improved generic description
+            retrograde_content = f"Retrograde planets suggest energies that are turned inward, internalized, or operate unconventionally. They often indicate areas needing review, reflection, or a unique approach. You have {len(retrograde_planets_list)} retrograde planet{'s' if len(retrograde_planets_list) > 1 else ''}:\n\n"
             
-            # Add individual interpretations if needed/available
-            # for planet in retrograde_planets_list:
-            #    retrograde_content += f"\n**{planet} Retrograde**: Specific interpretation here..."
+            # Add individual interpretations 
+            for planet in retrograde_planets_list:
+                planet_lower = planet.lower()
+                planet_info = self._planet_cache.get(planet_lower, {})
+                # Get the planet's core description or fall back to its name
+                planet_desc_full = planet_info.get("description")
+                fallback_desc = f"The energy and themes associated with {planet.capitalize()}"
+                planet_theme_desc = planet_desc_full if planet_desc_full else fallback_desc
+
+                # Attempt to get a sentence fragment, handle fallback case
+                first_sentence = planet_theme_desc
+                if '.' in planet_theme_desc and planet_theme_desc != fallback_desc:
+                    first_sentence = planet_theme_desc.split('.')[0]
+                
+                retrograde_content += f"*   **{planet.capitalize()} Retrograde**: {first_sentence}. These energies may be experienced more subjectively or require conscious effort to express outwardly.\n"
             
             structured_sections["retrograde_planets"] = {
                 "title": "Planetary Movement", # Renamed title
                 "content": retrograde_content,
-                "data": {"planets": retrograde_planets_list}
+                "data": retrograde_planets_list # Keep simple list for frontend data display
             }
         
         # 9. Element Balance Section (Data for chart + Text)
@@ -916,7 +1070,7 @@ class InterpretationService:
         #         if "chart_patterns" not in display_order:
         #             display_order.append("chart_patterns") # Add if not already there
 
-        # Filter out any sections that weren't populated and maintain requested order
+        # Filter out any sections that weren't populated OR have no data/content
         final_display_order = [section_key for section_key in display_order 
                                if section_key in structured_sections and 
                                (structured_sections[section_key].get("content") or structured_sections[section_key].get("data"))]
@@ -925,6 +1079,11 @@ class InterpretationService:
         if "retrograde_planets" in final_display_order and not retrograde_planets_list:
             final_display_order.remove("retrograde_planets")
             if "retrograde_planets" in structured_sections: del structured_sections["retrograde_planets"]
+
+        # Special case for patterns: only include if patterns exist
+        if "chart_patterns" in final_display_order and not patterns:
+             final_display_order.remove("chart_patterns")
+             if "chart_patterns" in structured_sections: del structured_sections["chart_patterns"]
 
         self.logger.debug(f"Final display order: {final_display_order}")
         self.logger.debug(f"Structured sections generated: {list(structured_sections.keys())}")
@@ -1023,11 +1182,18 @@ class InterpretationService:
         house_str = str(house)
 
         # --- Fetch data from caches/structured_data with fallbacks ---
+        self.logger.debug(f"Fetching data for {planet_lower}, {sign_lower}, house {house_str}")
         planet_data = self._planet_cache.get(planet_lower, {})
         sign_data = self._sign_cache.get(sign_lower, {})
         house_data = self._house_cache.get(house_str, {})
         dignities_data = self.structured_data.get("dignities", {})
         descriptions_data = self.structured_data.get("descriptions", {})
+        # Log if essential data is missing
+        if not planet_data: self.logger.warning(f"No planet data found in cache for {planet_lower}")
+        if not sign_data: self.logger.warning(f"No sign data found in cache for {sign_lower}")
+        if not house_data: self.logger.warning(f"No house data found in cache for {house_str}")
+        if not dignities_data: self.logger.warning("No dignities data found in structured_data")
+        if not descriptions_data: self.logger.warning("No descriptions data found in structured_data")
 
         # --- Planet in Sign Interpretation (using migrated data) ---
         level = "basic"  # Assuming basic for now, can be passed as arg later
@@ -1071,6 +1237,7 @@ class InterpretationService:
         else:
             # --- Original logic for other planets ---
             sign_interpretations = planet_data.get("sign_interpretations", {})
+            self.logger.debug(f"Looking up specific interpretation for {planet} in {sign} (level: {level}) in planets.json")
             specific_sign_interp = sign_interpretations.get(
                 level, {}).get(sign_lower)
 
@@ -1079,10 +1246,10 @@ class InterpretationService:
             if specific_sign_interp:
                 planet_sign_interp = specific_sign_interp
                 self.logger.debug(
-                    f"Using specific {level} interpretation for {planet} in {sign}")
+                    f"Using specific {level} interpretation for {planet} in {sign} from planets.json")
             else:
                 self.logger.warning(
-                    f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic.")
+                    f"No specific {level} interpretation found for {planet} in {sign} in planets.json. Building generic fallback.")
                 planet_core = planet_data.get(
                     "description", f"The energy of {planet.capitalize()}")
                 sign_keywords = sign_data.get("keywords", [sign_lower])
@@ -1091,11 +1258,12 @@ class InterpretationService:
                 planet_sign_interp = f"{planet_core}. In the sign of {sign.capitalize()}, these energies manifest through qualities like {sign_keyword1} and {sign_keyword2}."
 
         # --- House area of life ---
+        self.logger.debug(f"Looking up focus for house {house_str} in houses.json")
         house_focus = house_data.get(
             "focus", f"the area of life associated with the {self._get_house_ordinal(house)} house")
-        if not house_data:
+        if not house_data or "focus" not in house_data:
             self.logger.warning(
-                f"No data found for house {house} in houses.json")
+                f"No focus found for house {house} in houses.json. Using generic description.")
 
         # Retrograde interpretation text (Consider moving to JSON later)
         retrograde_text = f" With {planet.capitalize()} retrograde, these energies are often internalized, prompting deeper reflection or unconventional expression." if retrograde else ""
@@ -1104,9 +1272,11 @@ class InterpretationService:
         dignity_type = self._get_essential_dignity(planet_lower, sign_lower)
         dignity_interp_sentence = "" # Initialize dignity sentence
         if dignity_type != "peregrine":
+            self.logger.debug(f"Looking up description for dignity '{dignity_type}' in dignities.json")
             dignity_desc_full = dignities_data.get(
                 dignity_type, {}).get("description", "") # Get full description
             if dignity_desc_full:
+                self.logger.debug(f"Using dignity description for '{dignity_type}'")
                 # Format the full description
                 formatted_desc = dignity_desc_full
                 # Replace generic terms (case-insensitive for start of sentence)
@@ -1125,9 +1295,11 @@ class InterpretationService:
                 dignity_interp_sentence = f"In terms of essential dignity, {planet.capitalize()} is in {dignity_type.capitalize()} here. {formatted_desc}"
             else:
                 self.logger.warning(
-                    f"No description found for dignity '{dignity_type}' in dignities.json")
+                    f"No description found for dignity '{dignity_type}' in dignities.json. Using fallback sentence.")
                 # Fallback if description missing but dignity known
                 dignity_interp_sentence = f"In terms of essential dignity, {planet.capitalize()} is in {dignity_type.capitalize()} here, which influences its expression."
+        else:
+            self.logger.debug(f"Planet {planet_lower} in {sign_lower} is peregrine (no essential dignity).")
 
         # --- Build Final Interpretation (Revised) ---
         # Format house number with correct ordinal
@@ -1238,31 +1410,35 @@ class InterpretationService:
         sign_data = self._sign_cache.get(sign_lower, {}) # Use sign cache
 
         # --- Get Specific Cusp Interpretation ---
-        specific_interp = house_data.get(
-            "cusp_sign_interpretations", {}).get(
-            "basic", {}).get(sign_lower)
+        specific_interp = None
+        if house_data and "cusp_sign_interpretations" in house_data:
+            if "basic" in house_data["cusp_sign_interpretations"]:
+                self.logger.debug(f"Attempting lookup for basic cusp interpretation: house {house_num}, sign {sign_lower} in houses.json")
+                specific_interp = house_data["cusp_sign_interpretations"]["basic"].get(sign_lower)
+                self.logger.debug(f"_get_house_cusp_interpretation: Looked up house {house_num}, sign {sign_lower}. Found specific interp: {'Yes' if specific_interp else 'No'}")
 
         if specific_interp:
             self.logger.debug(
                 f"Using specific interpretation for {house_ordinal} House cusp in {sign}")
-            # Return only the interpretation text, the title is handled by the section structure
-            return specific_interp
+            # Return only the interpretation text, assume it's descriptive
+            return specific_interp 
         else:
             self.logger.warning(
-                f"No specific cusp interpretation found for {house_ordinal} House in {sign}. Building generic.")
+                f"No specific cusp interpretation found for {house_ordinal} House in {sign} in houses.json. Building generic fallback.")
             # --- Fallback to Generic Description ---
-            house_focus = house_data.get("focus")
-            if not house_focus:
-                house_focus = f"matters associated with the {house_ordinal} house"
-                self.logger.warning(
-                    f"No focus found for House {house_num} in houses.json")
-
-            # Fetch sign keywords correctly using the helper method
+            self.logger.debug("Fetching house focus/keywords and sign keywords/element for fallback text.")
+            house_focus = house_data.get("focus", f"matters associated with the {house_ordinal} house")
+            house_keywords = house_data.get("keywords", [f"themes of the {house_ordinal} house"])
+            house_theme = house_keywords[0]
+            
+            # Fetch sign keywords and element correctly using helper methods
             sign_keywords = self._get_sign_keywords(sign_lower)
-            sign_keyword_str = sign_keywords[0] if sign_keywords else sign_lower # Use first keyword or sign name
+            sign_keyword_str = sign_keywords[0] if sign_keywords else sign.capitalize() # Use first keyword or sign name
+            sign_element = self._get_sign_element(sign_lower)
+            element_keyword = self._get_element_keywords_simple(sign_element)[0] if sign_element != "unknown" else "unique" # Get first element keyword
 
-            # Build interpretation using data from JSON
-            interpretation = f"With {sign.capitalize()} on the cusp, you approach {house_focus} with {sign_keyword_str} qualities."
+            # Build more descriptive interpretation
+            interpretation = f"With **{sign.capitalize()}** on the cusp of the **{house_ordinal} House**, you likely approach **{house_focus}** (representing {house_theme}) with distinctive {sign_keyword_str} and {element_keyword} qualities."
         return interpretation
 
     def _generate_aspect_interpretations(
@@ -1346,19 +1522,20 @@ class InterpretationService:
 
         if not aspect_data:
             self.logger.warning(
-                f"Unknown aspect type: {aspect_type}. Skipping interpretation.")
+                f"Unknown aspect type: {aspect_type} ({aspect_key}). No data found in aspect cache/aspects.json. Skipping interpretation.")
             return None
 
         # --- Try Specific Pair Interpretation First ---
+        self.logger.debug(f"Looking up specific pair interpretation for {pair_key} and aspect {aspect_key} in aspects.json")
         specific_interp = aspect_data.get("specific_pairs", {}).get(pair_key)
         if specific_interp:
             self.logger.debug(
-                f"Using specific interpretation for {pair_key} {aspect_key} aspect")
+                f"Using specific interpretation for {pair_key} {aspect_key} aspect from aspects.json")
             interpretation_core = specific_interp
         else:
             # --- Fallback to Generic Interpretation ---
-            self.logger.debug(
-                f"No specific interpretation found for {pair_key} {aspect_key}. Building generic.")
+            self.logger.warning(
+                f"No specific interpretation found for {pair_key} {aspect_key} in aspects.json. Building generic fallback.")
             aspect_name = aspect_data.get("name", aspect_key.capitalize())
             aspect_keywords = aspect_data.get("keywords", [])
             aspect_action = aspect_keywords[0] if aspect_keywords else aspect_data.get(
@@ -1495,9 +1672,13 @@ class InterpretationService:
         self.logger.debug("Analyzing planetary combinations")
         combinations = []
         # Load data for both simple sign pairings and detailed elemental combos
+        self.logger.debug("Loading combination data from combinations.json and interpretation_combinations.json")
         simple_combinations_data = self.structured_data.get("combinations", {})
         detailed_combinations_data = self.structured_data.get(
             "interpretation_combinations", {})
+        # ... (Check if data loaded) ...
+        if not simple_combinations_data: self.logger.warning("combinations.json data not loaded.")
+        if not detailed_combinations_data: self.logger.warning("interpretation_combinations.json data not loaded.")
 
         sun_moon_sign_combinations = simple_combinations_data.get(
             "sun_moon_combinations", {})
@@ -1645,7 +1826,7 @@ class InterpretationService:
         interpretations = shape_data.get("interpretations", {})
 
         if not definitions or not interpretations:
-            self.logger.warning("Chart shape definitions or interpretations not found in structured data.")
+            self.logger.warning("Chart shape definitions or interpretations not found in chart_shapes.json. Cannot determine shape.")
             return {"shape_name": "Undetermined", "interpretation": "Chart shape data unavailable."}
 
         planets_to_use = definitions.get("planets_to_use", [])
@@ -1718,7 +1899,10 @@ class InterpretationService:
         # More checks can be added here
 
         # Get interpretation
+        self.logger.debug(f"Looking up interpretation for determined shape '{shape_name}' in chart_shapes.json")
         interpretation = interpretations.get(shape_name, interpretations.get("undetermined", "")) # Use determined shape_name
+        if not interpretation or shape_name == "undetermined":
+             self.logger.warning(f"No specific interpretation found for chart shape '{shape_name}'. Using fallback/undetermined.")
 
         self.logger.debug(f"Determined chart shape: {shape_name} (Span: {occupied_span:.1f}, Gap: {largest_gap:.1f})")
         self.logger.debug(f"Shape interpretation type: {type(interpretation).__name__}, value: {interpretation}")
@@ -1781,13 +1965,14 @@ class InterpretationService:
 
             if sign in cardinal_signs:
                 return "cardinal"
-            if sign in fixed_signs:
+            elif sign in fixed_signs: # Corrected indentation and used elif
                 return "fixed"
-            if sign in mutable_signs:
+            elif sign in mutable_signs: # Corrected indentation and used elif
                 return "mutable"
-
-            self.logger.warning(f"Unknown sign for modality determination: {sign}")
-            return "unknown"
+            else:
+                # This block only executes if the sign is not in any list
+                self.logger.warning(f"Unknown sign for modality determination: {sign}")
+                return "unknown"
 
     def _get_sign_keywords(self, sign: str) -> List[str]:
         """Get keywords for a sign from the cache."""
@@ -1937,51 +2122,46 @@ class InterpretationService:
         patterns_data = self.structured_data.get("interpretation_patterns", {})
         elemental_patterns = patterns_data.get("elemental_patterns", {})
         element_emphasis_patterns = patterns_data.get("element_emphasis", {})
+        # Load meanings from structured data
+        element_data_all = self.structured_data.get("elements_modalities", {}).get("elements", {})
+        if not element_data_all:
+            self.logger.error("Element meanings not found in elements_modalities.json")
+            # Provide a fallback or handle error gracefully
+            return "Error: Element balance interpretation data is missing."
 
         # Describe dominant element
         if dominant:
             percentage = round(percentages[dominant])
-            # Use detailed description if emphasis is strong (e.g., > 40%),
-            # otherwise concise
+            meaning = element_data_all.get(dominant, {}).get("meaning", "its associated traits") # Reverted fallback meaning
+            # Use detailed description if emphasis is strong (e.g., > 40%), otherwise concise
             if percentage > 40 and f"{dominant}_dominant" in element_emphasis_patterns:
                 desc = element_emphasis_patterns[f"{dominant}_dominant"].get(
                     "description", "")
                 interpretation_parts.append(
-                    f"A {dominant.capitalize()} dominant chart occurs when a significant number of planets are positioned in {dominant} signs. {desc}")
+                    f"A **dominant {dominant.capitalize()}** presence ({percentage}%) suggests your primary mode of operating involves {meaning}. {desc}")
             elif f"{dominant}_dominant" in elemental_patterns:
                 desc = elemental_patterns[f"{dominant}_dominant"].get(
-                    "description", f"a focus on {dominant} qualities.")
-                interpretation_parts.append(
-                    f"{desc}")
-            else:
-                interpretation_parts.append(
-                    f"Your chart shows a strong emphasis on {dominant} qualities.")  # Fallback
-                self.logger.warning(
-                    f"No description found for dominant element {dominant} in interpretation_patterns.json")
+                    "description", f"A focus on {dominant} qualities ({meaning}).") # Reverted fallback desc structure
+                interpretation_parts.append(f"{desc}") # Reverted append
+            # Removed generic fallback block
 
         # Describe lacking elements
         if lacking:
-            # Use detailed description if element is very lacking (e.g., 0
-            # planets)
+            # Use detailed description if element is very lacking (e.g., 0 planets)
             lacking_elements_str = []
             for element in lacking:
-                # Get count via percentage (approximate)
+                meaning = element_data_all.get(element, {}).get("meaning", "its associated traits") # Reverted fallback meaning
                 count = percentages.get(element, 0)
                 if count == 0 and f"{element}_lacking" in element_emphasis_patterns:
                     desc = element_emphasis_patterns[f"{element}_lacking"].get(
                         "description", "")
                     lacking_elements_str.append(
-                        f"A chart lacking {element.capitalize()} energy creates a natural challenge in accessing qualities like {self._get_element_keywords_simple(element)[0]}. {desc}")
+                        f"A **lack of {element.capitalize()}** energy ({count}%) may present challenges in accessing qualities like {meaning}. {desc}")
                 elif f"{element}_lacking" in elemental_patterns:
                     desc = elemental_patterns[f"{element}_lacking"].get(
-                        "description", f"potential challenges related to {element} qualities.")
-                    lacking_elements_str.append(
-                        f"{desc}")
-                else:
-                    lacking_elements_str.append(
-                        f"Your chart shows limited {element} energy, which may create challenges in accessing qualities like {self._get_element_keywords_simple(element)[0]}.")
-                    self.logger.warning(
-                        f"No description found for lacking element {element} in interpretation_patterns.json")
+                        "description", f"potential challenges related to {element} qualities ({meaning}).") # Reverted fallback desc structure
+                    lacking_elements_str.append(f"{desc}") # Reverted append
+                # Removed generic fallback block
             if lacking_elements_str:
                 interpretation_parts.extend(lacking_elements_str)
 
@@ -2097,49 +2277,46 @@ class InterpretationService:
         patterns_data = self.structured_data.get("interpretation_patterns", {})
         modality_patterns = patterns_data.get("modality_patterns", {})
         modality_emphasis_patterns = patterns_data.get("modality_emphasis", {})
+        # Load meanings from structured data
+        modality_data_all = self.structured_data.get("elements_modalities", {}).get("modalities", {})
+        if not modality_data_all:
+            self.logger.error("Modality meanings not found in elements_modalities.json")
+            # Provide a fallback or handle error gracefully
+            return "Error: Modality balance interpretation data is missing."
 
         # Describe dominant modality
         if dominant:
             percentage = round(percentages[dominant])
+            meaning = modality_data_all.get(dominant, {}).get("meaning", "its associated traits") # Reverted fallback meaning
             # Use detailed description if emphasis is strong (e.g., > 40%),
             # otherwise concise
             if percentage > 40 and f"{dominant}_dominant" in modality_emphasis_patterns:
                 desc = modality_emphasis_patterns[f"{dominant}_dominant"].get(
                     "description", "")
                 interpretation_parts.append(
-                    f"A {dominant.capitalize()} dominant chart occurs when a significant number of planets (typically four or more) are positioned in the {dominant} signs. {desc}")
+                    f"A **dominant {dominant.capitalize()}** presence ({percentage}%) suggests your primary mode of operating involves {meaning}. {desc}")
             elif f"{dominant}_dominant" in modality_patterns:
                 desc = modality_patterns[f"{dominant}_dominant"].get(
-                    "description", f"a focus on {dominant} qualities.")
-                interpretation_parts.append(
-                    f"{desc}")
-            else:
-                interpretation_parts.append(
-                    f"Your chart shows a strong emphasis on {dominant} qualities, suggesting a natural tendency toward {self._get_modality_keywords(dominant)[0]}.")  # Fallback
-                self.logger.warning(
-                    f"No description found for dominant modality {dominant} in interpretation_patterns.json")
+                    "description", f"A focus on {dominant} qualities ({meaning}).") # Reverted fallback desc structure
+                interpretation_parts.append(f"{desc}") # Reverted append
+            # Removed generic fallback block
 
         # Describe lacking modalities
         if lacking:
             lacking_modalities_str = []
             for modality in lacking:
-                # Get count via percentage (approximate)
+                meaning = modality_data_all.get(modality, {}).get("meaning", "its associated traits") # Reverted fallback meaning
                 count = percentages.get(modality, 0)
                 if count == 0 and f"{modality}_lacking" in modality_emphasis_patterns:
                     desc = modality_emphasis_patterns[f"{modality}_lacking"].get(
                         "description", "")
                     lacking_modalities_str.append(
-                        f"A chart lacking {modality.capitalize()} energy (no planets or only one planet in {modality} signs) creates a natural challenge in {self._get_modality_keywords(modality)[0]}. {desc}")
+                        f"A **lack of {modality.capitalize()}** energy ({count}%) may present challenges in {meaning}. {desc}")
                 elif f"{modality}_lacking" in modality_patterns:
                     desc = modality_patterns[f"{modality}_lacking"].get(
-                        "description", f"potential challenges related to {modality} qualities.")
-                    lacking_modalities_str.append(
-                        f"{desc}")
-                else:
-                    lacking_modalities_str.append(
-                        f"Your chart shows limited {modality} energy, which may create challenges in {self._get_modality_keywords(modality)[0]}.")
-                    self.logger.warning(
-                        f"No description found for lacking modality {modality} in interpretation_patterns.json")
+                        "description", f"potential challenges related to {modality} qualities ({meaning}).") # Reverted fallback desc structure
+                    lacking_modalities_str.append(f"{desc}") # Reverted append
+                # Removed generic fallback block
             if lacking_modalities_str:
                 interpretation_parts.extend(lacking_modalities_str)
 
@@ -2382,9 +2559,13 @@ class InterpretationService:
 
                     # --- Enhance T-Square Interpretation ---
                     # Get signs for modality/element analysis
-                    p1_sign = planets_data.get(p1, {}).get("sign")
-                    p2_sign = planets_data.get(p2, {}).get("sign")
-                    apex_sign = planets_data.get(apex, {}).get("sign")
+                    p1_data = planets_data.get(p1, {})
+                    p2_data = planets_data.get(p2, {})
+                    apex_data = planets_data.get(apex, {})
+                    p1_sign = p1_data.get("sign")
+                    p2_sign = p2_data.get("sign")
+                    apex_sign = apex_data.get("sign")
+                    apex_house = apex_data.get("house")
 
                     interpretation_text = "" # Initialize interpretation text
                     if p1_sign and p2_sign and apex_sign:
@@ -2397,6 +2578,17 @@ class InterpretationService:
                         all_elements = {"fire", "earth", "air", "water"}
                         missing_elements = list(all_elements - elements_present)
                         missing_element_str = missing_elements[0] if missing_elements else "None" # Should always find one
+
+                        # Calculate empty leg sign (opposite apex sign)
+                        apex_sign_index = self._get_sign_index(apex_sign)
+                        empty_leg_sign_index = (apex_sign_index + 6) % 12
+                        empty_leg_sign = self._get_sign_from_index(empty_leg_sign_index)
+                        
+                        # Fetch keywords/themes
+                        apex_keywords = self._get_sign_keywords(apex_sign.lower())
+                        apex_keywords_str = apex_keywords[0] if apex_keywords else apex_sign
+                        empty_leg_keywords = self._get_sign_keywords(empty_leg_sign.lower())
+                        empty_leg_keywords_str = empty_leg_keywords[0] if empty_leg_keywords else empty_leg_sign
 
                         # Enhance interpretation with modality information
                         if modality == "cardinal":

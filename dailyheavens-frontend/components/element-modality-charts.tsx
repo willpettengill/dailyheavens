@@ -116,25 +116,37 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
               nameKey="name"
               cx="50%" 
               cy="50%" 
+              labelLine={false}
+              label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
+                const RADIAN = Math.PI / 180;
+                const radius = innerRadius + (outerRadius - innerRadius) * 1.15;
+                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                return (
+                  <text 
+                    x={x}
+                    y={y}
+                    fill="currentColor"
+                    textAnchor={x > cx ? 'start' : 'end'} 
+                    dominantBaseline="central"
+                    className="text-xs fill-foreground"
+                  >
+                    {`${name.charAt(0).toUpperCase() + name.slice(1)} (${(percent * 100).toFixed(0)}%)`}
+                  </text>
+                );
+              }}
               outerRadius={70}
-              fill="#8884d8" // This is overridden by the Cell components
+              fill="#8884d8"
             >
               {
                 chartData.map((entry, index) => {
-                  // Get the correct color based on the element name
                   const elementName = entry.name.toLowerCase();
                   const color = getElementColor(elementName);
                   
                   return <Cell key={`cell-${index}`} fill={color} />;
                 })
               }
-              <LabelList
-                dataKey="name"
-                className="fill-background"
-                stroke="none"
-                fontSize={12}
-                formatter={(value: string) => value.charAt(0).toUpperCase() + value.slice(1)}
-              />
             </Pie>
           </PieChart>
         </ChartContainer>
@@ -233,25 +245,37 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
               nameKey="name"
               cx="50%" 
               cy="50%" 
+              labelLine={false}
+              label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
+                const RADIAN = Math.PI / 180;
+                const radius = innerRadius + (outerRadius - innerRadius) * 1.15;
+                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                return (
+                  <text 
+                    x={x}
+                    y={y}
+                    fill="currentColor"
+                    textAnchor={x > cx ? 'start' : 'end'} 
+                    dominantBaseline="central"
+                    className="text-xs fill-foreground"
+                  >
+                    {`${name.charAt(0).toUpperCase() + name.slice(1)} (${(percent * 100).toFixed(0)}%)`}
+                  </text>
+                );
+              }}
               outerRadius={70}
-              fill="#8884d8" // This is overridden by the Cell components
+              fill="#8884d8"
             >
               {
                 chartData.map((entry, index) => {
-                  // Get the correct color based on the modality name
                   const modalityName = entry.name.toLowerCase();
                   const color = getModalityColor(modalityName);
                   
                   return <Cell key={`cell-${index}`} fill={color} />;
                 })
               }
-              <LabelList
-                dataKey="name"
-                className="fill-background"
-                stroke="none"
-                fontSize={12}
-                formatter={(value: string) => value.charAt(0).toUpperCase() + value.slice(1)}
-              />
             </Pie>
           </PieChart>
         </ChartContainer>
@@ -260,46 +284,44 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
   );
 }
 
-// Sign Distribution Chart 
-export interface SignDistributionData {
-  planets: Record<string, number>;
-  houses: Record<string, number>;
+// Sign Distribution Chart
+export interface SignDistributionBackendData {
+  // Structure matches what the backend generates
+  [sign: string]: { planets: number; houses: number };
 }
 
-export function SignDistributionChart({ signDistribution }: { signDistribution: SignDistributionData }) {
-  const planets = signDistribution.planets || {};
-  const houses = signDistribution.houses || {};
+export function SignDistributionChart({ signDistribution }: { signDistribution: SignDistributionBackendData }) {
+  const zodiacSigns = [
+    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+  ];
 
-  // Get all unique signs from both planets and houses
-  const allSigns = [...new Set([...Object.keys(planets), ...Object.keys(houses)])];
+  // Transform the backend data into the format Recharts expects
+  const processedChartData = zodiacSigns.map(sign => {
+    const signData = signDistribution[sign] || { planets: 0, houses: 0 };
+    return {
+      sign: sign, // Keep full name for potential sorting/filtering
+      signAbbr: sign.substring(0, 3), // Keep abbreviation for axis
+      planets: signData.planets,
+      houses: signData.houses,
+      total: signData.planets + signData.houses // Add total for sorting
+    };
+  });
 
-  // Transform data for stacked bar chart, iterating through all unique signs
-  const chartData = allSigns
-    .map(sign => ({
-      sign: sign,
-      planets: planets[sign] || 0, // Default to 0 if sign not in planets
-      houses: houses[sign] || 0,  // Default to 0 if sign not in houses
-      // Calculate total for sorting
-      total: (planets[sign] || 0) + (houses[sign] || 0)
-    }))
-    // Filter out signs with zero total count (optional, but keeps chart clean)
-    .filter(data => data.total > 0)
-    // Sort by total count descending
-    .sort((a, b) => b.total - a.total);
-    
-  // Updated chartConfig to remove hsl() wrapper as per ShadCN v4 docs with @theme inline
+  // Sort the data by total count descending
+  const chartData = processedChartData.sort((a, b) => b.total - a.total);
+
   const chartConfig = {
     planets: {
       label: "Planets",
-      color: "var(--chart-1)"
+      color: "var(--color-chart-1)",
     },
     houses: {
       label: "Houses",
-      color: "var(--chart-2)"
-    }
+      color: "var(--color-chart-3)",
+    },
   } satisfies ChartConfig;
 
-  // Format sign name to title case with full names
   const formatSignName = (sign: string): string => {
     const zodiacSigns: Record<string, string> = {
       'aries': 'Aries',
@@ -326,51 +348,35 @@ export function SignDistributionChart({ signDistribution }: { signDistribution: 
       <CardContent className="pt-2">
         <ChartContainer
           config={chartConfig}
-          className="min-h-[300px] w-full [&_.recharts-text]:fill-card-foreground"
+          className="h-[250px] w-full"
         >
-          <BarChart 
-            accessibilityLayer 
-            data={chartData}
-            margin={{ top: 10, right: 30, left: 15, bottom: 80 }}
-          >
+          <BarChart data={chartData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
             <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="sign"
-              tickLine={false}
-              tickMargin={20}
+            <XAxis 
+              dataKey="sign" 
+              tickLine={false} 
+              tickMargin={10} 
               axisLine={false}
+              tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig]?.label || value}
               angle={-45}
               textAnchor="end"
-              tick={{ fontSize: 12 }}
-              tickFormatter={formatSignName}
+              height={60}
             />
-            <YAxis 
-              tickLine={false}
-              axisLine={false}
-              tickMargin={10}
-              label={{ 
-                value: 'Count', 
-                angle: -90, 
-                position: 'insideLeft',
-                style: { textAnchor: 'middle' },
-                className: "fill-card-foreground text-xs"
-              }}
-            />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <ChartLegend verticalAlign="top" content={<ChartLegendContent />} />
-            {/* Updated fill properties to use --color-KEY pattern */}
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="planets"
               stackId="a"
               name="Planets"
-              fill="var(--color-planets)" // Corrected fill
+              fill="var(--color-planets)"
               radius={[0, 0, 4, 4]}
             />
             <Bar
               dataKey="houses"
               stackId="a"
               name="Houses"
-              fill="var(--color-houses)" // Corrected fill
+              fill="var(--color-houses)"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

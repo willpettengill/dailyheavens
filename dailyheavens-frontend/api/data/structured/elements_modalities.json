@@ -1,0 +1,41 @@
+{
+  "elements": {
+    "fire": {
+      "keywords": ["energy", "action", "enthusiasm", "inspiration", "passion", "spirit"],
+      "description": "Represents the energetic, assertive, and passionate principle. Associated with action, self-expression, and the drive to create.",
+      "meaning": "energy, action, enthusiasm, and inspiration"
+    },
+    "earth": {
+      "keywords": ["practicality", "stability", "patience", "resourcefulness", "groundedness", "material"],
+      "description": "Represents the tangible, practical, and grounded principle. Associated with stability, the physical world, and building enduring structures.",
+      "meaning": "practicality, stability, patience, and resourcefulness"
+    },
+    "air": {
+      "keywords": ["intellect", "communication", "social connection", "perspective", "ideas", "objectivity"],
+      "description": "Represents the intellectual, communicative, and social principle. Associated with ideas, logic, relationships, and abstract thought.",
+      "meaning": "intellect, communication, social connection, and perspective"
+    },
+    "water": {
+      "keywords": ["emotion", "intuition", "sensitivity", "empathy", "flow", "connection"],
+      "description": "Represents the emotional, intuitive, and receptive principle. Associated with feelings, empathy, subconscious connections, and healing.",
+      "meaning": "emotion, intuition, sensitivity, and empathy"
+    }
+  },
+  "modalities": {
+    "cardinal": {
+      "keywords": ["initiating", "leading", "starting", "action-oriented", "enterprising"],
+      "description": "Represents the initiating principle, associated with starting new things, taking action, and leadership.",
+      "meaning": "initiating action, leadership, and starting new things"
+    },
+    "fixed": {
+      "keywords": ["stabilizing", "persisting", "maintaining", "determined", "focused"],
+      "description": "Represents the sustaining principle, associated with stability, determination, and maintaining focus.",
+      "meaning": "stabilizing, persisting, and maintaining"
+    },
+    "mutable": {
+      "keywords": ["adapting", "flexibility", "versatility", "communicating", "mediating"],
+      "description": "Represents the adaptable principle, associated with flexibility, communication, and adjusting to change.",
+      "meaning": "adapting, flexibility, and versatility"
+    }
+  }
+} 

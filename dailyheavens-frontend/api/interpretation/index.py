@@ -16,7 +16,7 @@ LOG_LEVEL = logging.DEBUG
 logging.basicConfig(level=LOG_LEVEL,
                     format='%(asctime)s - %(name)s [%(levelname)s] - %(message)s')
 logger = logging.getLogger(__name__)
-logger.info(f"Logger initialized with level: {logging.getLevelName(logger.level)}")
+logger.info(f"Handler logger '{logger.name}' initialized with level: {logging.getLevelName(logger.level)}")
 
 # --- Interpretation Service Initialization --- #
 interpretation_service = None
@@ -25,6 +25,15 @@ try:
     logger.info("Attempting to import and initialize InterpretationService...")
     from .interpretation import InterpretationService
     interpretation_service = InterpretationService(logger_instance=logger)
+
+    # --- Explicitly configure service logger --- #
+    # Get the logger actually used by the service (which it sets internally)
+    service_logger_name = InterpretationService.__module__ + "." + InterpretationService.__name__ # Or simply "api.interpretation.interpretation"
+    service_logger = logging.getLogger("api.interpretation.interpretation") # Use the correct name
+    service_logger.setLevel(LOG_LEVEL) # Ensure service logger level matches handler
+    logger.info(f"Ensured service logger '{service_logger.name}' level is set to: {logging.getLevelName(service_logger.level)}")
+    # --- End service logger configuration --- #
+
     logger.info("InterpretationService imported and initialized successfully.")
 except ImportError as e:
     service_initialization_error = f"Failed to import InterpretationService: {e}"
@@ -157,13 +166,17 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             post_body = self.rfile.read(content_length)
-            logger.debug(f"Received raw POST body (first 100 chars): {post_body[:100]}...")
+            logger.debug(f"Received raw POST body (first 500 chars): {post_body[:500]}...")
 
             # --- Parse JSON Data --- #
             try:
                 birth_chart_data = json.loads(post_body)
                 logger.info("Successfully parsed JSON request body.")
-                logger.debug(f"Parsed birth chart data keys: {list(birth_chart_data.keys())}")
+                # Log structure after parsing
+                if isinstance(birth_chart_data, dict):
+                    logger.debug(f"Parsed birth chart data keys: {list(birth_chart_data.keys())}")
+                else:
+                    logger.warning(f"Parsed JSON is not a dictionary: {type(birth_chart_data)}")
             except json.JSONDecodeError as e:
                 self.send_error(400, f"Invalid JSON format: {e}")
                 logger.error(f"Failed to parse JSON request body: {e}", exc_info=True)

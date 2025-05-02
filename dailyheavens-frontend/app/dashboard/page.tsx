@@ -16,9 +16,10 @@ import {
   SignDistributionChart,
   ElementBalanceData, 
   ModalityBalanceData,
-  SignDistributionData,
+  SignDistributionBackendData,
   BoilerplateStackedBarChart
 } from "@/components/element-modality-charts"
+import { Interpretation } from "../../lib/types"
 
 interface ChartData {
   user: {
@@ -98,66 +99,27 @@ const getPlanetData = (planets: Record<string, {
   return planets[capitalized] || planets[lowercase];
 };
 
-// Add this utility function after other helper functions
-const generateSignDistribution = (
-  planets: Record<string, {
-    sign?: string;
-    house?: string;
-    degree?: number;
-    description?: string;
-    retrograde?: boolean;
-  }>, 
-  houses: Record<string, {
-    sign?: string;
-    description?: string;
-  }>
-): SignDistributionData => {
-  const planetCounts: Record<string, number> = {};
-  const houseCounts: Record<string, number> = {};
-  
-  // Count planets in each sign
-  Object.values(planets).forEach(planet => {
-    if (planet && planet.sign) {
-      const sign = planet.sign.toLowerCase();
-      planetCounts[sign] = (planetCounts[sign] || 0) + 1;
-    }
-  });
-  
-  // Count houses in each sign
-  Object.values(houses).forEach(house => {
-    if (house && house.sign) {
-      const sign = house.sign.toLowerCase();
-      houseCounts[sign] = (houseCounts[sign] || 0) + 1;
-    }
-  });
-  
-  return {
-    planets: planetCounts,
-    houses: houseCounts
-  };
-};
-
 // Helper to render markdown content with proper styling
-const renderMarkdownSection = (content: string) => {
-  if (!content) return null;
+const renderMarkdown = (markdownText: string | undefined | null): React.ReactNode => {
+  if (!markdownText) return null;
   
-  // Process the markdown
-  let processedHtml = content.startsWith('<') 
-    ? content 
-    : parseMarkdown(content);
-    
-  // Add styling classes
-  processedHtml = processedHtml
-    .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4 text-card-foreground"')
-    .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3 text-card-foreground"')
-    .replace(/<h3/g, '<h3 class="text-lg font-semibold mb-2 text-card-foreground"')
-    .replace(/<p>/g, '<p class="text-card-foreground mb-4">')
-    .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-2">')
-    .replace(/<li>/g, '<li class="text-card-foreground">');
-    
+  // Basic check if it looks like HTML already
+  const isHtml = markdownText.trim().startsWith('<') && markdownText.trim().endsWith('>');
+  let processedHtml = isHtml ? markdownText : marked.parse(markdownText) as string;
+
+  // Apply basic prose styling for readability within CardContent
+  // Note: Using prose class handles most markdown elements well
+  // You might not need explicit replacements if prose covers it.
+  // Example explicit replacements (if needed beyond prose):
+  // processedHtml = processedHtml
+  //   .replace(/<h1/g, '<h1 class="text-2xl font-semibold mb-4"')
+  //   .replace(/<h2/g, '<h2 class="text-xl font-semibold mb-3"')
+  //   .replace(/<p>/g, '<p class="mb-4">')
+  //   .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-1">')
+  //   .replace(/<ol>/g, '<ol class="list-decimal pl-6 mb-4 space-y-1">');
+
   return (
     <div 
-      className="text-card-foreground"
       dangerouslySetInnerHTML={{ __html: processedHtml }} 
     />
   );
@@ -322,7 +284,9 @@ export default function Dashboard() {
                 <section>
                   <h3 className="mb-4 text-lg font-semibold">Planets</h3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].map((planet) => {
+                    {["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
+                      .filter(planet => planet !== 'sun' && planet !== 'moon')
+                      .map((planet) => {
                       const planetData = getPlanetData(planets, planet);
                       if (!planetData) return null;
                       return (
@@ -388,85 +352,351 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-6">
                 {interpretation?.structured_sections && interpretation?.display_order ? (
-                  interpretation.display_order.map((sectionKey) => {
+                  interpretation.display_order.map((sectionKey, index) => {
                     const section = interpretation.structured_sections?.[sectionKey];
-                    if (!section) {
-                      console.warn(`Dashboard: Section data not found for key: ${sectionKey}`);
-                      return null;
+                    console.log(`Rendering section ${index}: ${sectionKey}`, section);
+
+                    if (!section && sectionKey !== "element_balance" && sectionKey !== "sign_distribution") {
+                      console.warn(`Section data not found for key: ${sectionKey}`);
+                      return null; // Don't render if section data is missing, except for handled cases
                     }
 
-                    // Log section processing
-                    console.log(`Dashboard: Processing section '${sectionKey}'. Title: '${section.title}'. Has content: ${!!section.content}, Has data: ${!!section.data}`);
-                    if (section.content) {
-                      console.log(`  Content for '${sectionKey}' (start):`, section.content.substring(0, 100) + "...");
+                    // Skip rendering these keys directly as they are handled within other sections
+                    if (sectionKey === "sign_distribution" || sectionKey === "modality_balance") {
+                      return null;
                     }
                     
-                    if (sectionKey === 'element_balance') {
-                      const modalitySection = interpretation.structured_sections?.['modality_balance'];
-                      const elementContent = section?.content;
-                      const modalityContent = modalitySection?.content;
-                      const elementData = section?.data as ElementBalanceData | undefined;
-                      const modalityData = modalitySection?.data as ModalityBalanceData | undefined;
+                    // --- Specific Section Rendering --- //
+
+                    if (sectionKey === "overview") {
+                      // Don't render anything for overview, title is handled above
+                      return null; 
+                    }
+                    
+                    // NEW: Chart Shape Rendering
+                    if (sectionKey === "chart_shape") {
+                      if (!section?.content) return null; // Don't render if no content
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="prose dark:prose-invert max-w-none">
+                              {renderMarkdown(section.content)}
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+
+                    // Core Signs Rendering (3-column layout)
+                    if (sectionKey === "core_signs") {
+                      const coreSignsData = section?.data;
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title || 'Core Placements'}</CardTitle>
+                              <CardDescription>Your Sun, Moon, and Ascendant signs form the foundation of your personality.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {coreSignsData ? (
+                                <div className="space-y-6">
+                                  {coreSignsData.sun && (
+                                    <div className="space-y-2">
+                                      <h4 className="text-lg font-semibold">Sun in {coreSignsData.sun.sign}</h4>
+                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
+                                        {renderMarkdown(coreSignsData.sun.interpretation)}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {coreSignsData.moon && (
+                                    <div className="space-y-2">
+                                      <h4 className="text-lg font-semibold">Moon in {coreSignsData.moon.sign}</h4>
+                                       <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
+                                        {renderMarkdown(coreSignsData.moon.interpretation)}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {coreSignsData.ascendant && (
+                                    <div className="space-y-2">
+                                      <h4 className="text-lg font-semibold">Ascendant in {coreSignsData.ascendant.sign}</h4>
+                                       <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
+                                        {renderMarkdown(coreSignsData.ascendant.interpretation)}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                // Fallback if data structure is missing, render original content if exists
+                                <div className="prose dark:prose-invert max-w-none">
+                                  {renderMarkdown(section?.content || "Core sign data not available.")}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+                    
+                    // NEW: Combinations Rendering
+                    if (sectionKey === "combinations") {
+                       if (!section?.content) return null; // Don't render if no content
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="prose dark:prose-invert max-w-none">
+                              {renderMarkdown(section.content)}
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+
+                    // Stelliums & Sign Distribution Chart Rendering
+                    if (sectionKey === "stelliums") {
+                      const stelliumData = section?.data as Array<{
+                        location: string;
+                        count: number;
+                        planets?: string[];
+                        interpretation_hint?: string;
+                      }> | undefined;
                       
                       return (
-                        <section key="element-modality-balance">
-                          <h2 className="mb-4 text-xl font-semibold">Element and Modality Balance</h2>
-                          <div className="grid gap-6 mb-6 md:grid-cols-2">
-                            {elementData && (
-                              <ElementBalanceChart elementBalance={elementData} />
-                            )}
-                            {modalityData && (
-                              <ModalityBalanceChart modalityBalance={modalityData} />
-                            )}
-                          </div>
-                          {elementContent && renderMarkdownSection(elementContent)}
-                          {modalityContent && renderMarkdownSection(modalityContent)}
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              {/* <CardTitle>{section?.title || 'Stelliums & Sign Distribution'}</CardTitle> <-- Removed Title */}
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              {/* Display Stellium Data from section.data */}
+                              {stelliumData && Array.isArray(stelliumData) && stelliumData.length > 0 && (
+                                <div className="space-y-3">
+                                  <p className="text-sm text-muted-foreground pb-2">Areas of concentrated energy (stelliums) and the overall balance of zodiac signs in your chart.</p> {/* Moved description here */} 
+                                  {stelliumData.map((stellium, index) => (
+                                    <div key={index}>
+                                      <h4 className="font-semibold">{stellium.location} Stellium ({stellium.count} planets)</h4>
+                                      <p className="text-sm text-muted-foreground">Involving: {stellium.planets?.join(', ') || 'N/A'}</p>
+                                      <p className="text-sm">{stellium.interpretation_hint || 'Strong focus in this area.'}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {/* Pass backend data directly to SignDistributionChart*/}
+                              {interpretation.structured_sections?.['sign_distribution']?.data && (
+                                // Log data being passed to SignDistributionChart
+                                (() => {
+                                  const signDistData = interpretation.structured_sections['sign_distribution'].data as SignDistributionBackendData;
+                                  console.log("Dashboard: Passing data to SignDistributionChart:", JSON.stringify(signDistData));
+                                  return <SignDistributionChart signDistribution={signDistData} />;
+                                })()
+                              )}
+                            </CardContent>
+                          </Card>
                           <Separator className="my-6" />
-                        </section>
-                      );
-                    }
-                    
-                    else if (sectionKey === 'modality_balance') {
-                      return null;
-                    }
-                    
-                    else if (sectionKey === 'house_emphasis') {
-                      return (
-                        <section key={sectionKey}>
-                          <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
-                          {renderMarkdownSection(section.content)}
-                          <Separator className="my-6" />
-                        </section>
-                      );
-                    }
-                    
-                    else if (sectionKey === 'sign_distribution') {
-                      return null;
-                    }
-                    
-                    else if (sectionKey === 'stelliums') {
-                      return (
-                        <section key={sectionKey}>
-                          <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
-                          
-                          <div className="mb-6">
-                            <SignDistributionChart 
-                              signDistribution={generateSignDistribution(planets, houses)} 
-                            />
-                          </div>
-                          
-                          {renderMarkdownSection(section.content)}
-                          <Separator className="my-6" />
-                        </section>
+                        </React.Fragment>
                       );
                     }
 
+                    // Chart Patterns Rendering
+                    if (sectionKey === "chart_patterns") {
+                      if (!section?.content) return null;
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title || 'Key Chart Patterns'}</CardTitle>
+                              <CardDescription>Significant geometric alignments between planets, indicating major life themes or dynamics.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              {/* Render details from data */} 
+                              {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
+                                <div className="mt-4 space-y-3">
+                                  {section.data.map((pattern: any, index: number) => (
+                                    <div key={index} className="pl-3 border-l-4 border-primary">
+                                      <h4 className="font-semibold">{pattern.type || 'Unknown Pattern'}</h4>
+                                      <p className="text-sm text-muted-foreground">Planets: {pattern.planets?.join(', ') || 'N/A'}</p>
+                                      <p className="text-sm">{pattern.interpretation || 'No interpretation available.'}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+
+                    // Element & Modality Balance Chart Rendering
+                    if (sectionKey === "element_balance") {
+                      const elementData = section?.data as ElementBalanceData | undefined;
+                      const modalityData = interpretation.structured_sections?.['modality_balance']?.data as ModalityBalanceData | undefined;
+                      
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title || 'Elemental & Modality Balance'}</CardTitle>
+                               <CardDescription>The distribution of Fire, Earth, Air, Water (Elements) and Cardinal, Fixed, Mutable (Modalities) energies in your chart.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
+                                  {elementData && Object.keys(elementData.percentages).length > 0 ? (
+                                    // Log data being passed to ElementBalanceChart
+                                    (() => {
+                                      console.log("Dashboard: Passing data to ElementBalanceChart:", JSON.stringify(elementData));
+                                      return <ElementBalanceChart elementBalance={elementData} />;
+                                    })()
+                                   ) : (
+                                     <p className="py-10 text-sm text-center text-muted-foreground">Element data not available.</p>
+                                   )}
+                                   {modalityData && Object.keys(modalityData.percentages).length > 0 ? (
+                                    // Log data being passed to ModalityBalanceChart
+                                    (() => {
+                                      console.log("Dashboard: Passing data to ModalityBalanceChart:", JSON.stringify(modalityData));
+                                      return <ModalityBalanceChart modalityBalance={modalityData} />;
+                                    })()
+                                   ) : (
+                                     <p className="py-10 text-sm text-center text-muted-foreground">Modality data not available.</p>
+                                   )}
+                              </div>
+                              <div className="prose dark:prose-invert max-w-none">
+                                {/* Render combined content if available */} 
+                                {renderMarkdown(section?.content)}
+                                {renderMarkdown(interpretation.structured_sections?.['modality_balance']?.content)}
+                                {/* Optionally display dominant/lacking from data */} 
+                                {(elementData?.dominant || modalityData?.dominant) && (
+                                  <div className="mt-4 text-sm">
+                                    {elementData?.dominant && <p><strong>Dominant Element:</strong> {elementData.dominant}</p>}
+                                    {modalityData?.dominant && <p><strong>Dominant Modality:</strong> {modalityData.dominant}</p>}
+                                  </div>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+
+                    // Modality Balance Chart Rendering
+                    if (sectionKey === "modality_balance") {
+                      // This data is rendered within the 'element_balance' section
+                      return null;
+                    }
+
+                    // House Emphasis Rendering
+                    if (sectionKey === "house_emphasis") {
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title || 'House Emphasis'}</CardTitle>
+                               <CardDescription>Areas of life (houses) where significant planetary energy is focused.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="prose dark:prose-invert max-w-none">
+                                 {renderMarkdown(section?.content)}
+                              </div>
+                              {/* Display House Emphasis Data */} 
+                              {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
+                                <div className="mt-4">
+                                  <h4 className="font-semibold">Emphasized Houses:</h4>
+                                  <ul className="pl-5 text-sm list-disc">
+                                    {section.data.map((emphasis: any, index: number) => (
+                                      <li key={index}>
+                                        House {emphasis.house}: {emphasis.interpretation || 'No specific focus interpretation.'}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+
+                    // Angles Rendering
+                    if (sectionKey === "angles") {
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title || 'Angles (AC, DC, MC, IC)'}</CardTitle>
+                              <CardDescription>The four cardinal points of the chart, representing key areas of self, relationships, career, and home.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              {/* Render the main combined interpretation */} 
+                              <div className="prose dark:prose-invert max-w-none">
+                                {renderMarkdown(section?.content)}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </React.Fragment>
+                      );
+                    }
+
+                    // Retrograde Planets Rendering
+                    if (sectionKey === "retrograde_planets") {
+                      return (
+                        <React.Fragment key={sectionKey}>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>{section?.title || 'Planetary Movement'}</CardTitle>
+                              <CardDescription>Planets appearing to move backward (retrograde), suggesting internalized or reviewed energy.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="prose dark:prose-invert max-w-none">
+                                {renderMarkdown(section?.content)}
+                              </div>
+                               {/* Display Retrograde Data */} 
+                              {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
+                                <div className="mt-4">
+                                  <h4 className="font-semibold">Retrograde Planets:</h4>
+                                  <p className="text-sm">{section.data.join(', ')}</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                          <Separator className="my-6" />
+                        </React.Fragment>
+                      );
+                    }
+
+                    // --- Default Section Rendering --- //
+
+                    // Generic rendering for any other sections
+                    // Should only be reached if a section key is in display_order but not handled above
+                    if (!section?.content && !section?.data) {
+                        console.warn(`Rendering default for ${sectionKey}, but it has no content or data.`);
+                        return null; // Skip truly empty sections
+                    }
                     return (
-                      <section key={sectionKey}>
-                        <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
-                        {renderMarkdownSection(section.content)}
-                        <Separator className="my-6" />
-                      </section>
+                        <React.Fragment key={sectionKey}>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>{section?.title || sectionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="prose dark:prose-invert max-w-none">
+                                    {renderMarkdown(section?.content)}
+                                    {/* Add generic data display if needed */} 
+                                    {section?.data && (
+                                        <pre className="p-2 mt-4 overflow-auto text-xs rounded bg-muted">{JSON.stringify(section.data, null, 2)}</pre>
+                                    )}
+                                </CardContent>
+                            </Card>
+                            <Separator className="my-6" />
+                        </React.Fragment>
                     );
                   })
                 ) : (
@@ -513,7 +743,6 @@ export default function Dashboard() {
                           <div className="grid gap-4 md:grid-cols-2">
                             {elementBalance?.percentages && (
                               <div className="space-y-4">
-                                <ElementBalanceChart elementBalance={elementBalance as ElementBalanceData} />
                                 <Card>
                                   <CardHeader className="pb-2">
                                     <CardTitle className="text-base">Element Details</CardTitle>
@@ -534,7 +763,6 @@ export default function Dashboard() {
                             
                             {modalityBalance?.percentages && (
                               <div className="space-y-4">
-                                <ModalityBalanceChart modalityBalance={modalityBalance as ModalityBalanceData} />
                                 <Card>
                                   <CardHeader className="pb-2">
                                     <CardTitle className="text-base">Modality Details</CardTitle>

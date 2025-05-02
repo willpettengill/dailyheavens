@@ -83,5 +83,18 @@
       "interpretation_template": "As {transiting_planet} moves through your {house_number} house, expect {interpretation}.",
       "priority_transits": ["Outer planet transits to angles", "Saturn return", "Jupiter return", "Progressed Moon phases"]
     }
+  },
+  "introduction": {
+    "title": "Welcome to Your Birth Chart Interpretation",
+    "content": "This report provides insights into your astrological blueprint..."
+  },
+  "fallback_templates": {
+    "planet_in_sign": "{planet_core}. In {sign}, these energies manifest through qualities like {keyword1} and {keyword2}.",
+    "planet_in_house": "Placed in the {house_ordinal} House, this influence manifests particularly in relation to {house_focus}.",
+    "planet_retrograde": "With {planet} retrograde, these energies are often internalized, prompting deeper reflection or unconventional expression.",
+    "cusp_in_sign": "With **{sign}** on the cusp of the **{house_ordinal} House**, you likely approach **{house_focus}** (representing {house_theme}) with distinctive {sign_keyword} qualities.",
+    "aspect_generic": "{planet1} {aspect_name} {planet2}: This aspect {aspect_action} the themes of {planet1_keyword} ({planet1}) and {planet2_keyword} ({planet2}).",
+    "aspect_orb_tight": "With a tight orb of {orb:.1f}°, its influence is particularly direct and significant.",
+    "aspect_orb_wide": "With a wider orb of {orb:.1f}°, its influence may be less immediate but still relevant."
   }
 } 
