@@ -769,10 +769,12 @@ class InterpretationService:
             "overview",           # Title only
             "chart_shape",        # NEW: Add chart shape high up
             "core_signs",
-            "combinations",       # NEW: Add combinations section
+            "sun_sign_details", # NEW: Add section for Sun sign details
+            # "combinations",       # REMOVED: Merged into chart_highlights
             "stelliums",          # Includes sign dist chart
             "sign_distribution",  # Data only, handled by stelliums render
-            "chart_patterns",     # NEW: Major aspect patterns (T-square, Yod, etc.)
+            # "chart_patterns",     # REMOVED: Merged into chart_highlights
+            "chart_highlights",   # NEW: Combined patterns and combinations
             "element_balance",    # Render element/modality together
             "modality_balance",   # Key needed, but rendering handled by element_balance
             "house_emphasis",
@@ -875,21 +877,51 @@ class InterpretationService:
                 "data": core_signs_data 
             }
         
-        # NEW: Combinations Section
+        # NEW: Sun Sign Details Section
+        sun_sign = core_signs_data.get("sun", {}).get("sign") # Reuse Sun sign from core_signs if available
+        if sun_sign:
+            sun_sign_lower = sun_sign.lower()
+            all_signs_data = self.structured_data.get("signs", {})
+            sun_sign_full_data = all_signs_data.get(sun_sign_lower)
+            if sun_sign_full_data:
+                 structured_sections["sun_sign_details"] = {
+                     "title": f"{sun_sign.capitalize()} Details", # Use Sun Sign name in Title
+                     "content": "", # No primary content needed, data is the focus
+                     "data": sun_sign_full_data
+                 }
+            else:
+                 self.logger.warning(f"Could not find full sign data for Sun sign '{sun_sign_lower}' in signs.json")
+        elif sun_data and sun_data.get("sign"): # Fallback if core_signs didn't populate
+            sun_sign_lower = sun_data["sign"].lower()
+            all_signs_data = self.structured_data.get("signs", {})
+            sun_sign_full_data = all_signs_data.get(sun_sign_lower)
+            if sun_sign_full_data:
+                 structured_sections["sun_sign_details"] = {
+                     "title": f"{sun_data['sign'].capitalize()} Details",
+                     "content": "",
+                     "data": sun_sign_full_data
+                 }
+            else:
+                 self.logger.warning(f"Could not find full sign data for Sun sign '{sun_sign_lower}' in signs.json (fallback)")
+
+        # Store intermediate data for the combined section
+        combinations_data = []
+        combinations_content = ""
+        patterns_data = []
+        patterns_content = ""
+
+        # Process Combinations
         if combinations:
-            combinations_content = ""
+            # Build content for combinations
             for combo in combinations:
                 combo_type = combo.get('type', 'Combination')
                 points = combo.get('planets', []) or combo.get('points', []) # Handle both keys
                 interpretation = combo.get('interpretation', 'No specific interpretation available.')
-                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\n{interpretation}\n\n"
+                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\\n{interpretation}\\n\\n"
+            combinations_data = combinations # Keep raw data
 
-            structured_sections["combinations"] = {
-                "title": "Key Planetary Blends",
-                "content": combinations_content.strip(),
-                "data": combinations # Pass the raw list of combination objects
-            }
-        
+            # Removed structured_sections["combinations"] block
+
         # 3. & 5. Stelliums (Planetary Concentrations) Section
         stellium_patterns = [p for p in simple_patterns if p.get("type") == "stellium"]
         if stellium_patterns:
@@ -943,22 +975,38 @@ class InterpretationService:
             "data": sign_distribution_data # Data is handled by frontend `generateSignDistribution` -> NOW by passing this data
         }
 
-        # NEW: Chart Patterns Section (Complex Patterns)
+        # Process Chart Patterns (Complex Patterns)
         if patterns: # patterns is the list of complex patterns
             # Build content summarizing the patterns found
-            pattern_summary_content = "Key astrological patterns found in your chart:\n\n"
+            patterns_content += "Key astrological patterns found in your chart:\\n\\n"
             for pattern in patterns:
                 pattern_type = pattern.get('type', 'Unknown Pattern')
                 planets_involved = ", ".join(pattern.get('planets', []))
                 pattern_interpretation = pattern.get("interpretation", "")
-                pattern_summary_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\n\n"
+                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\\n\\n"
+            patterns_data = patterns # Keep raw data
 
-            structured_sections["chart_patterns"] = {
-                "title": "Key Chart Patterns",
-                "content": pattern_summary_content.strip(),
-                "data": patterns # Pass the raw list of pattern objects
-        }
-        
+            # Removed structured_sections["chart_patterns"] block
+
+        # NEW: Chart Highlights Section (Combined)
+        combined_content = ""
+        if combinations_content:
+            combined_content += "### Planetary Connections\\n\\n" + combinations_content.strip() + "\\n\\n"
+        if patterns_content:
+             # Adjust header for patterns content
+            patterns_content_adjusted = patterns_content.replace("Key astrological patterns found in your chart:", "### Key Chart Patterns", 1)
+            combined_content += patterns_content_adjusted.strip()
+
+        if combined_content: # Only create section if there's content
+             structured_sections["chart_highlights"] = {
+                 "title": "Chart Highlights", # New combined title
+                 "content": combined_content.strip(),
+                 "data": { # Combine data from both sources
+                     "combinations": combinations_data,
+                     "patterns": patterns_data
+                 }
+             }
+
         # 6. House Emphasis Section
         house_patterns = [p for p in simple_patterns if p.get("type") == "house_emphasis"]
         if house_patterns:
@@ -1081,9 +1129,9 @@ class InterpretationService:
             if "retrograde_planets" in structured_sections: del structured_sections["retrograde_planets"]
 
         # Special case for patterns: only include if patterns exist
-        if "chart_patterns" in final_display_order and not patterns:
-             final_display_order.remove("chart_patterns")
-             if "chart_patterns" in structured_sections: del structured_sections["chart_patterns"]
+        if "chart_highlights" in final_display_order and not patterns_data:
+             final_display_order.remove("chart_highlights")
+             if "chart_highlights" in structured_sections: del structured_sections["chart_highlights"]
 
         self.logger.debug(f"Final display order: {final_display_order}")
         self.logger.debug(f"Structured sections generated: {list(structured_sections.keys())}")
@@ -1755,6 +1803,28 @@ class InterpretationService:
 
         # --- Sun-Rising Combination (Elemental Theme) ---
         if sun_sign and rising_sign:
+            sun_sign_lower = sun_sign.lower()
+            rising_sign_lower = rising_sign.lower()
+            
+            # First check for same-sign combination
+            if sun_sign_lower == rising_sign_lower:
+                # Check for a specific same-sign interpretation in combinations.json
+                sun_rising_sign_combinations = simple_combinations_data.get("sun_rising_combinations", {})
+                if sun_sign_lower in sun_rising_sign_combinations and rising_sign_lower in sun_rising_sign_combinations[sun_sign_lower]:
+                    interpretation = sun_rising_sign_combinations[sun_sign_lower][rising_sign_lower]
+                    combinations.append({
+                        "type": "Sun-Rising Sign Pairing",
+                        "points": ["Sun", "Ascendant"],
+                        "signs": [sun_sign, rising_sign],
+                        "interpretation": interpretation
+                    })
+                    self.logger.debug(
+                        f"Found Sun-Rising same sign pairing interpretation for {sun_sign}-{rising_sign}.")
+                else:
+                    self.logger.warning(
+                        f"No interpretation found for Sun-Rising same sign pairing: {sun_sign}-{rising_sign}")
+            
+            # Continue with element compatibility check
             sun_element = self._get_sign_element(sun_sign)
             rising_element = self._get_sign_element(rising_sign)
             compatibility = self._get_element_compatibility(
@@ -1781,6 +1851,28 @@ class InterpretationService:
 
         # --- Moon-Rising Combination (Elemental Theme) ---
         if moon_sign and rising_sign:
+            moon_sign_lower = moon_sign.lower()
+            rising_sign_lower = rising_sign.lower()
+            
+            # First check for same-sign combination
+            if moon_sign_lower == rising_sign_lower:
+                # Check for a specific same-sign interpretation in combinations.json
+                moon_rising_sign_combinations = simple_combinations_data.get("moon_rising_combinations", {})
+                if moon_sign_lower in moon_rising_sign_combinations and rising_sign_lower in moon_rising_sign_combinations[moon_sign_lower]:
+                    interpretation = moon_rising_sign_combinations[moon_sign_lower][rising_sign_lower]
+                    combinations.append({
+                        "type": "Moon-Rising Sign Pairing",
+                        "points": ["Moon", "Ascendant"],
+                        "signs": [moon_sign, rising_sign],
+                        "interpretation": interpretation
+                    })
+                    self.logger.debug(
+                        f"Found Moon-Rising same sign pairing interpretation for {moon_sign}-{rising_sign}.")
+                else:
+                    self.logger.warning(
+                        f"No interpretation found for Moon-Rising same sign pairing: {moon_sign}-{rising_sign}")
+            
+            # Continue with element compatibility check
             moon_element = self._get_sign_element(moon_sign)
             rising_element = self._get_sign_element(rising_sign)
             compatibility = self._get_element_compatibility(
@@ -1959,6 +2051,7 @@ class InterpretationService:
             return sign_data["modality"]
         else:
             # Fallback logic
+            # CORRECT INDENTATION: Move the list definitions inside the else block
             cardinal_signs = ["aries", "cancer", "libra", "capricorn"]
             fixed_signs = ["taurus", "leo", "scorpio", "aquarius"]
             mutable_signs = ["gemini", "virgo", "sagittarius", "pisces"]
@@ -2146,31 +2239,48 @@ class InterpretationService:
             # Removed generic fallback block
 
         # Describe lacking elements
+        lacking_section_parts = [] # Use a list to store each lacking description
         if lacking:
-            # Use detailed description if element is very lacking (e.g., 0 planets)
-            lacking_elements_str = []
             for element in lacking:
-                meaning = element_data_all.get(element, {}).get("meaning", "its associated traits") # Reverted fallback meaning
+                meaning = element_data_all.get(element, {}).get("meaning", "its associated traits")
                 count = percentages.get(element, 0)
+                lacking_desc = ""
                 if count == 0 and f"{element}_lacking" in element_emphasis_patterns:
-                    desc = element_emphasis_patterns[f"{element}_lacking"].get(
-                        "description", "")
-                    lacking_elements_str.append(
-                        f"A **lack of {element.capitalize()}** energy ({count}%) may present challenges in accessing qualities like {meaning}. {desc}")
+                    desc = element_emphasis_patterns[f"{element}_lacking"].get("description", "")
+                    lacking_desc = f"A **lack of {element.capitalize()}** energy ({count}%) may present challenges in accessing qualities like {meaning}. {desc}"
                 elif f"{element}_lacking" in elemental_patterns:
-                    desc = elemental_patterns[f"{element}_lacking"].get(
-                        "description", f"potential challenges related to {element} qualities ({meaning}).") # Reverted fallback desc structure
-                    lacking_elements_str.append(f"{desc}") # Reverted append
-                # Removed generic fallback block
-            if lacking_elements_str:
-                interpretation_parts.extend(lacking_elements_str)
+                    desc = elemental_patterns[f"{element}_lacking"].get("description", f"potential challenges related to {element} qualities ({meaning}).")
+                    lacking_desc = f"{desc}"
+                if lacking_desc:
+                    lacking_section_parts.append(lacking_desc)
 
         # Note balance if neither dominant nor lacking elements
+        balance_section = ""
         if not dominant and not lacking:
-            interpretation_parts.append(
+            balance_section = (
                 "Your chart shows a relatively balanced distribution of elements, "
                 "suggesting versatility in approaching life through different modes of expression.")
 
+        # Combine the parts with double newlines for paragraphs
+        final_interpretation = ""
+        if interpretation_parts: # If there's a dominant description
+            final_interpretation += interpretation_parts[0]
+        
+        if lacking_section_parts: # If there are lacking descriptions
+            # Add a paragraph break before the first lacking description if dominant exists
+            if final_interpretation:
+                 final_interpretation += "\n\n"
+            # Join multiple lacking descriptions with paragraph breaks
+            final_interpretation += "\n\n".join(lacking_section_parts)
+        elif balance_section: # Only add balance if there were no lacking elements
+             # Add a paragraph break before the balance description if dominant exists
+             if final_interpretation:
+                 final_interpretation += "\n\n"
+             final_interpretation += balance_section
+            
+        return final_interpretation.strip()
+
+    def _analyze_simple_modality_balance(self, birth_chart: Dict) -> Dict:
         return " ".join(interpretation_parts)
 
     def _analyze_simple_modality_balance(self, birth_chart: Dict) -> Dict:
