@@ -104,7 +104,7 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
       <CardContent className="flex-1 pt-4 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[200px] [&_.recharts-text]:fill-background"
+          className="mx-auto aspect-square max-h-[200px]"
         >
           <PieChart>
             <ChartTooltip
@@ -116,26 +116,7 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
               nameKey="name"
               cx="50%" 
               cy="50%" 
-              labelLine={false}
-              label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
-                const RADIAN = Math.PI / 180;
-                const radius = innerRadius + (outerRadius - innerRadius) * 1.15;
-                const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-                return (
-                  <text 
-                    x={x}
-                    y={y}
-                    fill="currentColor"
-                    textAnchor={x > cx ? 'start' : 'end'} 
-                    dominantBaseline="central"
-                    className="text-xs fill-foreground"
-                  >
-                    {`${name.charAt(0).toUpperCase() + name.slice(1)} (${(percent * 100).toFixed(0)}%)`}
-                  </text>
-                );
-              }}
+              labelLine={true}
               outerRadius={70}
               fill="#8884d8"
             >
@@ -147,6 +128,7 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
                   return <Cell key={`cell-${index}`} fill={color} />;
                 })
               }
+              <LabelList dataKey="name" position="outside" style={{ textTransform: 'capitalize' }} />
             </Pie>
           </PieChart>
         </ChartContainer>
@@ -233,7 +215,7 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
       <CardContent className="flex-1 pt-4 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[200px] [&_.recharts-text]:fill-background"
+          className="mx-auto aspect-square max-h-[200px]"
         >
           <PieChart>
             <ChartTooltip
@@ -245,26 +227,7 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
               nameKey="name"
               cx="50%" 
               cy="50%" 
-              labelLine={false}
-              label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
-                const RADIAN = Math.PI / 180;
-                const radius = innerRadius + (outerRadius - innerRadius) * 1.15;
-                const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-                return (
-                  <text 
-                    x={x}
-                    y={y}
-                    fill="currentColor"
-                    textAnchor={x > cx ? 'start' : 'end'} 
-                    dominantBaseline="central"
-                    className="text-xs fill-foreground"
-                  >
-                    {`${name.charAt(0).toUpperCase() + name.slice(1)} (${(percent * 100).toFixed(0)}%)`}
-                  </text>
-                );
-              }}
+              labelLine={true}
               outerRadius={70}
               fill="#8884d8"
             >
@@ -276,6 +239,7 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
                   return <Cell key={`cell-${index}`} fill={color} />;
                 })
               }
+              <LabelList dataKey="name" position="outside" style={{ textTransform: 'capitalize' }} />
             </Pie>
           </PieChart>
         </ChartContainer>
@@ -358,9 +322,6 @@ export function SignDistributionChart({ signDistribution }: { signDistribution: 
               tickMargin={10} 
               axisLine={false}
               tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig]?.label || value}
-              angle={-45}
-              textAnchor="end"
-              height={60}
             />
             <YAxis />
             <ChartTooltip content={<ChartTooltipContent />} />
