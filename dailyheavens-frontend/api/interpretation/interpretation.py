@@ -2052,12 +2052,10 @@ class InterpretationService:
             return sign_data["modality"]
         else:
             # Fallback logic
-            # CORRECT INDENTATION: Indent the following lines
             cardinal_signs = ["aries", "cancer", "libra", "capricorn"]
             fixed_signs = ["taurus", "leo", "scorpio", "aquarius"]
             mutable_signs = ["gemini", "virgo", "sagittarius", "pisces"]
 
-            # Indent this entire if/elif/else block
             if sign in cardinal_signs:
                 return "cardinal"
             elif sign in fixed_signs:
