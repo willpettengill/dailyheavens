@@ -116,7 +116,26 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
               nameKey="name"
               cx="50%" 
               cy="50%" 
-              labelLine={true}
+              labelLine={false}
+              label={({ cx, cy, midAngle, innerRadius, outerRadius, name }) => {
+                const RADIAN = Math.PI / 180;
+                const radius = innerRadius + (outerRadius - innerRadius) * 1.15; 
+                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                return (
+                  <text 
+                    x={x}
+                    y={y}
+                    fill="currentColor"
+                    textAnchor={x > cx ? 'start' : 'end'} 
+                    dominantBaseline="central"
+                    className="text-xs fill-foreground"
+                  >
+                    {name.charAt(0).toUpperCase() + name.slice(1)}
+                  </text>
+                );
+              }}
               outerRadius={70}
               fill="#8884d8"
             >
@@ -128,7 +147,6 @@ export function ElementBalanceChart({ elementBalance }: { elementBalance: Elemen
                   return <Cell key={`cell-${index}`} fill={color} />;
                 })
               }
-              <LabelList dataKey="name" position="outside" style={{ textTransform: 'capitalize' }} />
             </Pie>
           </PieChart>
         </ChartContainer>
@@ -227,7 +245,26 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
               nameKey="name"
               cx="50%" 
               cy="50%" 
-              labelLine={true}
+              labelLine={false}
+              label={({ cx, cy, midAngle, innerRadius, outerRadius, name }) => {
+                const RADIAN = Math.PI / 180;
+                const radius = innerRadius + (outerRadius - innerRadius) * 1.15;
+                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                return (
+                  <text 
+                    x={x}
+                    y={y}
+                    fill="currentColor"
+                    textAnchor={x > cx ? 'start' : 'end'} 
+                    dominantBaseline="central"
+                    className="text-xs fill-foreground"
+                  >
+                    {name.charAt(0).toUpperCase() + name.slice(1)}
+                  </text>
+                );
+              }}
               outerRadius={70}
               fill="#8884d8"
             >
@@ -239,7 +276,6 @@ export function ModalityBalanceChart({ modalityBalance }: { modalityBalance: Mod
                   return <Cell key={`cell-${index}`} fill={color} />;
                 })
               }
-              <LabelList dataKey="name" position="outside" style={{ textTransform: 'capitalize' }} />
             </Pie>
           </PieChart>
         </ChartContainer>
