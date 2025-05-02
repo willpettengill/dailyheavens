@@ -912,16 +912,14 @@ class InterpretationService:
 
         # Process Combinations
         if combinations:
-            # Build content for combinations
+            combinations_content += "### Planetary Connections\\n\\n" # Add H3 header FIRST
             for combo in combinations:
                 combo_type = combo.get('type', 'Combination')
                 points = combo.get('planets', []) or combo.get('points', []) # Handle both keys
                 interpretation = combo.get('interpretation', 'No specific interpretation available.')
                 # USE ACTUAL NEWLINES
-                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\n{interpretation}\n\n"
+                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\\n{interpretation}\\n\\n" # Adds interpretation
             combinations_data = combinations # Keep raw data
-
-            # Removed structured_sections["combinations"] block
 
         # 3. & 5. Stelliums (Planetary Concentrations) Section
         stellium_patterns = [p for p in simple_patterns if p.get("type") == "stellium"]
@@ -979,21 +977,25 @@ class InterpretationService:
         # Process Chart Patterns (Complex Patterns)
         self.logger.debug(f"_generate_structured_sections - Patterns input: {patterns}") # Log input
         if patterns: # patterns is the list passed to the function
-            # Build content summarizing the patterns found
-            patterns_content += "### Key Chart Patterns\n\n" # Add header
+            patterns_content += "### Key Chart Patterns\\n\\n" # Add H3 header FIRST
             for pattern in patterns:
                 pattern_type = pattern.get('type', 'Unknown Pattern')
                 planets_involved = ", ".join(pattern.get('planets', []))
                 pattern_interpretation = pattern.get("interpretation", "")
                  # USE ACTUAL NEWLINES
-                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\n\n"
+                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\\n\\n" # Adds interpretation
             patterns_data = patterns # Keep raw data
 
-            # Removed structured_sections["chart_patterns"] block
+        # Combine the content - ensure proper spacing between sections if both exist
+        combined_content = ""
+        if combinations_content:
+            combined_content += combinations_content.strip()
+        if patterns_content:
+            if combined_content: # Add extra newline only if combinations content was also added
+                 combined_content += "\\n\\n"
+            combined_content += patterns_content.strip()
 
-        # Combine the content
-        combined_content = combinations_content.strip() + "\n\n" + patterns_content.strip()
-        combined_content = combined_content.strip() # Remove leading/trailing whitespace
+        combined_content = combined_content.strip() # Final trim
 
         self.logger.debug(f"_generate_structured_sections - Combined Content before check: '{combined_content}'") # Log combined content
 
