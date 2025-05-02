@@ -917,7 +917,8 @@ class InterpretationService:
                 combo_type = combo.get('type', 'Combination')
                 points = combo.get('planets', []) or combo.get('points', []) # Handle both keys
                 interpretation = combo.get('interpretation', 'No specific interpretation available.')
-                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\\n{interpretation}\\n\\n"
+                # USE ACTUAL NEWLINES
+                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\n{interpretation}\n\n"
             combinations_data = combinations # Keep raw data
 
             # Removed structured_sections["combinations"] block
@@ -978,12 +979,14 @@ class InterpretationService:
         # Process Chart Patterns (Complex Patterns)
         if patterns: # patterns is the list of complex patterns
             # Build content summarizing the patterns found
-            patterns_content += "Key astrological patterns found in your chart:\\n\\n"
+             # USE ACTUAL NEWLINES
+            patterns_content += "Key astrological patterns found in your chart:\n\n"
             for pattern in patterns:
                 pattern_type = pattern.get('type', 'Unknown Pattern')
                 planets_involved = ", ".join(pattern.get('planets', []))
                 pattern_interpretation = pattern.get("interpretation", "")
-                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\\n\\n"
+                 # USE ACTUAL NEWLINES
+                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\n\n"
             patterns_data = patterns # Keep raw data
 
             # Removed structured_sections["chart_patterns"] block
@@ -991,7 +994,8 @@ class InterpretationService:
         # NEW: Chart Highlights Section (Combined)
         combined_content = ""
         if combinations_content:
-            combined_content += "### Planetary Connections\\n\\n" + combinations_content.strip() + "\\n\\n"
+             # USE ACTUAL NEWLINES
+            combined_content += "### Planetary Connections\n\n" + combinations_content.strip() + "\n\n"
         if patterns_content:
              # Adjust header for patterns content
             patterns_content_adjusted = patterns_content.replace("Key astrological patterns found in your chart:", "### Key Chart Patterns", 1)
