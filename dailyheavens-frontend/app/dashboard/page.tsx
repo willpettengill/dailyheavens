@@ -20,6 +20,7 @@ import {
   BoilerplateStackedBarChart
 } from "@/components/element-modality-charts"
 import { Interpretation } from "../../lib/types"
+import { Badge } from "@/components/ui/badge"
 
 interface ChartData {
   user: {
@@ -117,7 +118,7 @@ const renderMarkdown = (markdownText: string | undefined | null): React.ReactNod
   //   .replace(/<p>/g, '<p class="mb-4">')
   //   .replace(/<ul>/g, '<ul class="list-disc pl-6 mb-4 space-y-1">')
   //   .replace(/<ol>/g, '<ol class="list-decimal pl-6 mb-4 space-y-1">');
-
+    
   return (
     <div 
       dangerouslySetInnerHTML={{ __html: processedHtml }} 
@@ -143,7 +144,7 @@ export default function Dashboard() {
         if (storedDataString) {
           try {
             parsedData = JSON.parse(storedDataString);
-            console.log("Loaded data from localStorage:", parsedData);
+        console.log("Loaded data from localStorage:", parsedData);
           } catch (e) {
             console.error("Failed to parse birthChartData from localStorage:", e);
             localStorage.removeItem('birthChartData');
@@ -151,18 +152,18 @@ export default function Dashboard() {
         }
         
         if (parsedData) {
-          setChartData(parsedData);
+        setChartData(parsedData);
           setUserEmail(storedEmail);
-          setIsLoading(false);
-        } else {
+        setIsLoading(false);
+      } else {
           console.log("No valid data in localStorage, redirecting to home.");
           router.push("/");
         }
-      } catch (error) {
+    } catch (error) {
         console.error("Error loading data from localStorage:", error);
         localStorage.removeItem('birthChartData');
         localStorage.removeItem('userEmail');
-        setIsLoading(false);
+      setIsLoading(false);
         router.push("/");
       }
     };
@@ -214,7 +215,7 @@ export default function Dashboard() {
     const planetData = getPlanetData(planets, planet);
     return planetData?.retrograde ?? false;
   };
-
+  
   const getAscendantData = () => {
     if (angles?.ascendant?.sign && angles.ascendant.sign !== "Unknown") {
       return {
@@ -394,72 +395,103 @@ export default function Dashboard() {
                     // Core Signs Rendering (3-column layout)
                     if (sectionKey === "core_signs") {
                       const coreSignsData = section?.data;
+                      // Find the corresponding sun_sign_details section
+                      const sunSignDetailsSection = interpretation.structured_sections?.["sun_sign_details"];
+                      // Check if the data exists before trying to use it
+                      const sunSignData = sunSignDetailsSection?.data; 
+                      
                       return (
                         <React.Fragment key={sectionKey}>
                           <Card>
                             <CardHeader>
-                              <CardTitle>{section?.title || 'Core Placements'}</CardTitle>
-                              <CardDescription>Your Sun, Moon, and Ascendant signs form the foundation of your personality.</CardDescription>
+                              <CardTitle>Know Thyself</CardTitle>
                             </CardHeader>
                             <CardContent>
                               {coreSignsData ? (
                                 <div className="space-y-6">
+                                  {/* Sun, Moon, Ascendant paragraphs */}
                                   {coreSignsData.sun && (
                                     <div className="space-y-2">
-                                      <h4 className="text-lg font-semibold">Sun in {coreSignsData.sun.sign}</h4>
-                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
-                                        {renderMarkdown(coreSignsData.sun.interpretation)}
-                                      </div>
+                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none" 
+                                           dangerouslySetInnerHTML={{ __html: parseMarkdown(coreSignsData.sun.interpretation) }} />
                                     </div>
                                   )}
                                   {coreSignsData.moon && (
                                     <div className="space-y-2">
-                                      <h4 className="text-lg font-semibold">Moon in {coreSignsData.moon.sign}</h4>
-                                       <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
-                                        {renderMarkdown(coreSignsData.moon.interpretation)}
-                                      </div>
+                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none" 
+                                           dangerouslySetInnerHTML={{ __html: parseMarkdown(coreSignsData.moon.interpretation) }} />
                                     </div>
                                   )}
                                   {coreSignsData.ascendant && (
                                     <div className="space-y-2">
-                                      <h4 className="text-lg font-semibold">Ascendant in {coreSignsData.ascendant.sign}</h4>
-                                       <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none">
-                                        {renderMarkdown(coreSignsData.ascendant.interpretation)}
-                                      </div>
+                                      <div className="text-sm prose-sm prose text-muted-foreground dark:prose-invert max-w-none" 
+                                           dangerouslySetInnerHTML={{ __html: parseMarkdown(coreSignsData.ascendant.interpretation) }} />
                                     </div>
                                   )}
                                 </div>
-                              ) : (
-                                // Fallback if data structure is missing, render original content if exists
-                                <div className="prose dark:prose-invert max-w-none">
-                                  {renderMarkdown(section?.content || "Core sign data not available.")}
-                                </div>
-                              )}
+                              ) : <p>Loading core signs...</p>}
                             </CardContent>
                           </Card>
+
+                          {/* NEW: Cosmic Details (Sun Sign Facts) - Conditionally Render based on data */} 
+                          {sunSignData && (
+                             <Card className="mt-6"> {/* Add margin top */} 
+                                <CardHeader>
+                                  <CardTitle>{sunSignDetailsSection?.title || "Sun Sign Details"}</CardTitle>
+                                  <CardDescription>Quick facts about your Sun sign</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex flex-wrap gap-2">
+                                    {/* Ruling Planet */}
+                                    {sunSignData.ruling_planet && (
+                                      <Badge variant="outline" className="px-3 py-1 border-blue-500/30 bg-blue-500/5 text-sm">
+                                        <span className="font-semibold mr-1">Ruling Planet:</span> 
+                                        {sunSignData.ruling_planet}
+                                      </Badge>
+                                    )}
+                                    {/* Lucky Day */}
+                                    {sunSignData.lucky_day && (
+                                      <Badge variant="outline" className="px-3 py-1 border-yellow-500/30 bg-yellow-500/5 text-sm">
+                                        <span className="font-semibold mr-1">Lucky Day:</span> 
+                                        {sunSignData.lucky_day}
+                                      </Badge>
+                                    )}
+                                    {/* Birthstone */}
+                                    {sunSignData.birthstone && (
+                                      <Badge variant="outline" className="px-3 py-1 border-green-500/30 bg-green-500/5 text-sm">
+                                        <span className="font-semibold mr-1">Birthstone:</span> 
+                                        {sunSignData.birthstone}
+                                      </Badge>
+                                    )}
+                                    {/* Lucky Numbers */}
+                                    {sunSignData.lucky_numbers && Array.isArray(sunSignData.lucky_numbers) && sunSignData.lucky_numbers.length > 0 && (
+                                      <Badge variant="outline" className="px-3 py-1 border-purple-500/30 bg-purple-500/5 text-sm">
+                                        <span className="font-semibold mr-1">Lucky Numbers:</span> 
+                                        {sunSignData.lucky_numbers.join(', ')}
+                                      </Badge>
+                                    )}
+                                    {/* Best Trait */}
+                                    {sunSignData.best_trait && (
+                                      <Badge variant="outline" className="px-3 py-1 border-indigo-500/30 bg-indigo-500/5 text-sm">
+                                        <span className="font-semibold mr-1">Best Trait:</span> 
+                                        {sunSignData.best_trait}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                          )}
+                          
                           <Separator className="my-6" />
                         </React.Fragment>
                       );
                     }
                     
-                    // NEW: Combinations Rendering
-                    if (sectionKey === "combinations") {
-                       if (!section?.content) return null; // Don't render if no content
-                      return (
-                        <React.Fragment key={sectionKey}>
-                          <Card>
-                            <CardHeader>
-                              <CardTitle>{section?.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="prose dark:prose-invert max-w-none">
-                              {renderMarkdown(section.content)}
-                            </CardContent>
-                          </Card>
-                          <Separator className="my-6" />
-                        </React.Fragment>
-                      );
+                    // NEW: Sun Sign Details Rendering (Only data, no visible component needed here)
+                    if (sectionKey === "sun_sign_details") {
+                      return null; // Data is accessed by the core_signs rendering block
                     }
-
+                    
                     // Stelliums & Sign Distribution Chart Rendering
                     if (sectionKey === "stelliums") {
                       const stelliumData = section?.data as Array<{
@@ -469,8 +501,8 @@ export default function Dashboard() {
                         interpretation_hint?: string;
                       }> | undefined;
                       
-                      return (
-                        <React.Fragment key={sectionKey}>
+                          return (
+                            <React.Fragment key={sectionKey}>
                           <Card>
                             <CardHeader>
                               {/* <CardTitle>{section?.title || 'Stelliums & Sign Distribution'}</CardTitle> <-- Removed Title */}
@@ -500,34 +532,37 @@ export default function Dashboard() {
                               )}
                             </CardContent>
                           </Card>
-                          <Separator className="my-6" />
+                                <Separator className="my-6" />
                         </React.Fragment>
                       );
                     }
 
-                    // Chart Patterns Rendering
-                    if (sectionKey === "chart_patterns") {
-                      if (!section?.content) return null;
+                    // NEW: Chart Highlights Rendering (Combined Patterns & Combinations)
+                    if (sectionKey === "chart_highlights") {
+                      // More robust check: ensure content exists and is a non-empty string
+                      if (!section?.content || typeof section.content !== 'string' || section.content.trim() === '') {
+                         console.log("Dashboard: Skipping Chart Highlights render (no content)."); // Added log
+                         return null;
+                       } 
+                      
+                      // Extract data if needed for more complex rendering
+                      const combinedData = section?.data || { combinations: [], patterns: [] };
+                      const combinationsData = combinedData.combinations;
+                      const patternsData = combinedData.patterns;
+                      
+                      console.log("Dashboard: Rendering Chart Highlights."); // Added log
                       return (
                         <React.Fragment key={sectionKey}>
                           <Card>
                             <CardHeader>
-                              <CardTitle>{section?.title || 'Key Chart Patterns'}</CardTitle>
-                              <CardDescription>Significant geometric alignments between planets, indicating major life themes or dynamics.</CardDescription>
+                              <CardTitle>{section?.title || 'Chart Highlights'}</CardTitle>
+                              <CardDescription>Key patterns and planetary connections shaping your chart's dynamics.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                              {/* Render details from data */} 
-                              {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
-                                <div className="mt-4 space-y-3">
-                                  {section.data.map((pattern: any, index: number) => (
-                                    <div key={index} className="pl-3 border-l-4 border-primary">
-                                      <h4 className="font-semibold">{pattern.type || 'Unknown Pattern'}</h4>
-                                      <p className="text-sm text-muted-foreground">Planets: {pattern.planets?.join(', ') || 'N/A'}</p>
-                                      <p className="text-sm">{pattern.interpretation || 'No interpretation available.'}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              {/* Render the combined markdown content from the backend */}
+                              <div className="prose dark:prose-invert max-w-none">
+                                {renderMarkdown(section.content)} 
+                              </div>
                             </CardContent>
                           </Card>
                           <Separator className="my-6" />
@@ -592,33 +627,114 @@ export default function Dashboard() {
                       // This data is rendered within the 'element_balance' section
                       return null;
                     }
-
-                    // House Emphasis Rendering
-                    if (sectionKey === "house_emphasis") {
+                    
+                    // Combined Understanding your Houses Section (replaces separate House Emphasis and Angles sections)
+                    if (sectionKey === "house_emphasis" || sectionKey === "angles") {
+                      // Only render once - when house_emphasis is encountered
+                      if (sectionKey === "angles") return null;
+                      
+                      // Get the angles section data for combined rendering
+                      const anglesSection = interpretation.structured_sections?.["angles"];
+                      
                       return (
-                        <React.Fragment key={sectionKey}>
+                        <React.Fragment key="understanding_houses">
                           <Card>
                             <CardHeader>
-                              <CardTitle>{section?.title || 'House Emphasis'}</CardTitle>
-                               <CardDescription>Areas of life (houses) where significant planetary energy is focused.</CardDescription>
+                              <CardTitle>Understanding your Houses</CardTitle>
+                              <CardDescription>The 12 houses represent different areas of life experience and how planetary energies manifest in specific domains.</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                              <div className="prose dark:prose-invert max-w-none">
-                                 {renderMarkdown(section?.content)}
+                            <CardContent className="space-y-6">
+                              {/* Display Important Angles Section */}
+                              <div className="mb-4">
+                                <h4 className="font-semibold mb-3">Important Angles:</h4>
+                                <div className="prose dark:prose-invert max-w-none text-sm">
+                                  {renderMarkdown(anglesSection?.content)}
+                                </div>
+                                <div className="mt-2 px-3 py-2 rounded-md bg-muted/50">
+                                  <p className="text-xs text-muted-foreground">The angles (Ascendant, Descendant, Midheaven, and IC) are the four most sensitive points in your chart, functioning as power channels through which planetary energy flows most directly into your life experience.</p>
+                                </div>
                               </div>
+
                               {/* Display House Emphasis Data */} 
                               {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
-                                <div className="mt-4">
-                                  <h4 className="font-semibold">Emphasized Houses:</h4>
-                                  <ul className="pl-5 text-sm list-disc">
+                                <div>
+                                  <h4 className="font-semibold mb-3">Emphasized Houses:</h4>
+                                  <ul className="pl-5 text-sm list-disc space-y-3">
                                     {section.data.map((emphasis: any, index: number) => (
-                                      <li key={index}>
-                                        House {emphasis.house}: {emphasis.interpretation || 'No specific focus interpretation.'}
+                                      <li key={index} className="leading-relaxed">
+                                        <strong>House {emphasis.house}:</strong> {emphasis.interpretation || 'No specific focus interpretation.'}
+                                        {emphasis.planets && emphasis.planets.length > 0 && (
+                                          <div className="mt-1 ml-2">
+                                            <span className="font-medium">Planets:</span> {emphasis.planets.map((planet: string, i: number) => (
+                                              <span key={i} className="ml-1">
+                                                {planet}{i < emphasis.planets.length - 1 ? ', ' : ''}
+                                              </span>
+                                            ))}
+                                            <div className="mt-1">
+                                              {emphasis.planets.map((planet: string, i: number) => {
+                                                const planetLower = planet.toLowerCase();
+                                                let governs = "";
+                                                
+                                                // Map common planets to what they govern
+                                                if (planetLower === "sun") governs = "identity, vitality, purpose";
+                                                else if (planetLower === "moon") governs = "emotions, instincts, unconscious";
+                                                else if (planetLower === "mercury") governs = "communication, thought, learning";
+                                                else if (planetLower === "venus") governs = "love, beauty, values";
+                                                else if (planetLower === "mars") governs = "action, desire, courage";
+                                                else if (planetLower === "jupiter") governs = "expansion, abundance, wisdom";
+                                                else if (planetLower === "saturn") governs = "structure, responsibility, mastery";
+                                                else if (planetLower === "uranus") governs = "innovation, rebellion, freedom";
+                                                else if (planetLower === "neptune") governs = "spirituality, dreams, dissolution";
+                                                else if (planetLower === "pluto") governs = "transformation, power, rebirth";
+                                                
+                                                return governs ? (
+                                                  <div key={i} className="text-xs text-muted-foreground">
+                                                    <span className="font-medium">{planet}</span> governs {governs}
+                          </div>
+                                                ) : null;
+                                              })}
+                                            </div>
+                                          </div>
+                                        )}
                                       </li>
                                     ))}
                                   </ul>
                                 </div>
                               )}
+                              
+                              {/* House Classification Analysis */}
+                              <div className="mt-4">
+                                <h4 className="font-semibold mb-3">House Classifications:</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  <div className="p-3 rounded-md border border-border">
+                                    <h5 className="text-sm font-medium mb-1">Angular Houses (1, 4, 7, 10)</h5>
+                                    <p className="text-xs text-muted-foreground">Action-oriented areas that initiate major life themes in identity, home, relationships, and career.</p>
+                                  </div>
+                                  <div className="p-3 rounded-md border border-border">
+                                    <h5 className="text-sm font-medium mb-1">Succedent Houses (2, 5, 8, 11)</h5>
+                                    <p className="text-xs text-muted-foreground">Resource-building areas that stabilize and develop values, creativity, transformation, and social connections.</p>
+                                  </div>
+                                  <div className="p-3 rounded-md border border-border">
+                                    <h5 className="text-sm font-medium mb-1">Cadent Houses (3, 6, 9, 12)</h5>
+                                    <p className="text-xs text-muted-foreground">Adaptable areas that process, refine, and prepare for transition through communication, service, philosophy, and spirituality.</p>
+                                  </div>
+                                </div>
+                          </div>
+                          
+                              {/* Hemisphere Analysis */}
+                              <div className="mt-4">
+                                <h4 className="font-semibold mb-3">Hemisphere Distribution:</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="p-3 rounded-md border border-border">
+                                    <h5 className="text-sm font-medium mb-1">Eastern (Houses 10-3) vs. Western (Houses 4-9)</h5>
+                                    <p className="text-xs text-muted-foreground">Eastern emphasis suggests self-directed energy and personal initiative. Western emphasis indicates relationship-oriented and responsive approach.</p>
+                                  </div>
+                                  <div className="p-3 rounded-md border border-border">
+                                    <h5 className="text-sm font-medium mb-1">Northern (Houses 1-6) vs. Southern (Houses 7-12)</h5>
+                                    <p className="text-xs text-muted-foreground">Northern emphasis suggests subjective, personal, and private focus. Southern emphasis indicates objective, social, and public engagement.</p>
+                                  </div>
+                                </div>
+                              </div>
                             </CardContent>
                           </Card>
                           <Separator className="my-6" />
@@ -626,38 +742,20 @@ export default function Dashboard() {
                       );
                     }
 
-                    // Angles Rendering
-                    if (sectionKey === "angles") {
-                      return (
-                        <React.Fragment key={sectionKey}>
-                          <Card>
-                            <CardHeader>
-                              <CardTitle>{section?.title || 'Angles (AC, DC, MC, IC)'}</CardTitle>
-                              <CardDescription>The four cardinal points of the chart, representing key areas of self, relationships, career, and home.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              {/* Render the main combined interpretation */} 
-                              <div className="prose dark:prose-invert max-w-none">
-                                {renderMarkdown(section?.content)}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </React.Fragment>
-                      );
-                    }
-
                     // Retrograde Planets Rendering
                     if (sectionKey === "retrograde_planets") {
-                      return (
+                    return (
                         <React.Fragment key={sectionKey}>
                           <Card>
                             <CardHeader>
                               <CardTitle>{section?.title || 'Planetary Movement'}</CardTitle>
-                              <CardDescription>Planets appearing to move backward (retrograde), suggesting internalized or reviewed energy.</CardDescription>
+                              <CardDescription>Retrograde planets suggest energies that are turned inward, internalized, or operate unconventionally. They often indicate areas needing review, reflection, or a unique approach.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div className="prose dark:prose-invert max-w-none">
-                                {renderMarkdown(section?.content)}
+                                {/* Filter out the "You have 3 retrograde planets:" text */}
+                                {section?.content && 
+                                  renderMarkdown(section.content.replace(/You have \d+ retrograde planets?:/g, ''))}
                               </div>
                                {/* Display Retrograde Data */} 
                               {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
@@ -668,7 +766,7 @@ export default function Dashboard() {
                               )}
                             </CardContent>
                           </Card>
-                          <Separator className="my-6" />
+                        <Separator className="my-6" />
                         </React.Fragment>
                       );
                     }
@@ -749,12 +847,12 @@ export default function Dashboard() {
                                   </CardHeader>
                                   <CardContent>
                                     <div className="space-y-4">
-                                      {Object.entries(elementBalance.percentages).map(([element, percentage]) => (
-                                        <li key={element} className="flex items-center justify-between">
-                                          <span className="capitalize text-card-foreground">{element}</span>
-                                          <span className="text-card-foreground">{percentage}%</span>
-                                        </li>
-                                      ))}
+                                            {Object.entries(elementBalance.percentages).map(([element, percentage]) => (
+                                              <li key={element} className="flex items-center justify-between">
+                                                <span className="capitalize text-card-foreground">{element}</span>
+                                                <span className="text-card-foreground">{percentage}%</span>
+                                              </li>
+                                            ))}
                                     </div>
                                   </CardContent>
                                 </Card>
@@ -769,12 +867,12 @@ export default function Dashboard() {
                                   </CardHeader>
                                   <CardContent>
                                     <div className="space-y-4">
-                                      {Object.entries(modalityBalance.percentages).map(([modality, percentage]) => (
-                                        <li key={modality} className="flex items-center justify-between">
-                                          <span className="capitalize text-card-foreground">{modality}</span>
-                                          <span className="text-card-foreground">{percentage}%</span>
-                                        </li>
-                                      ))}
+                                            {Object.entries(modalityBalance.percentages).map(([modality, percentage]) => (
+                                              <li key={modality} className="flex items-center justify-between">
+                                                <span className="capitalize text-card-foreground">{modality}</span>
+                                                <span className="text-card-foreground">{percentage}%</span>
+                                              </li>
+                                            ))}
                                     </div>
                                   </CardContent>
                                 </Card>
