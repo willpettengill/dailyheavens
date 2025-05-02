@@ -21,6 +21,15 @@ import {
 } from "@/components/element-modality-charts"
 import { Interpretation } from "../../lib/types"
 import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface ChartData {
   user: {
@@ -438,18 +447,15 @@ export default function Dashboard() {
                       );
                     }
                     
-                    // NEW: Sun Sign Details Rendering (Badges)
+                    // UPDATED: Sun Sign Details Rendering (Table)
                     if (sectionKey === "sun_sign_details") {
-                      // Access data directly from this section
                       const sunSignData = section?.data;
                       
-                      // Check if sunSignData exists and is an object before rendering
                       if (!sunSignData || typeof sunSignData !== 'object' || Object.keys(sunSignData).length === 0) {
-                        return null; // Don't render if no data
+                        return null; 
                       }
 
-                      // Define which badges to show
-                      const badgeKeysToShow: (keyof typeof sunSignData)[] = [
+                      const detailsToShow: (keyof typeof sunSignData)[] = [
                         'ruling_planet', 
                         'lucky_day',
                         'lucky_numbers', 
@@ -457,48 +463,46 @@ export default function Dashboard() {
                         'best_trait'
                       ];
                       
-                      // Helper to format badge label from key
-                      const formatBadgeLabel = (key: string): string => {
-                        return key
-                          .replace(/_/g, ' ') // Replace underscores with spaces
-                          .split(' ')
-                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(' ');
+                      const formatLabel = (key: string): string => {
+                        return key.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                       };
                       
-                      // Helper to format array values
-                      const formatArrayValue = (value: any): string => {
+                      const formatValue = (value: any): string => {
                         return Array.isArray(value) ? value.join(', ') : String(value);
                       }
 
                       return (
                          <React.Fragment key={sectionKey}>
-                            {/* MOVE Badge Card rendering here */}
-                           <Card>
+                           <Card> {/* Keep the Card wrapper */} 
                                 <CardHeader>
-                                  {/* Use title from section data */}
                                   <CardTitle>{section?.title || 'Cosmic Details'}</CardTitle> 
-                                  <CardDescription>Fun facts and associations for your Sun sign.</CardDescription>
+                                  <CardDescription>Key facts and associations for your Sun sign.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                  <div className="flex flex-wrap gap-2">
-                                    {badgeKeysToShow.map(key => (
-                                      // Render badge only if the key exists in the data
-                                      sunSignData[key] && (
-                                        <Badge 
-                                          key={key} 
-                                          variant="outline" 
-                                          className="px-3 py-1 border-indigo-500/30 bg-indigo-500/5 text-sm"
-                                        >
-                                          <span className="font-semibold mr-1">{formatBadgeLabel(key)}:</span> 
-                                          {formatArrayValue(sunSignData[key])} {/* Format array values */}
-                                        </Badge>
-                                      )
-                                    ))}
-                                  </div>
+                                  {/* Replace Badge div with Table */}
+                                  <Table>
+                                    {/* Optional: Add TableCaption if desired */}
+                                    {/* <TableCaption>Details for your Sun sign.</TableCaption> */}
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead className="w-[150px]">Detail</TableHead>
+                                        <TableHead>Value</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {detailsToShow.map(key => (
+                                        // Render row only if the key exists in the data
+                                        sunSignData[key] ? (
+                                          <TableRow key={key as string}> {/* Cast key to string for React key */} 
+                                            <TableCell className="font-medium">{formatLabel(key as string)}</TableCell> {/* Cast key */} 
+                                            <TableCell>{formatValue(sunSignData[key])}</TableCell>
+                                          </TableRow>
+                                        ) : null
+                                      ))}
+                                    </TableBody>
+                                  </Table>
                                 </CardContent>
                               </Card>
-                              {/* Add separator after Sun Sign Details */}
                               <Separator className="my-6" />
                          </React.Fragment>
                       );
