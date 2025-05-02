@@ -1959,20 +1959,20 @@ class InterpretationService:
             return sign_data["modality"]
         else:
             # Fallback logic
-            cardinal_signs = ["aries", "cancer", "libra", "capricorn"]
-            fixed_signs = ["taurus", "leo", "scorpio", "aquarius"]
-            mutable_signs = ["gemini", "virgo", "sagittarius", "pisces"]
+        cardinal_signs = ["aries", "cancer", "libra", "capricorn"]
+        fixed_signs = ["taurus", "leo", "scorpio", "aquarius"]
+        mutable_signs = ["gemini", "virgo", "sagittarius", "pisces"]
 
-            if sign in cardinal_signs:
-                return "cardinal"
+        if sign in cardinal_signs:
+            return "cardinal"
             elif sign in fixed_signs: # Corrected indentation and used elif
-                return "fixed"
+            return "fixed"
             elif sign in mutable_signs: # Corrected indentation and used elif
-                return "mutable"
-            else:
+            return "mutable"
+        else:
                 # This block only executes if the sign is not in any list
                 self.logger.warning(f"Unknown sign for modality determination: {sign}")
-                return "unknown"
+            return "unknown"
 
     def _get_sign_keywords(self, sign: str) -> List[str]:
         """Get keywords for a sign from the cache."""
