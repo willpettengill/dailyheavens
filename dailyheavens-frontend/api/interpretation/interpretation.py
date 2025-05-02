@@ -912,15 +912,15 @@ class InterpretationService:
 
         # Process Combinations
         if combinations:
-            combinations_content += "### Planetary Connections\\n\\n" # Add H3 header FIRST
+            combinations_content += "### Planetary Connections\n\n" # Add H3 header FIRST
             for combo in combinations:
                 combo_type = combo.get('type', 'Combination')
                 points = combo.get('planets', []) or combo.get('points', []) # Handle both keys
                 interpretation = combo.get('interpretation', 'No specific interpretation available.')
-                # USE ACTUAL NEWLINES
-                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\\n{interpretation}\\n\\n" # Adds interpretation
+                # Use ACTUAL NEWLINES, not escaped \\n
+                combinations_content += f"**{combo_type}** (Involving: {', '.join(points)}):\n{interpretation}\n\n" # Adds interpretation
             combinations_data = combinations # Keep raw data
-
+        
         # 3. & 5. Stelliums (Planetary Concentrations) Section
         stellium_patterns = [p for p in simple_patterns if p.get("type") == "stellium"]
         if stellium_patterns:
@@ -977,13 +977,13 @@ class InterpretationService:
         # Process Chart Patterns (Complex Patterns)
         self.logger.debug(f"_generate_structured_sections - Patterns input: {patterns}") # Log input
         if patterns: # patterns is the list passed to the function
-            patterns_content += "### Key Chart Patterns\\n\\n" # Add H3 header FIRST
+            patterns_content += "### Key Chart Patterns\n\n" # Add H3 header FIRST
             for pattern in patterns:
                 pattern_type = pattern.get('type', 'Unknown Pattern')
                 planets_involved = ", ".join(pattern.get('planets', []))
                 pattern_interpretation = pattern.get("interpretation", "")
-                 # USE ACTUAL NEWLINES
-                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\\n\\n" # Adds interpretation
+                 # Use ACTUAL NEWLINES, not escaped \\n
+                patterns_content += f"**{pattern_type}** (Involving: {planets_involved}): {pattern_interpretation}\n\n" # Adds interpretation
             patterns_data = patterns # Keep raw data
 
         # Combine the content - ensure proper spacing between sections if both exist
@@ -992,7 +992,7 @@ class InterpretationService:
             combined_content += combinations_content.strip()
         if patterns_content:
             if combined_content: # Add extra newline only if combinations content was also added
-                 combined_content += "\\n\\n"
+                 combined_content += "\n\n" # Use ACTUAL NEWLINES
             combined_content += patterns_content.strip()
 
         combined_content = combined_content.strip() # Final trim
@@ -2053,20 +2053,20 @@ class InterpretationService:
         else:
             # Fallback logic
             # CORRECT INDENTATION: Move the list definitions inside the else block
-            cardinal_signs = ["aries", "cancer", "libra", "capricorn"]
-            fixed_signs = ["taurus", "leo", "scorpio", "aquarius"]
-            mutable_signs = ["gemini", "virgo", "sagittarius", "pisces"]
+        cardinal_signs = ["aries", "cancer", "libra", "capricorn"]
+        fixed_signs = ["taurus", "leo", "scorpio", "aquarius"]
+        mutable_signs = ["gemini", "virgo", "sagittarius", "pisces"]
 
-            if sign in cardinal_signs:
-                return "cardinal"
-            elif sign in fixed_signs:
-                return "fixed"
-            elif sign in mutable_signs:
-                return "mutable"
-            else:
+        if sign in cardinal_signs:
+            return "cardinal"
+        elif sign in fixed_signs:
+            return "fixed"
+        elif sign in mutable_signs:
+            return "mutable"
+        else:
                 # This block only executes if the sign is not in any list
                 self.logger.warning(f"Unknown sign for modality determination: {sign}")
-                return "unknown"
+            return "unknown"
 
     def _get_sign_keywords(self, sign: str) -> List[str]:
         """Get keywords for a sign from the cache."""
