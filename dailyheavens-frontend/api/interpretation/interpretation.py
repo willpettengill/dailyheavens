@@ -977,10 +977,10 @@ class InterpretationService:
         }
 
         # Process Chart Patterns (Complex Patterns)
-        if patterns: # patterns is the list of complex patterns
+        self.logger.debug(f"_generate_structured_sections - Patterns input: {patterns}") # Log input
+        if patterns: # patterns is the list passed to the function
             # Build content summarizing the patterns found
-             # USE ACTUAL NEWLINES
-            patterns_content += "Key astrological patterns found in your chart:\n\n"
+            patterns_content += "### Key Chart Patterns\n\n" # Add header
             for pattern in patterns:
                 pattern_type = pattern.get('type', 'Unknown Pattern')
                 planets_involved = ", ".join(pattern.get('planets', []))
@@ -991,25 +991,25 @@ class InterpretationService:
 
             # Removed structured_sections["chart_patterns"] block
 
-        # NEW: Chart Highlights Section (Combined)
-        combined_content = ""
-        if combinations_content:
-             # USE ACTUAL NEWLINES
-            combined_content += "### Planetary Connections\n\n" + combinations_content.strip() + "\n\n"
-        if patterns_content:
-             # Adjust header for patterns content
-            patterns_content_adjusted = patterns_content.replace("Key astrological patterns found in your chart:", "### Key Chart Patterns", 1)
-            combined_content += patterns_content_adjusted.strip()
+        # Combine the content
+        combined_content = combinations_content.strip() + "\n\n" + patterns_content.strip()
+        combined_content = combined_content.strip() # Remove leading/trailing whitespace
 
-        if combined_content: # Only create section if there's content
+        self.logger.debug(f"_generate_structured_sections - Combined Content before check: '{combined_content}'") # Log combined content
+
+        # Only create the section if there's actual content
+        if combined_content:
+             self.logger.debug("Creating chart_highlights section.") # Log section creation
              structured_sections["chart_highlights"] = {
                  "title": "Chart Highlights", # New combined title
-                 "content": combined_content.strip(),
+                 "content": combined_content, # Content should contain both parts now
                  "data": { # Combine data from both sources
                      "combinations": combinations_data,
                      "patterns": patterns_data
                  }
              }
+        else:
+             self.logger.debug("Skipping chart_highlights section creation (no content).") # Log skipping
 
         # 6. House Emphasis Section
         house_patterns = [p for p in simple_patterns if p.get("type") == "house_emphasis"]
@@ -1131,11 +1131,6 @@ class InterpretationService:
         if "retrograde_planets" in final_display_order and not retrograde_planets_list:
             final_display_order.remove("retrograde_planets")
             if "retrograde_planets" in structured_sections: del structured_sections["retrograde_planets"]
-
-        # Special case for patterns: only include if patterns exist
-        if "chart_highlights" in final_display_order and not patterns_data:
-             final_display_order.remove("chart_highlights")
-             if "chart_highlights" in structured_sections: del structured_sections["chart_highlights"]
 
         self.logger.debug(f"Final display order: {final_display_order}")
         self.logger.debug(f"Structured sections generated: {list(structured_sections.keys())}")
