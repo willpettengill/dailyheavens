@@ -6,12 +6,12 @@ interface PlanetCardProps {
   planet: string
   sign: string
   house: string
-  degree: number
+  sign_description?: string
   description?: string
   retrograde?: boolean
 }
 
-export function PlanetCard({ planet, sign, house, degree, description, retrograde }: PlanetCardProps) {
+export function PlanetCard({ planet, sign, house, sign_description, description, retrograde }: PlanetCardProps) {
   const formattedPlanet = planet.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
@@ -42,8 +42,10 @@ export function PlanetCard({ planet, sign, house, degree, description, retrograd
             {sign || 'Unknown'}
             {retrograde && <Badge className="ml-2 bg-orange-600" variant="secondary">Rx</Badge>}
           </h4>
-          {degree !== undefined && degree > 0 && (
-            <p className="text-sm text-muted-foreground mt-1">{degree.toFixed(1)}°</p>
+          {sign_description && (
+            <p className="text-sm text-muted-foreground mt-1 italic">
+              {sign_description}
+            </p>
           )}
         </div>
       </CardContent>

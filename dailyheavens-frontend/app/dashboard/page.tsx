@@ -68,6 +68,15 @@ interface ChartData {
       name: string;
       description: string;
     }>;
+    // Added signs data structure
+    signs?: Record<string, {
+      keywords?: string[];
+      element?: string;
+      modality?: string;
+      polarity?: string;
+      ruling_planet?: string;
+      description?: string;
+    }>;
     // New fields for structured content
     structured_sections?: Record<string, {
       title: string;
@@ -89,6 +98,29 @@ const parseMarkdown = (content: string): string => {
   
   // Otherwise, parse it as markdown
   return marked.parse(content) as string;
+};
+
+// Add this helper function for consistent sign keyword access
+const getSignKeywords = (signs: Record<string, any> | undefined, signName: string | undefined): string => {
+  if (!signs || !signName) return '';
+  
+  const signLower = signName.toLowerCase();
+  const signData = signs[signLower];
+  
+  if (signData?.keywords && Array.isArray(signData.keywords)) {
+    return signData.keywords.join(', ');
+  }
+  
+  // Fallback to element and modality if available
+  if (signData?.element || signData?.modality) {
+    const traits = [];
+    if (signData.element) traits.push(signData.element);
+    if (signData.modality) traits.push(signData.modality);
+    return traits.join(', ');
+  }
+  
+  // Ultimate fallback
+  return signName;
 };
 
 // Add this helper function for consistent planet data access
@@ -219,6 +251,36 @@ export default function Dashboard() {
   const elementBalance = interpretation?.element_balance;
   const modalityBalance = interpretation?.modality_balance;
   const displayEmail = userEmail ?? "No email found";
+  
+  // Add debug log to check signs data
+  console.log("Signs data in interpretation:", interpretation?.signs);
+  
+  // Create basic sign data if not available
+  const ensureSignsData = () => {
+    if (interpretation && !interpretation.signs) {
+      // Basic sign keywords for fallback
+      const basicSignData: Record<string, any> = {
+        aries: { keywords: ["energetic", "pioneering", "assertive"], element: "fire", modality: "cardinal" },
+        taurus: { keywords: ["reliable", "practical", "sensual"], element: "earth", modality: "fixed" },
+        gemini: { keywords: ["versatile", "curious", "communicative"], element: "air", modality: "mutable" },
+        cancer: { keywords: ["nurturing", "protective", "sensitive"], element: "water", modality: "cardinal" },
+        leo: { keywords: ["confident", "creative", "generous"], element: "fire", modality: "fixed" },
+        virgo: { keywords: ["analytical", "practical", "perfectionist"], element: "earth", modality: "mutable" },
+        libra: { keywords: ["balanced", "diplomatic", "cooperative"], element: "air", modality: "cardinal" },
+        scorpio: { keywords: ["intense", "passionate", "transformative"], element: "water", modality: "fixed" },
+        sagittarius: { keywords: ["adventurous", "optimistic", "philosophical"], element: "fire", modality: "mutable" },
+        capricorn: { keywords: ["ambitious", "disciplined", "patient"], element: "earth", modality: "cardinal" },
+        aquarius: { keywords: ["independent", "humanitarian", "intellectual"], element: "air", modality: "fixed" },
+        pisces: { keywords: ["compassionate", "intuitive", "dreamy"], element: "water", modality: "mutable" }
+      };
+      
+      console.log("Adding fallback signs data");
+      interpretation.signs = basicSignData;
+    }
+  };
+  
+  // Ensure sign data is available
+  ensureSignsData();
 
   const isRetrograde = (planet: string) => {
     const planetData = getPlanetData(planets, planet);
@@ -264,7 +326,7 @@ export default function Dashboard() {
                       planet="sun"
                       sign={getPlanetData(planets, "sun")?.sign ?? 'N/A'}
                       house={getPlanetData(planets, "sun")?.house?.toString() ?? 'N/A'}
-                      degree={getPlanetData(planets, "sun")?.degree ?? 0}
+                      sign_description={getSignKeywords(interpretation?.signs, getPlanetData(planets, "sun")?.sign)}
                       description={getPlanetData(planets, "sun")?.description}
                       retrograde={isRetrograde("sun")}
                     />
@@ -273,7 +335,7 @@ export default function Dashboard() {
                       planet="moon"
                       sign={getPlanetData(planets, "moon")?.sign ?? 'N/A'}
                       house={getPlanetData(planets, "moon")?.house?.toString() ?? 'N/A'}
-                      degree={getPlanetData(planets, "moon")?.degree ?? 0}
+                      sign_description={getSignKeywords(interpretation?.signs, getPlanetData(planets, "moon")?.sign)}
                       description={getPlanetData(planets, "moon")?.description}
                       retrograde={isRetrograde("moon")}
                     />
@@ -282,7 +344,7 @@ export default function Dashboard() {
                       planet="ascendant"
                       sign={ascendantData?.sign ?? 'N/A'}
                       house={ascendantData?.house?.toString() ?? '1'}
-                      degree={ascendantData?.degree ?? 0}
+                      sign_description={getSignKeywords(interpretation?.signs, ascendantData?.sign)}
                       description="Your rising sign - how others see you"
                       retrograde={false}
                     />
@@ -305,7 +367,7 @@ export default function Dashboard() {
                           planet={planet}
                           sign={planetData?.sign ?? 'N/A'}
                           house={planetData?.house?.toString() ?? 'N/A'}
-                          degree={planetData?.degree ?? 0}
+                          sign_description={getSignKeywords(interpretation?.signs, planetData?.sign)}
                           description={planetData?.description}
                           retrograde={isRetrograde(planet)}
                         />
@@ -346,7 +408,7 @@ export default function Dashboard() {
                           planet={placement}
                           sign={placementData?.sign ?? 'N/A'}
                           house={placementData?.house?.toString() ?? 'N/A'}
-                          degree={placementData?.degree ?? 0}
+                          sign_description={getSignKeywords(interpretation?.signs, placementData?.sign)}
                           description={placementData?.description}
                           retrograde={isRetrograde(placement)}
                         />
@@ -475,8 +537,8 @@ export default function Dashboard() {
                          <React.Fragment key={sectionKey}>
                            <Card> {/* Keep the Card wrapper */} 
                                 <CardHeader>
-                                  <CardTitle>{section?.title || 'Cosmic Details'}</CardTitle> 
-                                  <CardDescription>Key facts and associations for your Sun sign.</CardDescription>
+                                  <CardTitle className="mb-2">{section?.title || 'Cosmic Details'}</CardTitle> 
+                                  <CardDescription className="mb-4">Key facts and associations for your Sun sign.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                   {/* Replace Badge div with Table */}
@@ -490,15 +552,21 @@ export default function Dashboard() {
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {detailsToShow.map(key => (
-                                        // Render row only if the key exists in the data
-                                        sunSignData[key] ? (
+                                      {detailsToShow.map((key, index) => (
+                                        sunSignData[key] && sunSignData[key] !== '' ? (
                                           <TableRow key={key as string}> {/* Cast key to string for React key */} 
-                                            <TableCell className="font-medium">{formatLabel(key as string)}</TableCell> {/* Cast key */} 
-                                            <TableCell>{formatValue(sunSignData[key])}</TableCell>
+                                            <TableCell className="font-medium text-primary">{formatLabel(key as string)}</TableCell> {/* Cast key */} 
+                                            <TableCell className="text-secondary">{formatValue(sunSignData[key])}</TableCell>
                                           </TableRow>
                                         ) : null
                                       ))}
+                                      {/* Ensure even number of rows by adding an empty row if needed */}
+                                      {detailsToShow.filter(key => sunSignData[key] && sunSignData[key] !== '').length % 2 !== 0 && (
+                                        <TableRow key="empty-row">
+                                          <TableCell className="font-medium text-primary"></TableCell>
+                                          <TableCell className="text-secondary"></TableCell>
+                                        </TableRow>
+                                      )}
                                     </TableBody>
                                   </Table>
                                 </CardContent>
@@ -527,7 +595,7 @@ export default function Dashboard() {
                               {/* Display Stellium Data from section.data */}
                               {stelliumData && Array.isArray(stelliumData) && stelliumData.length > 0 && (
                                 <div className="space-y-3">
-                                  <p className="text-sm text-muted-foreground pb-2">Areas of concentrated energy (stelliums) and the overall balance of zodiac signs in your chart.</p> {/* Moved description here */} 
+                                  <p className="pb-2 text-sm text-muted-foreground">Areas of concentrated energy (stelliums) and the overall balance of zodiac signs in your chart.</p> {/* Moved description here */} 
                                   {stelliumData.map((stellium, index) => (
                                     <div key={index}>
                                       <h4 className="font-semibold">{stellium.location} Stellium ({stellium.count} planets)</h4>
@@ -571,8 +639,8 @@ export default function Dashboard() {
                         <React.Fragment key={sectionKey}>
                           <Card>
                             <CardHeader>
-                              <CardTitle>{section?.title || 'Chart Highlights'}</CardTitle>
-                              <CardDescription>Key patterns and planetary connections shaping your chart's dynamics.</CardDescription>
+                              <CardTitle>{section?.title || 'Planetary Connections'}</CardTitle>
+                              <CardDescription>Chart Highlights: Key patterns and planetary connections shaping your chart's dynamics.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                               {/* Render the combined markdown content from the backend */}
@@ -624,12 +692,7 @@ export default function Dashboard() {
                                 {renderMarkdown(section?.content)}
                                 {renderMarkdown(interpretation.structured_sections?.['modality_balance']?.content)}
                                 {/* Optionally display dominant/lacking from data */} 
-                                {(elementData?.dominant || modalityData?.dominant) && (
-                                  <div className="mt-4 text-sm">
-                                    {elementData?.dominant && <p><strong>Dominant Element:</strong> {elementData.dominant}</p>}
-                                    {modalityData?.dominant && <p><strong>Dominant Modality:</strong> {modalityData.dominant}</p>}
-                                  </div>
-                                )}
+                                // 
                               </div>
                             </CardContent>
                           </Card>
@@ -656,17 +719,17 @@ export default function Dashboard() {
                         <React.Fragment key="understanding_houses">
                           <Card>
                             <CardHeader>
-                              <CardTitle>Understanding your Houses</CardTitle>
-                              <CardDescription>The 12 houses represent different areas of life experience and how planetary energies manifest in specific domains.</CardDescription>
+                              <CardTitle>Understanding Your Houses</CardTitle>
+                              <CardDescription>The 12 Houses represent different areas of life experience and how planetary energies manifest in specific domains.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                               {/* Display Important Angles Section */}
                               <div className="mb-4">
-                                <h4 className="font-semibold mb-3">Important Angles:</h4>
-                                <div className="prose dark:prose-invert max-w-none text-sm">
+                                <h4 className="mb-3 font-semibold">Important Angles:</h4>
+                                <div className="text-sm prose dark:prose-invert max-w-none">
                                   {renderMarkdown(anglesSection?.content)}
                                 </div>
-                                <div className="mt-2 px-3 py-2 rounded-md bg-muted/50">
+                                <div className="px-3 py-2 mt-2 rounded-md bg-muted/50">
                                   <p className="text-xs text-muted-foreground">The angles (Ascendant, Descendant, Midheaven, and IC) are the four most sensitive points in your chart, functioning as power channels through which planetary energy flows most directly into your life experience.</p>
                                 </div>
                               </div>
@@ -674,8 +737,8 @@ export default function Dashboard() {
                               {/* Display House Emphasis Data */} 
                               {section?.data && Array.isArray(section.data) && section.data.length > 0 && (
                                 <div>
-                                  <h4 className="font-semibold mb-3">Emphasized Houses:</h4>
-                                  <ul className="pl-5 text-sm list-disc space-y-3">
+                                  <h4 className="mb-3 font-semibold">Emphasized Houses:</h4>
+                                  <ul className="pl-5 space-y-3 text-sm list-disc">
                                     {section.data.map((emphasis: any, index: number) => (
                                       <li key={index} className="leading-relaxed">
                                         <strong>House {emphasis.house}:</strong> {emphasis.interpretation || 'No specific focus interpretation.'}
@@ -720,18 +783,18 @@ export default function Dashboard() {
                               
                               {/* House Classification Analysis */}
                               <div className="mt-4">
-                                <h4 className="font-semibold mb-3">House Classifications:</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                  <div className="p-3 rounded-md border border-border">
-                                    <h5 className="text-sm font-medium mb-1">Angular Houses (1, 4, 7, 10)</h5>
+                                <h4 className="mb-3 font-semibold">House Classifications:</h4>
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                  <div className="p-3 border rounded-md border-border">
+                                    <h5 className="mb-1 text-sm font-medium">Angular Houses (1, 4, 7, 10)</h5>
                                     <p className="text-xs text-muted-foreground">Action-oriented areas that initiate major life themes in identity, home, relationships, and career.</p>
                                   </div>
-                                  <div className="p-3 rounded-md border border-border">
-                                    <h5 className="text-sm font-medium mb-1">Succedent Houses (2, 5, 8, 11)</h5>
+                                  <div className="p-3 border rounded-md border-border">
+                                    <h5 className="mb-1 text-sm font-medium">Succedent Houses (2, 5, 8, 11)</h5>
                                     <p className="text-xs text-muted-foreground">Resource-building areas that stabilize and develop values, creativity, transformation, and social connections.</p>
                                   </div>
-                                  <div className="p-3 rounded-md border border-border">
-                                    <h5 className="text-sm font-medium mb-1">Cadent Houses (3, 6, 9, 12)</h5>
+                                  <div className="p-3 border rounded-md border-border">
+                                    <h5 className="mb-1 text-sm font-medium">Cadent Houses (3, 6, 9, 12)</h5>
                                     <p className="text-xs text-muted-foreground">Adaptable areas that process, refine, and prepare for transition through communication, service, philosophy, and spirituality.</p>
                                   </div>
                                 </div>
@@ -739,14 +802,14 @@ export default function Dashboard() {
                           
                               {/* Hemisphere Analysis */}
                               <div className="mt-4">
-                                <h4 className="font-semibold mb-3">Hemisphere Distribution:</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div className="p-3 rounded-md border border-border">
-                                    <h5 className="text-sm font-medium mb-1">Eastern (Houses 10-3) vs. Western (Houses 4-9)</h5>
+                                <h4 className="mb-3 font-semibold">Hemisphere Distribution:</h4>
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                  <div className="p-3 border rounded-md border-border">
+                                    <h5 className="mb-1 text-sm font-medium">Eastern (Houses 10-3) vs. Western (Houses 4-9)</h5>
                                     <p className="text-xs text-muted-foreground">Eastern emphasis suggests self-directed energy and personal initiative. Western emphasis indicates relationship-oriented and responsive approach.</p>
                                   </div>
-                                  <div className="p-3 rounded-md border border-border">
-                                    <h5 className="text-sm font-medium mb-1">Northern (Houses 1-6) vs. Southern (Houses 7-12)</h5>
+                                  <div className="p-3 border rounded-md border-border">
+                                    <h5 className="mb-1 text-sm font-medium">Northern (Houses 1-6) vs. Southern (Houses 7-12)</h5>
                                     <p className="text-xs text-muted-foreground">Northern emphasis suggests subjective, personal, and private focus. Southern emphasis indicates objective, social, and public engagement.</p>
                                   </div>
                                 </div>
