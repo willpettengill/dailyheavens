@@ -517,12 +517,21 @@ export default function Dashboard() {
                         return null; 
                       }
 
-                      const detailsToShow: (keyof typeof sunSignData)[] = [
-                        'ruling_planet', 
+                      // Define all possible keys to organize into two balanced columns
+                      const leftColumnKeys = [
+                        'ruling_planet',
+                        'element',
+                        'modality',
+                        'polarity',
+                        'birthstone'
+                      ];
+                      
+                      const rightColumnKeys = [
                         'lucky_day',
-                        'lucky_numbers', 
-                        'birthstone', 
-                        'best_trait'
+                        'lucky_numbers',
+                        'compatible_signs',
+                        'best_trait',
+                        'keywords'
                       ];
                       
                       const formatLabel = (key: string): string => {
@@ -530,43 +539,65 @@ export default function Dashboard() {
                       };
                       
                       const formatValue = (value: any): string => {
-                        return Array.isArray(value) ? value.join(', ') : String(value);
-                      }
+                        // Handle arrays by joining with commas
+                        if (Array.isArray(value)) {
+                          return value.join(', ');
+                        }
+                        // Convert to string for any other type
+                        return String(value);
+                      };
 
                       return (
                          <React.Fragment key={sectionKey}>
-                           <Card> {/* Keep the Card wrapper */} 
-                                <CardHeader>
-                                  <CardTitle className="mb-2">{section?.title || 'Cosmic Details'}</CardTitle> 
-                                  <CardDescription className="mb-4">Key facts and associations for your Sun sign.</CardDescription>
+                           <Card>
+                                <CardHeader className="pb-1">
+                                  <CardTitle className="mb-1">{section?.title || 'Cosmic Details'}</CardTitle> 
+                                  <CardDescription>Key facts and associations for your Sun sign.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                  {/* Replace Badge div with Table */}
                                   <Table>
-                                    {/* Optional: Add TableCaption if desired */}
-                                    {/* <TableCaption>Details for your Sun sign.</TableCaption> */}
-                                    <TableHeader>
-                                      <TableRow>
-                                        <TableHead className="w-[150px]">Detail</TableHead>
-                                        <TableHead>Value</TableHead>
-                                      </TableRow>
-                                    </TableHeader>
                                     <TableBody>
-                                      {detailsToShow.map((key, index) => (
-                                        sunSignData[key] && sunSignData[key] !== '' ? (
-                                          <TableRow key={key as string}> {/* Cast key to string for React key */} 
-                                            <TableCell className="font-medium text-primary">{formatLabel(key as string)}</TableCell> {/* Cast key */} 
-                                            <TableCell className="text-secondary">{formatValue(sunSignData[key])}</TableCell>
-                                          </TableRow>
-                                        ) : null
-                                      ))}
-                                      {/* Ensure even number of rows by adding an empty row if needed */}
-                                      {detailsToShow.filter(key => sunSignData[key] && sunSignData[key] !== '').length % 2 !== 0 && (
-                                        <TableRow key="empty-row">
-                                          <TableCell className="font-medium text-primary"></TableCell>
-                                          <TableCell className="text-secondary"></TableCell>
+                                      {Array.from({ length: Math.max(leftColumnKeys.length, rightColumnKeys.length) }).map((_, rowIndex) => (
+                                        <TableRow key={rowIndex}>
+                                          {/* Left Column */}
+                                          {rowIndex < leftColumnKeys.length && leftColumnKeys[rowIndex] in sunSignData && (
+                                            <>
+                                              <TableCell className="font-medium text-primary">
+                                                {formatLabel(leftColumnKeys[rowIndex])}
+                                              </TableCell>
+                                              <TableCell className="text-muted-foreground">
+                                                {formatValue(sunSignData[leftColumnKeys[rowIndex]])}
+                                              </TableCell>
+                                            </>
+                                          )}
+                                          {/* If no data for this row, render empty cells */}
+                                          {(rowIndex >= leftColumnKeys.length || !(leftColumnKeys[rowIndex] in sunSignData)) && (
+                                            <>
+                                              <TableCell></TableCell>
+                                              <TableCell></TableCell>
+                                            </>
+                                          )}
+                                          
+                                          {/* Right Column */}
+                                          {rowIndex < rightColumnKeys.length && rightColumnKeys[rowIndex] in sunSignData && (
+                                            <>
+                                              <TableCell className="font-medium text-primary">
+                                                {formatLabel(rightColumnKeys[rowIndex])}
+                                              </TableCell>
+                                              <TableCell className="text-muted-foreground">
+                                                {formatValue(sunSignData[rightColumnKeys[rowIndex]])}
+                                              </TableCell>
+                                            </>
+                                          )}
+                                          {/* If no data for this row, render empty cells */}
+                                          {(rowIndex >= rightColumnKeys.length || !(rightColumnKeys[rowIndex] in sunSignData)) && (
+                                            <>
+                                              <TableCell></TableCell>
+                                              <TableCell></TableCell>
+                                            </>
+                                          )}
                                         </TableRow>
-                                      )}
+                                      ))}
                                     </TableBody>
                                   </Table>
                                 </CardContent>
