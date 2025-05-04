@@ -623,19 +623,8 @@ export default function Dashboard() {
                               {/* <CardTitle>{section?.title || 'Stelliums & Sign Distribution'}</CardTitle> <-- Removed Title */}
                             </CardHeader>
                             <CardContent className="space-y-4">
-                              {/* Display Stellium Data from section.data */}
-                              {stelliumData && Array.isArray(stelliumData) && stelliumData.length > 0 && (
-                                <div className="space-y-3">
-                                  <p className="pb-2 text-sm text-muted-foreground">Areas of concentrated energy (stelliums) and the overall balance of zodiac signs in your chart.</p> {/* Moved description here */} 
-                                  {stelliumData.map((stellium, index) => (
-                                    <div key={index}>
-                                      <h4 className="font-semibold">{stellium.location} Stellium ({stellium.count} planets)</h4>
-                                      <p className="text-sm text-muted-foreground">Involving: {stellium.planets?.join(', ') || 'N/A'}</p>
-                                      <p className="text-sm">{stellium.interpretation_hint || 'Strong focus in this area.'}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              {/* Delete the descriptive text about stelliums */}
+                              
                               {/* Pass backend data directly to SignDistributionChart*/}
                               {interpretation.structured_sections?.['sign_distribution']?.data && (
                                 // Log data being passed to SignDistributionChart
@@ -665,6 +654,14 @@ export default function Dashboard() {
                       const combinationsData = combinedData.combinations;
                       const patternsData = combinedData.patterns;
                       
+                      // Get stellium data to include in this section
+                      const stelliumData = interpretation.structured_sections?.['stelliums']?.data as Array<{
+                        location: string;
+                        count: number;
+                        planets?: string[];
+                        interpretation_hint?: string;
+                      }> | undefined;
+                      
                       console.log("Dashboard: Rendering Chart Highlights."); // Added log
                       return (
                         <React.Fragment key={sectionKey}>
@@ -674,6 +671,19 @@ export default function Dashboard() {
                               <CardDescription>Chart Highlights: Key patterns and planetary connections shaping your chart's dynamics.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                              {/* Display Stellium Data if available */}
+                              {stelliumData && Array.isArray(stelliumData) && stelliumData.length > 0 && (
+                                <div className="mb-4 space-y-3">
+                                  {stelliumData.map((stellium, index) => (
+                                    <div key={index}>
+                                      <h4 className="font-semibold">{stellium.location} Stellium ({stellium.count} planets)</h4>
+                                      <p className="text-sm text-muted-foreground">Involving: {stellium.planets?.join(', ') || 'N/A'}</p>
+                                      <p className="text-sm">{stellium.interpretation_hint || 'Strong focus in this area.'}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            
                               {/* Render the combined markdown content from the backend */}
                               <div className="prose dark:prose-invert max-w-none">
                                 {renderMarkdown(section.content)} 
